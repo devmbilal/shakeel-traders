@@ -1,0 +1,195 @@
+<div class="page-header">
+  <div><h4>Order Management</h4><div class="page-sub">Review synced orders from order bookers and convert to bills</div></div>
+  <div class="d-flex gap-2">
+    <a href="/orders/converted" class="btn btn-outline-secondary btn-sm">Converted Bills</a>
+    <a href="/orders/consolidated" class="btn btn-outline-secondary btn-sm">Consolidated View</a>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="GET" action="/orders" class="d-flex gap-2 flex-wrap align-items-end">
+      <div>
+        <label class="form-label" style="font-size:0.72rem;">Date</label>
+        <input type="date" name="date" class="form-control form-control-sm" value="<%= filters.date %>">
+      </div>
+      <div>
+        <label class="form-label" style="font-size:0.72rem;">Order Booker</label>
+        <select name="booker_id" class="form-select form-select-sm" data-searchable style="min-width:160px;">
+          <option value="">All Bookers</option>
+          <% bookers.forEach(b => { %><option value="<%= b.id %>" <%= filters.booker_id == b.id ? 'selected' : '' %>><%= b.full_name %></option><% }) %>
+        </select>
+      </div>
+      <div>
+        <label class="form-label" style="font-size:0.72rem;">Route</label>
+        <select name="route_id" class="form-select form-select-sm" data-searchable style="min-width:140px;">
+          <option value="">All Routes</option>
+          <% routes.forEach(r => { %><option value="<%= r.id %>" <%= filters.route_id == r.id ? 'selected' : '' %>><%= r.name %></option><% }) %>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+      <a href="/orders" class="btn btn-outline-secondary btn-sm">Clear</a>
+    </form>
+  </div>
+</div>
+
+<!-- Bulk Toolbar -->
+<div id="bulkToolbar" class="card mb-3 d-none" style="background:#F1F5F9;">
+  <div class="card-body py-2 px-3 d-flex gap-2 align-items-center">
+    <span id="selectedCount" style="font-weight:600;font-size:0.85rem;">0 selected</span>
+    <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewConsolidated()">
+      <i class="bi bi-box-seam me-1"></i> View Consolidated Stock
+    </button>
+    <button type="button" class="btn btn-sm btn-success" onclick="bulkConvert()">
+      <i class="bi bi-receipt me-1"></i> Convert to Bills
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="bulkDelete()">
+      <i class="bi bi-trash me-1"></i> Delete Selected
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="printConsolidatedPdf()">
+      <i class="bi bi-printer me-1"></i> Print Consolidated PDF
+    </button>
+  </div>
+</div>
+
+<% if (pagination && pagination.total > 0) { %>
+  <p class="text-muted small mb-2">
+    <%= pagination.total %> records
+    <label style="margin-left:16px;cursor:pointer;">
+      <input type="checkbox" id="selectAll" style="margin-right:4px;"> Select All
+    </label>
+  </p>
+<% } %>
+
+<% if (orders.length === 0) { %>
+  <div class="card" style="text-align:center;padding:48px;color:var(--text-muted);">
+    <i class="bi bi-inbox" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+    No pending orders found.
+  </div>
+<% } else { %>
+  <% orders.forEach(order => { %>
+  <div class="card mb-3">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <input type="checkbox" class="order-cb" value="<%= order.id %>" style="width:18px;height:18px;cursor:pointer;">
+        <div>
+          <div style="font-weight:700;"><%= order.shop_name %></div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">
+            Booker: <%= order.booker_name %> &nbsp;|&nbsp; Route: <%= order.route_name %>
+            &nbsp;|&nbsp; <%= new Date(order.created_at_device).toLocaleString() %>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="badge <%= order.status === 'stock_adjusted' ? 'badge-orange' : 'badge-pending' %>">
+          <%= order.status.replace(/_/g,' ') %>
+        </span>
+        <% if (order.stock_check_note) { %>
+          <span title="<%= order.stock_check_note %>" style="cursor:help;">
+            <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+          </span>
+        <% } %>
+        <form method="POST" action="/orders/<%= order.id %>/convert"
+              onsubmit="return confirm('Convert this order to a bill? Stock will be deducted immediately.')">
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-receipt me-1"></i> Convert to Bill
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <% }) %>
+<% } %>
+
+<%- include('../layout/pagination', {pagination, queryString}) %>
+
+<script>
+(function() {
+  const selectAll = document.getElementById('selectAll');
+  const checkboxes = document.querySelectorAll('.order-cb');
+  const toolbar = document.getElementById('bulkToolbar');
+  const selectedCount = document.getElementById('selectedCount');
+
+  function updateToolbar() {
+    const checked = Array.from(checkboxes).filter(cb => cb.checked);
+    if (checked.length > 0) {
+      toolbar.classList.remove('d-none');
+      selectedCount.textContent = `${checked.length} selected`;
+    } else {
+      toolbar.classList.add('d-none');
+    }
+  }
+
+  if (selectAll) {
+    selectAll.addEventListener('change', function() {
+      checkboxes.forEach(cb => cb.checked = this.checked);
+      updateToolbar();
+    });
+  }
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', updateToolbar);
+  });
+
+  window.viewConsolidated = function() {
+    const ids = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+    if (ids.length === 0) return alert('No orders selected');
+    fetch(`/orders/consolidated-selected?ids=${ids.join(',')}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) return alert(data.error);
+        let html = `<h5>Consolidated Stock (${data.totalOrders} orders)</h5><table class="table table-sm"><thead><tr><th>SKU</th><th>Product</th><th>Cartons</th><th>Loose</th><th>Stock</th><th>Shortfall</th></tr></thead><tbody>`;
+        data.products.forEach(p => {
+          html += `<tr><td>${p.sku_code}</td><td>${p.name}</td><td>${p.total_cartons}</td><td>${p.total_loose}</td><td>${p.current_stock_cartons}C ${p.current_stock_loose}L</td><td style="color:${p.shortfall?'red':'green'}">${p.shortfall?'YES':'NO'}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        const win = window.open('', '_blank', 'width=900,height=600');
+        win.document.write(`<html><head><title>Consolidated Stock</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head><body class="p-4">${html}</body></html>`);
+      })
+      .catch(err => alert('Failed to load consolidated stock'));
+  };
+
+  window.bulkConvert = function() {
+    const ids = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+    if (ids.length === 0) return alert('No orders selected');
+    if (!confirm(`Convert ${ids.length} order(s) to bills? Stock will be deducted.`)) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/orders/bulk-convert';
+    ids.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'order_ids[]';
+      input.value = id;
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  };
+
+  window.bulkDelete = function() {
+    const ids = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+    if (ids.length === 0) return alert('No orders selected');
+    if (!confirm(`Delete ${ids.length} order(s)? This cannot be undone.`)) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/orders/bulk-delete';
+    ids.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'order_ids[]';
+      input.value = id;
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  };
+
+  window.printConsolidatedPdf = function() {
+    const ids = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+    if (ids.length === 0) return alert('No orders selected');
+    window.open(`/orders/consolidated-pdf?ids=${ids.join(',')}`, '_blank');
+  };
+})();
+</script>

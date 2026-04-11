@@ -1,0 +1,42 @@
+<div class="page-header">
+  <div><h4>Stock Requirement Report</h4><div class="page-sub">Consolidated product quantities needed across all pending orders for a booker</div></div>
+  <a href="/stock" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="GET" action="/stock/requirement-report" class="d-flex gap-3 align-items-end">
+      <div>
+        <label class="form-label">Order Booker</label>
+        <select name="booker_id" class="form-select form-select-sm" data-searchable style="min-width:200px;">
+          <option value="">— Select booker —</option>
+          <% bookers.forEach(b => { %>
+            <option value="<%= b.id %>" <%= selectedBookerId == b.id ? 'selected' : '' %>><%= b.full_name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Generate Report</button>
+    </form>
+  </div>
+</div>
+
+<% if (selectedBookerId && report.length === 0) { %>
+  <div class="card" style="text-align:center;padding:40px;color:var(--text-muted);">No pending orders for this booker.</div>
+<% } else if (report.length > 0) { %>
+<div class="card table-card">
+  <table class="table">
+    <thead><tr><th>SKU</th><th>Product</th><th>Total Cartons</th><th>Total Loose</th><th>Total Units</th></tr></thead>
+    <tbody>
+      <% report.forEach(r => { %>
+      <tr>
+        <td><code style="font-size:0.75rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;"><%= r.sku_code %></code></td>
+        <td style="font-weight:600;"><%= r.name %></td>
+        <td style="font-weight:700;color:var(--secondary);"><%= r.total_cartons %></td>
+        <td><%= r.total_loose %></td>
+        <td style="font-weight:700;"><%= r.total_cartons * r.units_per_carton + r.total_loose %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>

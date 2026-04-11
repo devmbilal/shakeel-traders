@@ -1,0 +1,131 @@
+<div class="page-header">
+  <div><h4>Centralized Cash Screen</h4><div class="page-sub">All cash received across all three sales channels</div></div>
+  <div class="d-flex gap-2 align-items-center">
+    <span id="lastRefreshed" class="small text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm" onclick="refreshDaily()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+    <div class="btn-group btn-group-sm">
+      <a href="/centralized-cash" class="btn <%= view === 'daily' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">Daily</a>
+      <a href="/centralized-cash/monthly" class="btn <%= view === 'monthly' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">Monthly</a>
+    </div>
+  </div>
+</div>
+
+<div id="pollError" class="alert alert-danger d-none small py-1 px-2 mb-2">
+  <i class="bi bi-exclamation-triangle me-1"></i>Connection lost — retrying...
+</div>
+
+<% if (view === 'daily') { %>
+<!-- Daily View -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="GET" action="/centralized-cash" class="d-flex gap-2 align-items-end">
+      <div><label class="form-label" style="font-size:0.72rem;">Date</label><input type="date" name="date" class="form-control form-control-sm" value="<%= date %>"></div>
+      <button type="submit" class="btn btn-primary btn-sm">View</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card" style="border-left:4px solid #3B82F6;">
+      <div class="card-body">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:6px;">Salesman Sales Cash</div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.5rem;color:#1E293B;" id="cc-salesman">Rs <%= Number(totals.salesman_sale).toFixed(2) %></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card" style="border-left:4px solid #10B981;">
+      <div class="card-body">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:6px;">Recovery Cash</div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.5rem;color:#1E293B;" id="cc-recovery">Rs <%= Number(totals.recovery).toFixed(2) %></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card" style="border-left:4px solid #F59E0B;">
+      <div class="card-body">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:6px;">Delivery Man Cash</div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.5rem;color:#1E293B;" id="cc-delivery">Rs <%= Number(totals.delivery_man_collection).toFixed(2) %></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card card-dark" style="padding:20px 24px;">
+  <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.45);margin-bottom:6px;">Total Cash Received Today</div>
+  <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:2rem;color:#fff;" id="cc-grand">Rs <%= Number(totals.grand).toFixed(2) %></div>
+</div>
+
+<% } else { %>
+<!-- Monthly View -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="GET" action="/centralized-cash/monthly" class="d-flex gap-2 align-items-end">
+      <div><label class="form-label" style="font-size:0.72rem;">From</label><input type="date" name="from" class="form-control form-control-sm" value="<%= dateFrom %>"></div>
+      <div><label class="form-label" style="font-size:0.72rem;">To</label><input type="date" name="to" class="form-control form-control-sm" value="<%= dateTo %>"></div>
+      <button type="submit" class="btn btn-primary btn-sm">View</button>
+    </form>
+  </div>
+</div>
+
+<% if (pagination && pagination.total > 0) { %>
+  <p class="text-muted small mb-2"><%= pagination.total %> records</p>
+<% } %>
+
+<div class="card table-card">
+  <% if (!monthlyData.length) { %>
+    <div style="text-align:center;padding:40px;color:var(--text-muted);">No cash entries in this period.</div>
+  <% } else { %>
+  <table class="table">
+    <thead><tr><th>Date</th><th>Salesman Sales</th><th>Recovery</th><th>Delivery Man</th><th>Daily Total</th></tr></thead>
+    <tbody>
+      <% let grandTotal = 0; %>
+      <% monthlyData.forEach(row => { grandTotal += row.total; %>
+      <tr>
+        <td style="font-weight:600;"><%= row.date %></td>
+        <td>Rs <%= Number(row.salesman_sale||0).toFixed(2) %></td>
+        <td>Rs <%= Number(row.recovery||0).toFixed(2) %></td>
+        <td>Rs <%= Number(row.delivery_man_collection||0).toFixed(2) %></td>
+        <td style="font-weight:700;color:var(--secondary);">Rs <%= Number(row.total).toFixed(2) %></td>
+      </tr>
+      <% }) %>
+      <tr style="background:#F8FAFC;font-weight:700;">
+        <td>Total</td><td colspan="3"></td>
+        <td style="color:var(--secondary);font-family:'Manrope',sans-serif;font-weight:800;">Rs <%= Number(grandTotal).toFixed(2) %></td>
+      </tr>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<% if (pagination && pagination.pages > 1) { %>
+  <div class="mt-3">
+    <%- include('../layout/pagination', { pagination, queryString }) %>
+  </div>
+<% } %>
+<% } %>
+
+<% if (view === 'daily') { %>
+<script>
+const _ccDate = '<%= date %>';
+function refreshDaily() {
+  fetch('/centralized-cash/data?date=' + _ccDate)
+    .then(r => r.json())
+    .then(d => {
+      if (document.getElementById('cc-salesman')) document.getElementById('cc-salesman').textContent = 'Rs ' + Number(d.salesman_sale||0).toFixed(2);
+      if (document.getElementById('cc-recovery')) document.getElementById('cc-recovery').textContent = 'Rs ' + Number(d.recovery||0).toFixed(2);
+      if (document.getElementById('cc-delivery')) document.getElementById('cc-delivery').textContent = 'Rs ' + Number(d.delivery_man_collection||0).toFixed(2);
+      if (document.getElementById('cc-grand')) document.getElementById('cc-grand').textContent = 'Rs ' + Number(d.grand||0).toFixed(2);
+      const el = document.getElementById('lastRefreshed');
+      if (el) el.textContent = 'Updated ' + new Date().toLocaleTimeString();
+      const indicator = document.getElementById('pollError');
+      if (indicator) indicator.classList.add('d-none');
+    }).catch(() => {
+      const indicator = document.getElementById('pollError');
+      if (indicator) indicator.classList.remove('d-none');
+    });
+}
+setInterval(refreshDaily, 10000);
+</script>
+<% } %>

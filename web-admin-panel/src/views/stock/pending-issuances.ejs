@@ -1,0 +1,49 @@
+<div class="page-header">
+  <div><h4>Pending Issuance Requests</h4><div class="page-sub">Approve salesman stock issuances. Warehouse stock is deducted only after approval.</div></div>
+  <a href="/stock" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Stock Overview</a>
+</div>
+
+<% if (issuances.length === 0) { %>
+  <div class="card" style="text-align:center;padding:48px;">
+    <i class="bi bi-check-circle" style="font-size:2rem;color:#10B981;display:block;margin-bottom:8px;"></i>
+    <div style="color:var(--text-muted);">No pending issuance requests.</div>
+  </div>
+<% } else { %>
+  <% issuances.forEach(iss => { %>
+  <div class="card mb-3">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="avatar avatar-sm avatar-blue"><%= iss.salesman_name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() %></div>
+        <div>
+          <div style="font-weight:700;"><%= iss.salesman_name %></div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Issuance Date: <%= iss.issuance_date %></div>
+        </div>
+      </div>
+      <span class="badge badge-pending">Pending Approval</span>
+    </div>
+    <div class="card-body p-0">
+      <table class="table mb-0">
+        <thead><tr><th>SKU</th><th>Product</th><th>Cartons</th><th>Loose Units</th></tr></thead>
+        <tbody>
+          <% (iss.items || []).forEach(item => { %>
+          <tr>
+            <td><code style="font-size:0.75rem;"><%= item.sku_code %></code></td>
+            <td><%= item.product_name %></td>
+            <td><%= item.cartons %></td>
+            <td><%= item.loose_units %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:12px 20px;border-top:1px solid var(--border);">
+      <form method="POST" action="/stock/issuances/<%= iss.id %>/approve"
+            onsubmit="return confirm('Approve issuance for <%= iss.salesman_name %>? This will deduct stock from warehouse.')">
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="bi bi-check-lg me-1"></i> Approve & Deduct Stock
+        </button>
+      </form>
+    </div>
+  </div>
+  <% }) %>
+<% } %>

@@ -1,0 +1,198 @@
+<div class="page-header">
+  <div><h4>Reports</h4><div class="page-sub">Generate and export business reports</div></div>
+</div>
+
+<div class="row g-3">
+
+  <%# ── Sales Reports ─────────────────────────────────────────────────────── %>
+  <div class="col-12"><div class="fw-bold text-muted small text-uppercase" style="letter-spacing:.06em;">Sales</div></div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#DBEAFE;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-graph-up" style="color:#3B82F6;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Daily Sales Report</div><div class="small text-muted">Sales by channel for a date</div></div>
+        </div>
+        <form method="GET" action="/reports/daily-sales" class="d-flex gap-2 mt-auto">
+          <input type="date" name="date" class="form-control form-control-sm" value="<%= new Date().toISOString().slice(0,10) %>">
+          <button class="btn btn-sm btn-primary text-nowrap"><i class="bi bi-arrow-right"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#DBEAFE;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-calendar3" style="color:#3B82F6;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Monthly Sales Report</div><div class="small text-muted">Sales by channel for a month</div></div>
+        </div>
+        <form method="GET" action="/reports/monthly-sales" class="d-flex gap-2 mt-auto">
+          <input type="month" name="ym" class="form-control form-control-sm" value="<%= new Date().toISOString().slice(0,7) %>" onchange="this.form.month.value=this.value.split('-')[1];this.form.year.value=this.value.split('-')[0];">
+          <input type="hidden" name="month" value="<%= new Date().getMonth()+1 %>">
+          <input type="hidden" name="year" value="<%= new Date().getFullYear() %>">
+          <button class="btn btn-sm btn-primary text-nowrap"><i class="bi bi-arrow-right"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#DCFCE7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-safe-fill" style="color:#10B981;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Cash Flow Report</div><div class="small text-muted">Centralized cash entries</div></div>
+        </div>
+        <a href="/reports/cash-flow" class="btn btn-sm btn-primary mt-auto"><i class="bi bi-arrow-right me-1"></i> Generate</a>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Performance Reports ────────────────────────────────────────────────── %>
+  <div class="col-12 mt-2"><div class="fw-bold text-muted small text-uppercase" style="letter-spacing:.06em;">Performance</div></div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#DCFCE7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-person-walking" style="color:#10B981;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Order Booker Performance</div><div class="small text-muted">Orders, conversions, recoveries</div></div>
+        </div>
+        <a href="/reports/order-booker-performance" class="btn btn-sm btn-primary mt-auto"><i class="bi bi-arrow-right me-1"></i> Generate</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#DCFCE7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-truck" style="color:#10B981;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Salesman Performance</div><div class="small text-muted">Issued, returned, sold</div></div>
+        </div>
+        <a href="/reports/salesman-performance" class="btn btn-sm btn-primary mt-auto"><i class="bi bi-arrow-right me-1"></i> Generate</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#FEE2E2;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-cash-coin" style="color:#EF4444;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Cash Recovery Report</div><div class="small text-muted">Assigned vs collected bills</div></div>
+        </div>
+        <a href="/reports/cash-recovery" class="btn btn-sm btn-primary mt-auto"><i class="bi bi-arrow-right me-1"></i> Generate</a>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Stock Reports ───────────────────────────────────────────────────────── %>
+  <div class="col-12 mt-2"><div class="fw-bold text-muted small text-uppercase" style="letter-spacing:.06em;">Stock</div></div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#FEF3C7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-box-seam" style="color:#F59E0B;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Stock Movement Report</div><div class="small text-muted">All stock additions and deductions</div></div>
+        </div>
+        <a href="/reports/stock-movement" class="btn btn-sm btn-primary mt-auto"><i class="bi bi-arrow-right me-1"></i> Generate</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#FEF3C7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-clipboard-check" style="color:#F59E0B;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Stock Requirement Report</div><div class="small text-muted">Per booker consolidated needs</div></div>
+        </div>
+        <form method="GET" action="/reports/stock-requirement" class="d-flex gap-2 mt-auto">
+          <select name="bookerId" class="form-select form-select-sm" data-searchable required>
+            <option value="">— Select Booker —</option>
+            <% (bookers||[]).forEach(b => { %><option value="<%= b.id %>"><%= b.full_name %></option><% }) %>
+          </select>
+          <button class="btn btn-sm btn-primary text-nowrap"><i class="bi bi-arrow-right"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Financial Reports ───────────────────────────────────────────────────── %>
+  <div class="col-12 mt-2"><div class="fw-bold text-muted small text-uppercase" style="letter-spacing:.06em;">Financial</div></div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#FEE2E2;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-shop" style="color:#EF4444;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Shop Ledger Report</div><div class="small text-muted">Full ledger for a shop</div></div>
+        </div>
+        <form method="GET" action="/reports/shop-ledger" class="d-flex gap-2 mt-auto">
+          <select name="shopId" class="form-select form-select-sm" data-searchable required>
+            <option value="">— Select Shop —</option>
+            <% (shops||[]).forEach(s => { %><option value="<%= s.id %>"><%= s.name %></option><% }) %>
+          </select>
+          <button class="btn btn-sm btn-primary text-nowrap"><i class="bi bi-arrow-right"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#E0E7FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-building" style="color:#6366F1;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Supplier Advance Report</div><div class="small text-muted">Advances, receipts, balance</div></div>
+        </div>
+        <form method="GET" action="/reports/supplier-advance" class="d-flex gap-2 mt-auto">
+          <select name="companyId" class="form-select form-select-sm" data-searchable required>
+            <option value="">— Select Supplier —</option>
+            <% (suppliers||[]).forEach(s => { %><option value="<%= s.id %>"><%= s.name %></option><% }) %>
+          </select>
+          <button class="btn btn-sm btn-primary text-nowrap"><i class="bi bi-arrow-right"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#E0E7FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-exclamation-triangle" style="color:#6366F1;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Claims Report</div><div class="small text-muted">Supplier claims history</div></div>
+        </div>
+        <form method="GET" action="/reports/claims" class="d-flex gap-2 mt-auto">
+          <select name="companyId" class="form-select form-select-sm" data-searchable required>
+            <option value="">— Select Supplier —</option>
+            <% (suppliers||[]).forEach(s => { %><option value="<%= s.id %>"><%= s.name %></option><% }) %>
+          </select>
+          <button class="btn btn-sm btn-primary text-nowrap"><i class="bi bi-arrow-right"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Staff Reports ───────────────────────────────────────────────────────── %>
+  <div class="col-12 mt-2"><div class="fw-bold text-muted small text-uppercase" style="letter-spacing:.06em;">Staff</div></div>
+
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:40px;height:40px;background:#F3E8FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-wallet2" style="color:#8B5CF6;font-size:1.2rem;"></i></div>
+          <div><div class="fw-bold" style="font-size:.9rem;">Staff Salary Report</div><div class="small text-muted">Salary, advances, balance</div></div>
+        </div>
+        <a href="/reports/staff-salary" class="btn btn-sm btn-primary mt-auto"><i class="bi bi-arrow-right me-1"></i> Generate</a>
+      </div>
+    </div>
+  </div>
+
+</div>

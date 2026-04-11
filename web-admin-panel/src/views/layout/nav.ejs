@@ -1,0 +1,109 @@
+<nav id="sidebar">
+  <div class="sidebar-brand">
+    <p class="brand-name">Shakeel Traders</p>
+    <span class="brand-sub">Admin Terminal</span>
+  </div>
+
+  <div class="sidebar-dispatch">
+    <a href="/orders" class="btn-dispatch">
+      <i class="bi bi-plus-lg"></i> New Dispatch
+    </a>
+  </div>
+
+  <ul class="sidebar-nav">
+    <li>
+      <a href="/dashboard" class="nav-link <% if(currentPath==='/dashboard'){%>active<%}%>">
+        <i class="bi bi-grid-1x2-fill nav-icon"></i><span class="nav-label">Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a href="/routes" class="nav-link <% if(currentPath&&currentPath.startsWith('/routes')&&!currentPath.startsWith('/route-a')){%>active<%}%>">
+        <i class="bi bi-signpost-2-fill nav-icon"></i><span class="nav-label">Route Management</span>
+      </a>
+    </li>
+    <li>
+      <a href="/route-assignments" class="nav-link <% if(currentPath&&currentPath.startsWith('/route-assignments')){%>active<%}%>">
+        <i class="bi bi-calendar-check-fill nav-icon"></i><span class="nav-label">Route Assignments</span>
+      </a>
+    </li>
+    <li>
+      <a href="/shops" class="nav-link <% if(currentPath&&currentPath.startsWith('/shops')){%>active<%}%>">
+        <i class="bi bi-shop-window nav-icon"></i><span class="nav-label">Shop Management</span>
+      </a>
+    </li>
+    <li>
+      <a href="/products" class="nav-link <% if(currentPath&&currentPath.startsWith('/products')){%>active<%}%>">
+        <i class="bi bi-box-seam-fill nav-icon"></i><span class="nav-label">Product Management</span>
+      </a>
+    </li>
+    <li>
+      <a href="/stock" class="nav-link <% if(currentPath&&currentPath.startsWith('/stock')){%>active<%}%>">
+        <i class="bi bi-archive-fill nav-icon"></i><span class="nav-label">Stock Management</span>
+      </a>
+    </li>
+    <li>
+      <a href="/orders" class="nav-link <% if(currentPath&&currentPath.startsWith('/orders')){%>active<%}%>">
+        <i class="bi bi-clipboard-check-fill nav-icon"></i><span class="nav-label">Order Management</span>
+      </a>
+    </li>
+    <li>
+      <a href="/direct-sales" class="nav-link <% if(currentPath&&currentPath.startsWith('/direct-sales')){%>active<%}%>">
+        <i class="bi bi-cart-fill nav-icon"></i><span class="nav-label">Direct Shop Sales</span>
+      </a>
+    </li>
+    <li>
+      <a href="/cash-recovery" class="nav-link <% if(currentPath&&currentPath.startsWith('/cash-recovery')){%>active<%}%>">
+        <i class="bi bi-cash-coin nav-icon"></i><span class="nav-label">Cash Recovery</span>
+      </a>
+    </li>
+    <li>
+      <a href="/suppliers" class="nav-link <% if(currentPath&&currentPath.startsWith('/suppliers')){%>active<%}%>">
+        <i class="bi bi-truck nav-icon"></i><span class="nav-label">Supplier Management</span>
+      </a>
+    </li>
+    <li>
+      <a href="/centralized-cash" class="nav-link <% if(currentPath&&currentPath.startsWith('/centralized-cash')){%>active<%}%>">
+        <i class="bi bi-safe-fill nav-icon"></i><span class="nav-label">Centralized Cash</span>
+      </a>
+    </li>
+    <li>
+      <a href="/salaries" class="nav-link <% if(currentPath&&currentPath.startsWith('/salaries')){%>active<%}%>">
+        <i class="bi bi-wallet2 nav-icon"></i><span class="nav-label">Salaries</span>
+      </a>
+    </li>
+    <li>
+      <a href="/expenses" class="nav-link <% if(currentPath&&currentPath.startsWith('/expenses')){%>active<%}%>">
+        <i class="bi bi-receipt nav-icon"></i><span class="nav-label">Expenses</span>
+      </a>
+    </li>
+    <li>
+      <a href="/reports" class="nav-link <% if(currentPath&&currentPath.startsWith('/reports')){%>active<%}%>">
+        <i class="bi bi-bar-chart-fill nav-icon"></i><span class="nav-label">Reports</span>
+      </a>
+    </li>
+    <li>
+      <a href="/company-profile" class="nav-link <% if(currentPath&&currentPath.startsWith('/company-profile')){%>active<%}%>">
+        <i class="bi bi-gear-fill nav-icon"></i><span class="nav-label">Settings</span>
+      </a>
+    </li>
+    <li>
+      <a href="/backup" class="nav-link <% if(currentPath&&currentPath.startsWith('/backup')){%>active<%}%>">
+        <i class="bi bi-cloud-arrow-up-fill nav-icon"></i><span class="nav-label">Backup</span>
+      </a>
+    </li>
+    <li>
+      <a href="/users" class="nav-link <% if(currentPath&&currentPath.startsWith('/users')){%>active<%}%>">
+        <i class="bi bi-people-fill nav-icon"></i><span class="nav-label">User Management</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <form method="POST" action="/logout">
+      <button type="submit" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-sm);color:rgba(255,255,255,0.5);font-size:0.78rem;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='rgba(255,255,255,0.5)'">
+        <i class="bi bi-box-arrow-left nav-icon"></i>
+        <span class="nav-label">Logout</span>
+      </button>
+    </form>
+  </div>
+</nav>

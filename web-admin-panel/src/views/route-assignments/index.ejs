@@ -1,0 +1,166 @@
+<div class="page-header">
+  <div>
+    <h4>Route Assignments</h4>
+    <div class="page-sub">Assign order bookers to routes for daily operations</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <ul class="nav nav-tabs px-4 pt-3" id="raTabs" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link <%= activeTab === 'assign' ? 'active' : '' %>" data-bs-toggle="tab" data-bs-target="#assign-pane" type="button">
+          <i class="bi bi-calendar-plus me-1"></i> Assign Today
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link <%= activeTab === 'by_date' ? 'active' : '' %>" data-bs-toggle="tab" data-bs-target="#bydate-pane" type="button">
+          <i class="bi bi-calendar3 me-1"></i> View by Date
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link <%= activeTab === 'by_booker' ? 'active' : '' %>" data-bs-toggle="tab" data-bs-target="#bybooker-pane" type="button">
+          <i class="bi bi-person-lines-fill me-1"></i> View by Booker
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content p-4">
+
+      <!-- Assign Today -->
+      <div class="tab-pane fade <%= activeTab === 'assign' ? 'show active' : '' %>" id="assign-pane">
+        <div class="alert alert-info" style="font-size:0.82rem;">
+          <i class="bi bi-info-circle me-1"></i>
+          Route assignment is <strong>for order booking only</strong>. Cash recovery is assigned separately under Cash Recovery.
+        </div>
+        <form method="POST" action="/route-assignments" class="row g-3 mb-4">
+          <div class="col-md-3">
+            <label class="form-label">Date <span style="color:#EF4444;">*</span></label>
+            <input type="date" name="assignment_date" class="form-control" value="<%= today %>" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Order Booker <span style="color:#EF4444;">*</span></label>
+            <select name="user_id" class="form-select" data-searchable required>
+              <option value="">— Select booker —</option>
+              <% orderBookers.filter(b => b.is_active).forEach(b => { %>
+              <option value="<%= b.id %>"><%= b.full_name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Routes <span style="color:#EF4444;">*</span></label>
+            <select name="route_ids" class="form-select" data-searchable multiple size="4" required>
+              <% routes.forEach(r => { %>
+              <option value="<%= r.id %>"><%= r.name %></option>
+              <% }) %>
+            </select>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">Hold Ctrl/Cmd to select multiple routes.</div>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-lg me-1"></i> Assign</button>
+          </div>
+        </form>
+
+        <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:10px;">Today's Assignments — <%= today %></div>
+        <% if (todayAssignments.length === 0) { %>
+          <div style="color:var(--text-muted);font-size:0.85rem;">No assignments for today yet.</div>
+        <% } else { %>
+          <table class="table mb-0">
+            <thead><tr><th>Route</th><th>Order Booker</th><th>Assigned At</th><th></th></tr></thead>
+            <tbody>
+              <% todayAssignments.forEach(a => { %>
+              <tr>
+                <td><span style="font-weight:600;"><%= a.route_name %></span></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="avatar avatar-sm avatar-blue"><%= a.booker_name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) %></div>
+                    <%= a.booker_name %>
+                  </div>
+                </td>
+                <td style="color:var(--text-muted);font-size:0.78rem;"><%= new Date(a.created_at).toLocaleTimeString() %></td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="/route-assignments/<%= a.id %>/edit" class="btn btn-icon btn-outline-primary btn-sm" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <form method="POST" action="/route-assignments/<%= a.id %>/delete" onsubmit="return confirm('Delete this assignment?')" style="display:inline;">
+                      <button type="submit" class="btn btn-icon btn-outline-danger btn-sm" title="Delete"><i class="bi bi-trash"></i></button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <!-- By Date -->
+      <div class="tab-pane fade <%= activeTab === 'by_date' ? 'show active' : '' %>" id="bydate-pane">
+        <form method="GET" action="/route-assignments/by-date" class="d-flex gap-2 mb-4">
+          <input type="date" name="date" class="form-control" style="max-width:200px;" value="<%= selectedDate %>">
+          <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i> View</button>
+        </form>
+        <% if (byDateAssignments.length === 0) { %>
+          <div style="color:var(--text-muted);font-size:0.85rem;">No assignments found for this date.</div>
+        <% } else { %>
+          <table class="table mb-0">
+            <thead><tr><th>Route</th><th>Order Booker</th><th>Date</th><th></th></tr></thead>
+            <tbody>
+              <% byDateAssignments.forEach(a => { %>
+              <tr>
+                <td><span style="font-weight:600;"><%= a.route_name %></span></td>
+                <td><%= a.booker_name %></td>
+                <td style="color:var(--text-muted);"><%= a.assignment_date %></td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="/route-assignments/<%= a.id %>/edit" class="btn btn-icon btn-outline-primary btn-sm" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <form method="POST" action="/route-assignments/<%= a.id %>/delete" onsubmit="return confirm('Delete this assignment?')" style="display:inline;">
+                      <button type="submit" class="btn btn-icon btn-outline-danger btn-sm" title="Delete"><i class="bi bi-trash"></i></button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <!-- By Booker -->
+      <div class="tab-pane fade <%= activeTab === 'by_booker' ? 'show active' : '' %>" id="bybooker-pane">
+        <form method="GET" action="/route-assignments/by-booker" class="d-flex gap-2 mb-4">
+          <select name="userId" class="form-select" data-searchable style="max-width:260px;">
+            <option value="">— Select order booker —</option>
+            <% orderBookers.forEach(b => { %>
+            <option value="<%= b.id %>" <%= selectedBookerId == b.id ? 'selected' : '' %>><%= b.full_name %></option>
+            <% }) %>
+          </select>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i> View</button>
+        </form>
+        <% if (byBookerAssignments.length === 0) { %>
+          <div style="color:var(--text-muted);font-size:0.85rem;">Select an order booker to view their assignments.</div>
+        <% } else { %>
+          <table class="table mb-0">
+            <thead><tr><th>Date</th><th>Route</th><th></th></tr></thead>
+            <tbody>
+              <% byBookerAssignments.forEach(a => { %>
+              <tr>
+                <td style="color:var(--text-muted);"><%= a.assignment_date %></td>
+                <td><span style="font-weight:600;"><%= a.route_name %></span></td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="/route-assignments/<%= a.id %>/edit" class="btn btn-icon btn-outline-primary btn-sm" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <form method="POST" action="/route-assignments/<%= a.id %>/delete" onsubmit="return confirm('Delete this assignment?')" style="display:inline;">
+                      <button type="submit" class="btn btn-icon btn-outline-danger btn-sm" title="Delete"><i class="bi bi-trash"></i></button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</div>

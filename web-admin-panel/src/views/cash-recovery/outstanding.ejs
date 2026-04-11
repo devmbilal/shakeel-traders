@@ -1,0 +1,88 @@
+<div class="page-header">
+  <div><h4>Cash Recovery & Bill Settlement</h4><div class="page-sub">Assign outstanding bills to order bookers for cash recovery. Independent of route assignment.</div></div>
+</div>
+
+<!-- Sub-nav -->
+<div class="d-flex gap-2 mb-3">
+  <a href="/cash-recovery/outstanding" class="btn btn-dark-primary btn-sm">Outstanding Bills</a>
+  <a href="/cash-recovery/settlement" class="btn btn-outline-secondary btn-sm">Bill Settlement (Delivery Man)</a>
+  <a href="/cash-recovery/pending" class="btn btn-outline-secondary btn-sm">Pending Verifications</a>
+  <a href="/cash-recovery/history" class="btn btn-outline-secondary btn-sm">Recovery History</a>
+</div>
+
+<div class="alert alert-info py-2" style="font-size:0.8rem;">
+  <i class="bi bi-info-circle me-1"></i>
+  Recovery assignment is <strong>completely independent</strong> of route assignment. Any order booker can be assigned any bill regardless of their routes.
+</div>
+
+<!-- Filters -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="GET" action="/cash-recovery/outstanding" class="d-flex gap-2 align-items-end flex-wrap">
+      <div>
+        <label class="form-label" style="font-size:0.72rem;">Route</label>
+        <select name="route_id" class="form-select form-select-sm" data-searchable style="min-width:140px;">
+          <option value="">All Routes</option>
+          <% routes.forEach(r => { %><option value="<%= r.id %>" <%= filters.route_id == r.id ? 'selected' : '' %>><%= r.name %></option><% }) %>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+      <a href="/cash-recovery/outstanding" class="btn btn-outline-secondary btn-sm">Clear</a>
+    </form>
+  </div>
+</div>
+
+<form method="POST" action="/cash-recovery/assign" id="assignForm">
+  <div class="card mb-3">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <span style="font-family:'Manrope',sans-serif;font-weight:700;">Outstanding Bills (<%= bills.length %>)</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <select name="booker_id" class="form-select form-select-sm" data-searchable style="min-width:180px;" required>
+          <option value="">— Assign to booker —</option>
+          <% bookers.filter(b=>b.is_active).forEach(b => { %>
+            <option value="<%= b.id %>"><%= b.full_name %></option>
+          <% }) %>
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Assign selected bills?')">
+          <i class="bi bi-person-check me-1"></i> Assign Selected
+        </button>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <% if (bills.length === 0) { %>
+        <div style="text-align:center;padding:40px;color:var(--text-muted);">
+          <i class="bi bi-check-circle" style="font-size:2rem;color:#10B981;display:block;margin-bottom:8px;"></i>
+          No outstanding bills in the pool.
+        </div>
+      <% } else { %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:40px;"><input type="checkbox" id="selectAll" onchange="toggleAll(this)"></th>
+            <th>Bill #</th><th>Shop</th><th>Route</th><th>Date</th><th>Net Amount</th><th>Outstanding</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% bills.forEach(b => { %>
+          <tr>
+            <td><input type="checkbox" name="bill_ids" value="<%= b.id %>" class="bill-check"></td>
+            <td><code style="font-size:0.75rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;"><%= b.bill_number %></code></td>
+            <td style="font-weight:600;"><%= b.shop_name %></td>
+            <td style="color:var(--text-secondary);"><%= b.route_name %></td>
+            <td style="font-size:0.78rem;"><%= b.bill_date %></td>
+            <td>Rs <%= Number(b.net_amount).toFixed(2) %></td>
+            <td style="color:#EF4444;font-weight:700;">Rs <%= Number(b.outstanding_amount).toFixed(2) %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</form>
+
+<script>
+function toggleAll(cb) {
+  document.querySelectorAll('.bill-check').forEach(c => c.checked = cb.checked);
+}
+</script>

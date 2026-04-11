@@ -1,0 +1,104 @@
+<div class="page-header">
+  <div>
+    <h4>Product Management</h4>
+    <div class="page-sub">Manage your product catalogue. SKU codes are unique identifiers.</div>
+  </div>
+  <a href="/products/new" class="btn btn-primary">
+    <i class="bi bi-plus-lg me-1"></i> Add Product
+  </a>
+</div>
+
+<!-- Filter bar -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <span style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);">Filter:</span>
+      <a href="/products" class="btn btn-sm <%= filter === '' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">All</a>
+      <a href="/products?filter=active" class="btn btn-sm <%= filter === 'active' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">Active</a>
+      <a href="/products?filter=inactive" class="btn btn-sm <%= filter === 'inactive' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">Inactive</a>
+      <span class="ms-auto" style="font-size:0.78rem;color:var(--text-muted);"><%= products.length %> products</span>
+    </div>
+  </div>
+</div>
+
+<% if (pagination && pagination.total > 0) { %>
+  <p class="text-muted small mb-2"><%= pagination.total %> records</p>
+<% } %>
+
+<div class="card table-card">
+  <% if (products.length === 0) { %>
+    <div style="text-align:center;padding:48px;color:var(--text-muted);">
+      <i class="bi bi-box" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+      No products found. <a href="/products/new">Add your first product</a>.
+    </div>
+  <% } else { %>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Product Name</th>
+        <th>Brand</th>
+        <th>Units/Carton</th>
+        <th>Stock</th>
+        <th>Retail Price</th>
+        <th>Wholesale</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% products.forEach(p => { %>
+      <tr>
+        <td><code style="font-size:0.78rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;"><%= p.sku_code %></code></td>
+        <td><span style="font-weight:600;"><%= p.name %></span></td>
+        <td><span style="color:var(--text-secondary);"><%= p.brand || '—' %></span></td>
+        <td><%= p.units_per_carton %></td>
+        <td>
+          <% const totalUnits = p.current_stock_cartons * p.units_per_carton + p.current_stock_loose; %>
+          <% const isLow = p.low_stock_threshold && totalUnits <= p.low_stock_threshold; %>
+          <span style="font-weight:600;color:<%= isLow ? '#EF4444' : 'var(--text-primary)' %>;">
+            <%= p.current_stock_cartons %>C + <%= p.current_stock_loose %>L
+          </span>
+          <% if (isLow) { %><i class="bi bi-exclamation-triangle-fill text-danger ms-1" title="Low stock"></i><% } %>
+        </td>
+        <td>Rs <%= Number(p.retail_price).toFixed(2) %></td>
+        <td>Rs <%= Number(p.wholesale_price).toFixed(2) %></td>
+        <td>
+          <% if (p.is_active) { %>
+            <span class="badge badge-active">Active</span>
+          <% } else { %>
+            <span class="badge badge-inactive">Inactive</span>
+          <% } %>
+        </td>
+        <td>
+          <div class="d-flex gap-1">
+            <a href="/products/<%= p.id %>/edit" class="btn btn-icon btn-edit" title="Edit">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <a href="/products/<%= p.id %>/movements" class="btn btn-icon btn-outline-secondary" title="Stock History">
+              <i class="bi bi-clock-history"></i>
+            </a>
+            <% if (p.is_active) { %>
+              <form method="POST" action="/products/<%= p.id %>/deactivate" class="d-inline"
+                    onsubmit="return confirm('Deactivate <%= p.name %>?')">
+                <button type="submit" class="btn btn-icon btn-delete" title="Deactivate">
+                  <i class="bi bi-slash-circle"></i>
+                </button>
+              </form>
+            <% } else { %>
+              <form method="POST" action="/products/<%= p.id %>/activate" class="d-inline">
+                <button type="submit" class="btn btn-icon btn-assign" title="Reactivate">
+                  <i class="bi bi-check-circle"></i>
+                </button>
+              </form>
+            <% } %>
+          </div>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<%- include('../layout/pagination', {pagination, queryString}) %>

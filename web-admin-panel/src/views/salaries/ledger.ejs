@@ -1,0 +1,226 @@
+<div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <div class="d-flex align-items-center gap-2">
+    <a href="/salaries?tab=<%= staff.staffType === 'salesman' ? 'salesmen' : staff.staffType === 'order_booker' ? 'order_bookers' : 'delivery_men' %>" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i> Back to Salaries
+    </a>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <a href="/salaries/<%= staff.staffType %>/<%= staff.id %>/ledger/export" class="btn btn-sm btn-outline-success">
+      <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+    </a>
+    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#salaryModal">
+      <i class="bi bi-cash me-1"></i> Record Salary
+    </button>
+    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#advanceModal">
+      <i class="bi bi-plus-circle me-1"></i> Record Advance
+    </button>
+  </div>
+</div>
+
+<!-- Staff Header with Net Balance -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <h5 class="fw-bold mb-1">
+          <i class="bi bi-person-badge text-primary me-2"></i><%= staff.full_name %>
+        </h5>
+        <div class="text-muted small">
+          <span class="badge bg-secondary-subtle text-secondary">
+            <%= staff.staffType === 'salesman' ? 'Salesman' : staff.staffType === 'order_booker' ? 'Order Booker' : 'Delivery Man' %>
+          </span>
+        </div>
+      </div>
+      <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <div class="small text-muted mb-1">Net Balance</div>
+        <div class="fs-4 fw-bold <%= netBalance >= 0 ? 'text-success' : 'text-danger' %>">
+          Rs <%= Math.abs(netBalance).toLocaleString('en-PK', {minimumFractionDigits: 2}) %>
+          <% if (netBalance >= 0) { %>
+            <span class="badge bg-success-subtle text-success fs-6 ms-1">To Pay</span>
+          <% } else { %>
+            <span class="badge bg-danger-subtle text-danger fs-6 ms-1">Overpaid</span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ledger Table -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-journal-text me-2"></i>Salary Ledger</span>
+    <span class="badge bg-secondary"><%= pagination.total %> entries</span>
+  </div>
+  <div class="card-body p-0">
+    <% if (entries.length === 0) { %>
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-journal-x fs-1 d-block mb-2"></i>
+        No ledger entries yet.
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table table-hover table-sm mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Date</th>
+              <th>Entry Type</th>
+              <th class="text-end">Amount</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% 
+            let runningBalance = 0;
+            // Calculate running balance from the end (most recent first in display)
+            const reversedEntries = [...entries].reverse();
+            reversedEntries.forEach(e => {
+              if (e.entry_type === 'basic_salary') {
+                runningBalance += parseFloat(e.amount);
+              } else {
+                runningBalance -= parseFloat(e.amount);
+              }
+            });
+            
+            // Now display in correct order with running balance
+            entries.forEach(e => { 
+              const isBasicSalary = e.entry_type === 'basic_salary';
+              const displayType = isBasicSalary 
+                ? `Basic Salary (${e.month}/${e.year})` 
+                : 'Advance Payment';
+            %>
+              <tr>
+                <td class="text-nowrap small">
+                  <%= e.entry_date ? new Date(e.entry_date).toLocaleDateString('en-PK') : '' %>
+                </td>
+                <td>
+                  <span class="badge <%= isBasicSalary ? 'bg-primary-subtle text-primary' : 'bg-warning-subtle text-warning' %> small">
+                    <%= displayType %>
+                  </span>
+                </td>
+                <td class="text-end small">
+                  <span class="<%= isBasicSalary ? 'text-success' : 'text-danger' %> fw-semibold">
+                    <%= isBasicSalary ? '+' : '-' %> Rs <%= parseFloat(e.amount).toLocaleString('en-PK', {minimumFractionDigits: 2}) %>
+                  </span>
+                </td>
+                <td class="small text-muted"><%= e.note || '—' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Pagination -->
+<% if (pagination && pagination.pages > 1) { %>
+<nav class="mt-3">
+  <ul class="pagination pagination-sm justify-content-center">
+    <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
+      <a class="page-link" href="?page=1">«</a>
+    </li>
+    <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
+      <a class="page-link" href="?page=<%= pagination.page - 1 %>">‹</a>
+    </li>
+    <% for(let p = Math.max(1, pagination.page-2); p <= Math.min(pagination.pages, pagination.page+2); p++) { %>
+    <li class="page-item <%= p === pagination.page ? 'active' : '' %>">
+      <a class="page-link" href="?page=<%= p %>"><%= p %></a>
+    </li>
+    <% } %>
+    <li class="page-item <%= pagination.page >= pagination.pages ? 'disabled' : '' %>">
+      <a class="page-link" href="?page=<%= pagination.page + 1 %>">›</a>
+    </li>
+    <li class="page-item <%= pagination.page >= pagination.pages ? 'disabled' : '' %>">
+      <a class="page-link" href="?page=<%= pagination.pages %>">»</a>
+    </li>
+  </ul>
+  <div class="text-center small text-muted">
+    Showing page <%= pagination.page %> of <%= pagination.pages %> (<%= pagination.total %> entries)
+  </div>
+</nav>
+<% } %>
+
+<!-- Record Salary Modal -->
+<div class="modal fade" id="salaryModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">Record Basic Salary</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/salaries/record">
+        <input type="hidden" name="staff_id" value="<%= staff.id %>">
+        <input type="hidden" name="staff_type" value="<%= staff.staffType %>">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Month</label>
+              <select name="month" class="form-select" required>
+                <% const now = new Date(); for(let m=1;m<=12;m++){%>
+                <option value="<%=m%>" <%=now.getMonth()+1===m?'selected':''%>>
+                  <%=new Date(2000,m-1).toLocaleString('default',{month:'long'})%>
+                </option>
+                <%}%>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Year</label>
+              <input type="number" name="year" class="form-control" value="<%= new Date().getFullYear() %>" min="2020" max="2030" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Basic Salary (Rs)</label>
+              <div class="input-group">
+                <span class="input-group-text">Rs</span>
+                <input type="number" name="basic_salary" class="form-control" step="0.01" min="0" required>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Record Advance Modal -->
+<div class="modal fade" id="advanceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">Record Advance</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/salaries/advance">
+        <input type="hidden" name="staff_id" value="<%= staff.id %>">
+        <input type="hidden" name="staff_type" value="<%= staff.staffType %>">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Amount (Rs)</label>
+              <div class="input-group">
+                <span class="input-group-text">Rs</span>
+                <input type="number" name="amount" class="form-control" step="0.01" min="0.01" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Date</label>
+              <input type="date" name="advance_date" class="form-control" value="<%= new Date().toISOString().slice(0,10) %>" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Note</label>
+              <input type="text" name="note" class="form-control" placeholder="Optional">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Record Advance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

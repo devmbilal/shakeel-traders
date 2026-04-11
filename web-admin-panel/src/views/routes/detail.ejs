@@ -1,0 +1,255 @@
+<div class="page-header">
+  <div>
+    <h4><%= route.name %></h4>
+    <div class="page-sub">Route details and shop assignments</div>
+  </div>
+  <a href="/routes" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> All Routes</a>
+</div>
+
+<div class="row g-3">
+  <!-- Left: Edit + Add Shop -->
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header">Route Details</div>
+      <div class="card-body">
+        <form method="POST" action="/routes/<%= route.id %>">
+          <div class="mb-3">
+            <label class="form-label">Route Name <span style="color:#EF4444;">*</span></label>
+            <input type="text" name="name" class="form-control" value="<%= route.name %>" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <div><span class="badge <%= route.is_active ? 'badge-active' : 'badge-inactive' %>"><%= route.is_active ? 'Active' : 'Inactive' %></span></div>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-lg me-1"></i> Save</button>
+            <% if (route.is_active) { %>
+            <form method="POST" action="/routes/<%= route.id %>/deactivate" class="d-inline" onsubmit="return confirm('Deactivate this route?')">
+              <button type="submit" class="btn btn-sm btn-delete">Deactivate</button>
+            </form>
+            <% } %>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Add Shop to Route</div>
+      <div class="card-body">
+        <div class="mb-2">
+          <input 
+            type="text" 
+            id="shopSearch" 
+            class="form-control" 
+            placeholder="Search shops by name or owner..."
+            autocomplete="off"
+          >
+        </div>
+        <div id="searchResults" class="list-group" style="max-height: 300px; overflow-y: auto;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Shops List -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span style="font-family:'Manrope',sans-serif;font-weight:700;">Shops in This Route</span>
+        <span class="badge badge-blue" id="shopCount"><%= shops.length %> shops</span>
+      </div>
+      <div class="card-body p-0" id="shopsListContainer">
+        <% if (shops.length === 0) { %>
+          <div style="text-align:center;padding:40px;color:var(--text-muted);">
+            <i class="bi bi-shop-window" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+            No shops assigned to this route yet.
+          </div>
+        <% } else { %>
+          <table class="table mb-0">
+            <thead><tr>
+              <th style="padding-left:20px;">Shop Name</th>
+              <th>Owner</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody id="shopsTableBody">
+              <% shops.forEach(s => { %>
+              <tr>
+                <td style="padding-left:20px;">
+                  <a href="/shops/<%= s.id %>" style="font-weight:600;color:var(--secondary);text-decoration:none;"><%= s.name %></a>
+                  <% if (s.phone) { %><div style="font-size:0.72rem;color:var(--text-muted);"><%= s.phone %></div><% } %>
+                </td>
+                <td style="color:var(--text-secondary);font-size:0.82rem;"><%= s.owner_name || '—' %></td>
+                <td><span class="badge badge-blue" style="text-transform:capitalize;"><%= s.shop_type %></span></td>
+                <td><span class="badge <%= s.is_active ? 'badge-active' : 'badge-inactive' %>"><%= s.is_active ? 'Active' : 'Inactive' %></span></td>
+                <td>
+                  <a href="/shops/<%= s.id %>" class="btn btn-sm btn-assign btn-icon me-1" title="View Shop"><i class="bi bi-arrow-right"></i></a>
+                  <button class="btn btn-sm btn-delete btn-icon" onclick="removeShop(<%= s.id %>)" title="Remove from Route"><i class="bi bi-x-lg"></i></button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const routeId = <%= route.id %>;
+  let debounceTimer;
+
+  // Debounced shop search
+  const searchInput = document.getElementById('shopSearch');
+  const searchResults = document.getElementById('searchResults');
+
+  searchInput.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    const query = this.value.trim();
+
+    if (query.length < 2) {
+      searchResults.innerHTML = '';
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      try {
+        const response = await fetch(`/routes/${routeId}/shops/search?q=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+          throw new Error('Search failed');
+        }
+        const shops = await response.json();
+        
+        if (shops.length === 0) {
+          searchResults.innerHTML = '<div class="list-group-item text-muted">No shops found</div>';
+        } else {
+          searchResults.innerHTML = shops.map(shop => `
+            <button 
+              class="list-group-item list-group-item-action" 
+              onclick="addShop(${shop.id}, '${shop.name.replace(/'/g, "\\'")}')">
+              <div style="font-weight:600;">${shop.name}</div>
+              <div style="font-size:0.82rem;color:var(--text-muted);">${shop.owner_name || '—'}</div>
+            </button>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('Search error:', err);
+        searchResults.innerHTML = '<div class="list-group-item text-danger">Search failed. Please try again.</div>';
+      }
+    }, 300);
+  });
+
+  // Add shop to route
+  window.addShop = async function(shopId, shopName) {
+    try {
+      const response = await fetch(`/routes/${routeId}/shops`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ shop_id: shopId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add shop');
+      }
+
+      // Clear search
+      searchInput.value = '';
+      searchResults.innerHTML = '';
+
+      // Reload shop list
+      await reloadShopList();
+      
+      // Show success message (optional)
+      console.log(`Shop "${shopName}" added successfully`);
+    } catch (err) {
+      console.error('Add shop error:', err);
+      alert('Failed to add shop. Please try again.');
+    }
+  };
+
+  // Remove shop from route
+  window.removeShop = async function(shopId) {
+    if (!confirm('Remove this shop from the route?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/routes/${routeId}/shops/${shopId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove shop');
+      }
+
+      // Reload shop list
+      await reloadShopList();
+      
+      console.log('Shop removed successfully');
+    } catch (err) {
+      console.error('Remove shop error:', err);
+      alert('Failed to remove shop. Please try again.');
+    }
+  };
+
+  // Reload shop list
+  async function reloadShopList() {
+    try {
+      const response = await fetch(`/routes/${routeId}/shops/list`);
+      if (!response.ok) {
+        throw new Error('Failed to load shops');
+      }
+      const shops = await response.json();
+      
+      // Update shop count
+      document.getElementById('shopCount').textContent = `${shops.length} shops`;
+      
+      // Update shop list
+      const container = document.getElementById('shopsListContainer');
+      if (shops.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px;color:var(--text-muted);">
+            <i class="bi bi-shop-window" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+            No shops assigned to this route yet.
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <table class="table mb-0">
+            <thead><tr>
+              <th style="padding-left:20px;">Shop Name</th>
+              <th>Owner</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody id="shopsTableBody">
+              ${shops.map(s => `
+                <tr>
+                  <td style="padding-left:20px;">
+                    <a href="/shops/${s.id}" style="font-weight:600;color:var(--secondary);text-decoration:none;">${s.name}</a>
+                    ${s.phone ? `<div style="font-size:0.72rem;color:var(--text-muted);">${s.phone}</div>` : ''}
+                  </td>
+                  <td style="color:var(--text-secondary);font-size:0.82rem;">${s.owner_name || '—'}</td>
+                  <td><span class="badge badge-blue" style="text-transform:capitalize;">${s.shop_type}</span></td>
+                  <td><span class="badge ${s.is_active ? 'badge-active' : 'badge-inactive'}">${s.is_active ? 'Active' : 'Inactive'}</span></td>
+                  <td>
+                    <a href="/shops/${s.id}" class="btn btn-sm btn-assign btn-icon me-1" title="View Shop"><i class="bi bi-arrow-right"></i></a>
+                    <button class="btn btn-sm btn-delete btn-icon" onclick="removeShop(${s.id})" title="Remove from Route"><i class="bi bi-x-lg"></i></button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    } catch (err) {
+      console.error('Reload shop list error:', err);
+    }
+  }
+})();
+</script>

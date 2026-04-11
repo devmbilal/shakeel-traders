@@ -1,0 +1,39 @@
+<div class="page-header">
+  <div><h4>Add Stock (Manual)</h4><div class="page-sub">Manually add stock to warehouse without a supplier receipt</div></div>
+  <a href="/stock" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-plus-circle me-2" style="color:var(--secondary);"></i>Manual Stock Addition</div>
+      <div class="card-body">
+        <form method="POST" action="/stock/manual-add">
+          <div class="mb-3">
+            <label class="form-label">Product <span style="color:#EF4444;">*</span></label>
+            <select name="product_id" class="form-select" data-searchable required>
+              <option value="">— Select product —</option>
+              <% products.forEach(p => { %>
+                <option value="<%= p.id %>"><%= p.sku_code %> — <%= p.name %> (Stock: <%= p.current_stock_cartons %>C + <%= p.current_stock_loose %>L)</option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label">Cartons to Add</label>
+              <input type="number" name="cartons" class="form-control" min="0" value="0">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Loose Units to Add</label>
+              <input type="number" name="loose_units" class="form-control" min="0" value="0">
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Note (optional)</label>
+            <input type="text" name="note" class="form-control" placeholder="Reason for manual addition">
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Add Stock</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

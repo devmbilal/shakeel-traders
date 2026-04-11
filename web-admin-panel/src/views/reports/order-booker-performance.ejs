@@ -1,0 +1,43 @@
+<div class="page-header">
+  <div><h4>Order Booker Performance</h4></div>
+  <div class="d-flex gap-2">
+    <a href="/reports/order-booker-performance?startDate=<%= filters.startDate||'' %>&endDate=<%= filters.endDate||'' %>&bookerId=<%= filters.bookerId||'' %>&export=excel" class="btn btn-outline-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i> Export</a>
+    <a href="/reports" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Reports</a>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" action="/reports/order-booker-performance" class="row g-3 align-items-end">
+      <div class="col-md-3"><label class="form-label fw-semibold">From</label><input type="date" name="startDate" class="form-control" value="<%= filters.startDate||'' %>"></div>
+      <div class="col-md-3"><label class="form-label fw-semibold">To</label><input type="date" name="endDate" class="form-control" value="<%= filters.endDate||'' %>"></div>
+      <div class="col-md-3"><button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i> Filter</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card table-card">
+  <% if (!data.length) { %>
+    <div class="text-center py-5 text-muted">No data found.</div>
+  <% } else { %>
+  <table class="table">
+    <thead><tr><th>Booker</th><th>Orders Booked</th><th>Bills Converted</th><th>Recovery Bills</th><th>Recoveries Collected</th></tr></thead>
+    <tbody>
+      <% data.forEach(r => { %>
+      <tr>
+        <td><div class="fw-semibold"><%= r.full_name %></div><div class="small text-muted"><%= r.username %></div></td>
+        <td><%= r.orders_booked %></td>
+        <td><%= r.bills_converted %></td>
+        <td><%= r.recovery_bills_assigned %></td>
+        <td class="text-success fw-semibold">Rs <%= Number(r.recoveries_collected||0).toLocaleString() %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<% 
+const queryString = new URLSearchParams({ startDate: filters.startDate||'', endDate: filters.endDate||'', bookerId: filters.bookerId||'' }).toString();
+%>
+<%- include('../layout/pagination', { pagination, queryString }) %>

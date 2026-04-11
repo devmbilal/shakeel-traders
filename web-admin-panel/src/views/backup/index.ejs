@@ -1,0 +1,200 @@
+<div class="page-header">
+  <div>
+    <h4>Database Backup</h4>
+    <div class="page-sub">Manage database backups and restore points</div>
+  </div>
+  <div>
+    <form method="POST" action="/backup/run" class="d-inline">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-cloud-arrow-up me-1"></i> Create Backup Now
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Backup Settings -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">Backup Settings</div>
+      <div class="card-body">
+        <form method="POST" action="/backup/settings">
+          <div class="mb-3">
+            <label class="form-label">Automatic Backup Time</label>
+            <input type="time" name="backupTime" class="form-control" value="02:00" />
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">
+              Daily automatic backup time (requires cron job configuration)
+            </div>
+          </div>
+          <button type="submit" class="btn btn-sm btn-dark-primary w-100">
+            <i class="bi bi-save me-1"></i> Save Settings
+          </button>
+        </form>
+
+        <div class="divider"></div>
+
+        <div style="font-size:0.8rem;">
+          <div style="font-weight:600;margin-bottom:8px;">Backup Information</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="color:var(--text-muted);">Backup Directory:</span>
+            <span style="font-weight:600;font-size:0.75rem;">backups/</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="color:var(--text-muted);">Total Backups:</span>
+            <span style="font-weight:600;"><%= backups.length %></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-muted);">Total Size:</span>
+            <span style="font-weight:600;">
+              <%= backups.reduce((sum, b) => sum + b.size, 0) > 0 ? 
+                  (backups.reduce((sum, b) => sum + b.size, 0) / (1024 * 1024)).toFixed(2) + ' MB' : 
+                  '0 MB' %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Restore Instructions -->
+    <div class="card mt-3">
+      <div class="card-header">Restore Instructions</div>
+      <div class="card-body">
+        <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.6;">
+          <div style="background:#FEF9C3;padding:10px;border-radius:8px;margin-bottom:12px;">
+            <i class="bi bi-exclamation-triangle-fill" style="color:#F59E0B;"></i>
+            <strong style="color:#854D0E;"> Warning:</strong>
+            <span style="color:#854D0E;">Restoring a backup will overwrite all current data.</span>
+          </div>
+          
+          <ol style="padding-left:20px;margin:0;">
+            <li style="margin-bottom:8px;">Select a backup from the list</li>
+            <li style="margin-bottom:8px;">Click the Restore button</li>
+            <li style="margin-bottom:8px;">Confirm the restoration</li>
+            <li>All users will need to log in again</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup History -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">Backup History</div>
+      <div class="card-body p-0">
+        <% if (backups.length === 0) { %>
+          <div style="padding:40px;text-align:center;color:var(--text-muted);">
+            <i class="bi bi-inbox" style="font-size:2.5rem;opacity:0.3;"></i>
+            <div style="margin-top:12px;font-size:0.85rem;">No backups found</div>
+            <div style="font-size:0.75rem;margin-top:4px;">Create your first backup using the button above</div>
+          </div>
+        <% } else { %>
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>Backup File</th>
+                <th>Created</th>
+                <th>Size</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% backups.forEach(backup => { %>
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <i class="bi bi-file-earmark-zip" style="color:var(--secondary);font-size:1.1rem;"></i>
+                    <div>
+                      <div style="font-weight:600;font-size:0.82rem;"><%= backup.filename %></div>
+                      <div style="font-size:0.7rem;color:var(--text-muted);">SQL Database Backup</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div style="font-size:0.8rem;"><%= new Date(backup.created_at).toLocaleDateString() %></div>
+                  <div style="font-size:0.7rem;color:var(--text-muted);"><%= new Date(backup.created_at).toLocaleTimeString() %></div>
+                </td>
+                <td>
+                  <span style="font-weight:600;font-size:0.82rem;"><%= backup.sizeFormatted %></span>
+                </td>
+                <td style="text-align:right;">
+                  <div style="display:flex;gap:6px;justify-content:flex-end;">
+                    <!-- Download -->
+                    <a href="/backup/download/<%= backup.filename %>" class="btn btn-sm btn-outline-primary" title="Download">
+                      <i class="bi bi-download"></i>
+                    </a>
+                    
+                    <!-- Restore -->
+                    <button type="button" class="btn btn-sm btn-outline-secondary" 
+                            onclick="confirmRestore('<%= backup.filename %>')" title="Restore">
+                      <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                    
+                    <!-- Delete -->
+                    <form method="POST" action="/backup/delete/<%= backup.filename %>" class="d-inline" 
+                          onsubmit="return confirm('Are you sure you want to delete this backup?');">
+                      <button type="submit" class="btn btn-sm btn-delete" title="Delete">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Restore Confirmation Modal -->
+<div class="modal fade" id="restoreModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Database Restore</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#FEE2E2;padding:14px;border-radius:8px;margin-bottom:16px;">
+          <i class="bi bi-exclamation-triangle-fill" style="color:#EF4444;font-size:1.2rem;"></i>
+          <strong style="color:#991B1B;margin-left:8px;">Warning: This action cannot be undone!</strong>
+        </div>
+        
+        <p style="font-size:0.85rem;margin-bottom:12px;">
+          Restoring this backup will:
+        </p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:16px;">
+          <li>Overwrite all current database data</li>
+          <li>Replace all orders, bills, and transactions</li>
+          <li>Reset all user sessions (everyone will need to log in again)</li>
+          <li>Cannot be reversed</li>
+        </ul>
+        
+        <p style="font-size:0.85rem;font-weight:600;">
+          Are you absolutely sure you want to restore from this backup?
+        </p>
+        
+        <form method="POST" action="/backup/restore" id="restoreForm">
+          <input type="hidden" name="filename" id="restoreFilename" />
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-sm btn-danger" onclick="document.getElementById('restoreForm').submit();">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Yes, Restore Database
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function confirmRestore(filename) {
+  document.getElementById('restoreFilename').value = filename;
+  const modal = new bootstrap.Modal(document.getElementById('restoreModal'));
+  modal.show();
+}
+</script>

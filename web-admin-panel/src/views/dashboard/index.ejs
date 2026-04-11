@@ -1,0 +1,459 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════════════════════════ -->
+<!-- SHAKEEL TRADERS DISTRIBUTION SYSTEM - EXECUTIVE DASHBOARD -->
+<!-- Professional Business Intelligence Dashboard with Real-Time Metrics -->
+<!-- ═══════════════════════════════════════════════════════════════════════════════════════════════ -->
+
+<style>
+  /* Dashboard-specific styles */
+  .metric-card { transition: transform 0.2s, box-shadow 0.2s; }
+  .metric-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .progress-ring { transform: rotate(-90deg); }
+  .badge-status { font-size: 0.7rem; padding: 0.25rem 0.5rem; }
+  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; }
+  .trend-indicator { font-size: 0.75rem; padding: 0.15rem 0.4rem; border-radius: 4px; }
+  .alert-badge { position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
+</style>
+
+<!-- Dashboard Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="mb-1" style="font-family: 'Manrope', sans-serif; font-weight: 700;">Executive Dashboard</h4>
+    <p class="text-muted small mb-0">Real-time business intelligence across all sales channels</p>
+  </div>
+  <div class="d-flex gap-2 align-items-center">
+    <div class="btn-group btn-group-sm">
+      <button type="button" class="btn btn-primary" id="btnDaily" onclick="window.switchView('daily')">TODAY</button>
+      <button type="button" class="btn btn-outline-secondary" id="btnMonthly" onclick="window.switchView('monthly')">MONTH</button>
+      <button type="button" class="btn btn-outline-secondary" id="btnYearly" onclick="window.switchView('yearly')">YEAR</button>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" onclick="window.refreshDashboard()">
+      <i class="bi bi-arrow-clockwise"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div id="loadingState" class="text-center py-5 d-none">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <p class="text-muted mt-2">Loading dashboard data...</p>
+</div>
+
+<!-- Error State -->
+<div id="errorState" class="alert alert-danger d-none" role="alert">
+  <i class="bi bi-exclamation-triangle me-2"></i>
+  <span id="errorMessage">Failed to load dashboard data.</span>
+</div>
+
+<!-- Dashboard Content -->
+<div id="dashboardContent">
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: KEY FINANCIAL METRICS -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  
+  <div class="row g-3 mb-4">
+    <!-- Financial Overview Card -->
+    <div class="col-md-8">
+      <div class="card border-0" style="background: linear-gradient(135deg, #1E293B 0%, #334155 100%); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <div class="card-body p-4">
+          <div class="text-white mb-3" style="opacity: 0.7; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;">
+            Financial Overview
+          </div>
+          <div class="d-flex align-items-baseline gap-2 mb-4">
+            <h1 class="text-white mb-0" id="totalOutstanding" style="font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 3rem;">Rs 0</h1>
+            <span class="text-white" style="opacity: 0.6; font-size: 0.9rem;">Outstanding</span>
+          </div>
+          <div class="row g-3">
+            <div class="col-4">
+              <div class="text-white" style="opacity: 0.6; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px;">
+                Stock Value
+              </div>
+              <div class="text-white" id="stockValue" style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 1.25rem;">Rs 0</div>
+              <div class="text-white" id="stockUnits" style="opacity: 0.5; font-size: 0.75rem;">0 Ctn + 0 Loose</div>
+            </div>
+            <div class="col-4">
+              <div class="text-white" style="opacity: 0.6; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px;">
+                Supplier Advance
+              </div>
+              <div class="text-white" id="supplierAdvance" style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 1.25rem;">Rs 0</div>
+              <div class="text-white" id="supplierCount" style="opacity: 0.5; font-size: 0.75rem;">0 Suppliers</div>
+            </div>
+            <div class="col-4">
+              <div class="text-white" style="opacity: 0.6; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px;">
+                Cash Collected
+              </div>
+              <div class="text-white" id="cashCollected" style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 1.25rem;">Rs 0</div>
+              <div class="text-white" id="cashPeriod" style="opacity: 0.5; font-size: 0.75rem;">Today</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical Alerts Card -->
+    <div class="col-md-4">
+      <div class="card border-0" style="border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0" style="font-weight: 700; font-size: 0.9rem;">Critical Alerts</h6>
+            <span class="badge bg-danger rounded-circle" id="totalAlertsCount" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem;">0</span>
+          </div>
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex align-items-center justify-content-between p-2 rounded-3" style="background: #FEF2F2;">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle text-danger" style="font-size: 1rem;"></i>
+                <span class="small fw-semibold" style="font-size: 0.8rem;">Low Stock</span>
+              </div>
+              <span class="badge bg-danger" style="font-size: 0.7rem;" id="lowStockCount">0</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between p-2 rounded-3" style="background: #FEF3C7;">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-hourglass-split text-warning" style="font-size: 1rem;"></i>
+                <span class="small fw-semibold" style="font-size: 0.8rem;">Pending</span>
+              </div>
+              <span class="badge badge-orange" style="font-size: 0.7rem;" id="pendingCount">0</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between p-2 rounded-3" style="background: #DBEAFE;">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-clock-history text-primary" style="font-size: 1rem;"></i>
+                <span class="small fw-semibold" style="font-size: 0.8rem;">Unsynced</span>
+              </div>
+              <span class="badge bg-primary" style="font-size: 0.7rem;" id="unsyncedCount">0</span>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <a href="/stock" class="btn btn-sm btn-outline-secondary flex-fill" style="font-size: 0.65rem; font-weight: 600; padding: 0.35rem 0.5rem;">STOCK</a>
+            <a href="/orders" class="btn btn-sm btn-outline-secondary flex-fill" style="font-size: 0.65rem; font-weight: 600; padding: 0.35rem 0.5rem;">ORDERS</a>
+            <a href="/cash-recovery" class="btn btn-sm btn-outline-secondary flex-fill" style="font-size: 0.65rem; font-weight: 600; padding: 0.35rem 0.5rem;">RECOVERY</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: SALES SUMMARY BY CHANNEL -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  
+  <div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h5 class="mb-0" style="font-weight: 700;">Sales Summary</h5>
+        <p class="text-muted small mb-0" id="salesPeriodLabel">Real-time revenue stream tracking</p>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <!-- Order Booker Sales -->
+      <div class="col-md-4">
+        <div class="card border-0 metric-card" style="border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="stat-icon" style="background: #DBEAFE;">
+                <i class="bi bi-person-badge" style="font-size: 1.5rem; color: #3B82F6;"></i>
+              </div>
+              <div>
+                <span class="small fw-semibold text-muted d-block">Order Booker Sales</span>
+                <span class="badge bg-light text-dark" style="font-size: 0.65rem;" id="obBillCount">0 bills</span>
+              </div>
+            </div>
+            <h3 class="mb-3" id="orderBookerSales" style="font-family: 'Manrope', sans-serif; font-weight: 800;">Rs 0</h3>
+            <div id="orderBookerBreakdown" class="d-flex flex-column gap-2">
+              <!-- Route breakdown will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Salesman Sales -->
+      <div class="col-md-4">
+        <div class="card border-0 metric-card" style="border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="stat-icon" style="background: #D1FAE5;">
+                <i class="bi bi-truck" style="font-size: 1.5rem; color: #10B981;"></i>
+              </div>
+              <div>
+                <span class="small fw-semibold text-muted d-block">Salesman Sales</span>
+                <span class="badge bg-light text-dark" style="font-size: 0.65rem;" id="smBillCount">0 bills</span>
+              </div>
+            </div>
+            <h3 class="mb-3" id="salesmanSales" style="font-family: 'Manrope', sans-serif; font-weight: 800;">Rs 0</h3>
+            <div id="salesmanBreakdown" class="d-flex flex-column gap-2">
+              <!-- Van breakdown will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Direct Shop Sales -->
+      <div class="col-md-4">
+        <div class="card border-0 metric-card" style="border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="stat-icon" style="background: #FED7AA;">
+                <i class="bi bi-shop" style="font-size: 1.5rem; color: #F59E0B;"></i>
+              </div>
+              <div>
+                <span class="small fw-semibold text-muted d-block">Direct Shop Sales</span>
+                <span class="badge bg-light text-dark" style="font-size: 0.65rem;" id="dsBillCount">0 bills</span>
+              </div>
+            </div>
+            <h3 class="mb-3" id="directShopSales" style="font-family: 'Manrope', sans-serif; font-weight: 800;">Rs 0</h3>
+            <div class="small text-muted">
+              <div class="d-flex justify-content-between mb-1">
+                <span>Walk-in customers</span>
+                <span class="fw-semibold">Direct admin sales</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: PERFORMANCE TABLES -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  
+  <div class="row g-3">
+    <!-- Order Booker Performance -->
+    <div class="col-md-6">
+      <div class="card border-0" style="border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+        <div class="card-body p-4 pb-0">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0" style="font-weight: 700;">Order Booker Performance</h6>
+            <a href="/users" class="small text-primary fw-semibold" style="text-decoration: none;">VIEW ALL</a>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0" style="font-size: 0.85rem;">
+            <thead style="background: #F9FAFB;">
+              <tr>
+                <th class="py-3 ps-4">AGENT</th>
+                <th class="text-center py-3">ORDERS</th>
+                <th class="text-center py-3">CONVERTED</th>
+                <th class="text-end py-3 pe-4">RECOVERY</th>
+                <th class="text-center py-3 pe-4">STATUS</th>
+              </tr>
+            </thead>
+            <tbody id="bookerPerformanceTable">
+              <tr><td colspan="5" class="text-center text-muted py-4">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salesman Performance -->
+    <div class="col-md-6">
+      <div class="card border-0" style="border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+        <div class="card-body p-4 pb-0">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0" style="font-weight: 700;">Salesman Performance</h6>
+            <a href="/stock" class="small text-primary fw-semibold" style="text-decoration: none;">VIEW ALL</a>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0" style="font-size: 0.85rem;">
+            <tbody id="salesmanPerformanceTable">
+              <tr><td colspan="2" class="text-center text-muted py-4">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+(function() {
+  'use strict';
+  
+  var currentView = 'daily';
+
+  function loadDashboardData() {
+    var loadingState = document.getElementById('loadingState');
+    var errorState = document.getElementById('errorState');
+    var dashboardContent = document.getElementById('dashboardContent');
+    
+    loadingState.classList.remove('d-none');
+    errorState.classList.add('d-none');
+    
+    fetch('/dashboard/data?view=' + currentView)
+      .then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(function(data) {
+        // Update Financial Overview (Hero Card)
+        document.getElementById('totalOutstanding').textContent = formatCurrency(data.financials.totalOutstanding || 0);
+        document.getElementById('stockValue').textContent = formatCurrency(data.financials.stockValue || 0);
+        document.getElementById('stockUnits').textContent = (data.financials.totalCartons || 0).toLocaleString() + ' Ctn + ' + (data.financials.totalLoose || 0).toLocaleString() + ' Loose';
+        document.getElementById('supplierAdvance').textContent = formatCurrency(data.financials.supplierAdvance || 0);
+        document.getElementById('supplierCount').textContent = (data.financials.supplierCount || 0) + ' Suppliers';
+        document.getElementById('cashCollected').textContent = formatCurrency(data.cash.total || 0);
+        document.getElementById('cashPeriod').textContent = data.dateLabel || 'Today';
+        
+        // Update Critical Alerts
+        var totalAlerts = (data.alerts.lowStockCount || 0) + (data.alerts.pendingIssuances || 0) + (data.alerts.pendingReturns || 0) + (data.alerts.pendingVerifications || 0) + (data.alerts.unsyncedBookers || []).length;
+        document.getElementById('totalAlertsCount').textContent = totalAlerts;
+        document.getElementById('lowStockCount').textContent = data.alerts.lowStockCount || 0;
+        document.getElementById('pendingCount').textContent = (data.alerts.pendingIssuances || 0) + (data.alerts.pendingReturns || 0) + (data.alerts.pendingVerifications || 0);
+        document.getElementById('unsyncedCount').textContent = (data.alerts.unsyncedBookers || []).length;
+        
+        // Update Sales Summary
+        document.getElementById('salesPeriodLabel').textContent = 'Real-time revenue stream tracking - ' + (data.dateLabel || 'Today');
+        document.getElementById('orderBookerSales').textContent = formatCurrency((data.sales.order_booker || {}).sales || 0);
+        document.getElementById('obBillCount').textContent = ((data.sales.order_booker || {}).count || 0) + ' bills';
+        document.getElementById('salesmanSales').textContent = formatCurrency((data.sales.salesman || {}).sales || 0);
+        document.getElementById('smBillCount').textContent = ((data.sales.salesman || {}).count || 0) + ' bills';
+        document.getElementById('directShopSales').textContent = formatCurrency((data.sales.direct_shop || {}).sales || 0);
+        document.getElementById('dsBillCount').textContent = ((data.sales.direct_shop || {}).count || 0) + ' bills';
+        
+        // Create sales breakdowns
+        createSalesBreakdown('orderBookerBreakdown', data.routeBreakdown || [], '#3B82F6', 'route_name');
+        createSalesBreakdown('salesmanBreakdown', data.salesmanBreakdown || [], '#10B981', 'salesman_name');
+        
+        // Update Order Booker Performance Table
+        updateBookerPerformanceTable(data.bookerPerformance || []);
+        
+        // Update Salesman Performance Table
+        updateSalesmanPerformanceTable(data.salesmanPerformance || []);
+        
+        loadingState.classList.add('d-none');
+        dashboardContent.classList.remove('d-none');
+      })
+      .catch(function(error) {
+        console.error('Dashboard error:', error);
+        loadingState.classList.add('d-none');
+        errorState.classList.remove('d-none');
+        document.getElementById('errorMessage').textContent = error.message;
+      });
+  }
+
+  function createSalesBreakdown(elementId, data, color, nameField) {
+    var container = document.getElementById(elementId);
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="small text-muted">No breakdown available</div>';
+      return;
+    }
+    
+    var total = data.reduce(function(sum, item) { return sum + parseFloat(item.total_sales || 0); }, 0);
+    
+    container.innerHTML = data.slice(0, 2).map(function(item) {
+      var value = parseFloat(item.total_sales || 0);
+      var percent = total > 0 ? (value / total * 100).toFixed(0) : 0;
+      var name = item[nameField] || 'Unknown';
+      
+      return '<div>' +
+        '<div class="d-flex justify-content-between align-items-center mb-1">' +
+        '<span class="small text-muted">' + name + '</span>' +
+        '<span class="small fw-semibold">' + formatCurrency(value) + '</span>' +
+        '</div>' +
+        '<div style="height: 6px; background: #F3F4F6; border-radius: 3px; overflow: hidden;">' +
+        '<div style="width: ' + percent + '%; height: 100%; background: ' + color + ';"></div>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function updateBookerPerformanceTable(data) {
+    var table = document.getElementById('bookerPerformanceTable');
+    if (!data || data.length === 0) {
+      table.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No data available</td></tr>';
+      return;
+    }
+    
+    table.innerHTML = data.slice(0, 5).map(function(b, idx) {
+      var initials = b.full_name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+      var colors = ['#DBEAFE', '#FED7AA', '#D1FAE5', '#FCE7F3', '#E0E7FF'];
+      var textColors = ['#3B82F6', '#F59E0B', '#10B981', '#EC4899', '#6366F1'];
+      var isActive = parseInt(b.orders_booked) > 0 || parseInt(b.recovery_collected) > 0;
+      
+      return '<tr style="border-bottom: 1px solid #F3F4F6;">' +
+        '<td class="py-3 ps-4">' +
+        '<div class="d-flex align-items-center gap-2">' +
+        '<div class="d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; background: ' + colors[idx % 5] + '; color: ' + textColors[idx % 5] + '; font-size: 0.75rem; border-radius: 50%;">' + initials + '</div>' +
+        '<span class="fw-semibold">' + b.full_name + '</span>' +
+        '</div>' +
+        '</td>' +
+        '<td class="text-center py-3">' + b.orders_booked + '</td>' +
+        '<td class="text-center py-3">' + b.bills_converted + '</td>' +
+        '<td class="text-end py-3 pe-4">' + formatCurrency(b.recovery_collected) + '</td>' +
+        '<td class="text-center py-3 pe-4"><i class="bi bi-circle-fill" style="font-size: 0.5rem; color: ' + (isActive ? '#10B981' : '#94A3B8') + ';"></i></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function updateSalesmanPerformanceTable(data) {
+    var table = document.getElementById('salesmanPerformanceTable');
+    if (!data || data.length === 0) {
+      table.innerHTML = '<tr><td class="text-center text-muted py-4">No data available</td></tr>';
+      return;
+    }
+    
+    table.innerHTML = data.slice(0, 5).map(function(s, idx) {
+      var issuedUnits = parseInt(s.issued_units || 0);
+      var soldUnits = parseInt(s.sold_units || 0);
+      var saleValue = parseFloat(s.sale_value || 0);
+      var efficiency = issuedUnits > 0 ? Math.min(100, (soldUnits / issuedUnits * 100)).toFixed(0) : 0;
+      var status = s.return_status === 'approved' ? 'COMPLETED' : s.issuance_status === 'approved' ? 'IN PROGRESS' : 'PENDING';
+      var statusColor = status === 'COMPLETED' ? '#10B981' : status === 'IN PROGRESS' ? '#F59E0B' : '#94A3B8';
+      
+      return '<tr style="border-bottom: 1px solid #F3F4F6;">' +
+        '<td class="py-4 ps-4">' +
+        '<div class="mb-2">' +
+        '<span class="fw-semibold">VAN 0' + (idx + 1) + ' - ' + s.full_name.toUpperCase() + '</span>' +
+        '<span class="badge ms-2" style="background: ' + statusColor + '; font-size: 0.65rem;">' + status + '</span>' +
+        '</div>' +
+        '<div class="small text-muted mb-2">Sold: ' + soldUnits.toLocaleString() + ' units / Issued: ' + issuedUnits.toLocaleString() + ' units</div>' +
+        '<div class="d-flex align-items-center gap-2">' +
+        '<div style="flex: 1; height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden;">' +
+        '<div style="width: ' + efficiency + '%; height: 100%; background: linear-gradient(90deg, #3B82F6 0%, #60A5FA 100%);"></div>' +
+        '</div>' +
+        '<span class="small fw-semibold" style="color: #3B82F6; min-width: 45px;">' + efficiency + '%</span>' +
+        '</div>' +
+        '<div class="mt-2 small fw-semibold" style="color: #10B981;">Sale Value: ' + formatCurrency(saleValue) + '</div>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function switchView(view) {
+    currentView = view;
+    document.getElementById('btnDaily').className = view === 'daily' ? 'btn btn-primary btn-sm' : 'btn btn-outline-secondary btn-sm';
+    document.getElementById('btnMonthly').className = view === 'monthly' ? 'btn btn-primary btn-sm' : 'btn btn-outline-secondary btn-sm';
+    document.getElementById('btnYearly').className = view === 'yearly' ? 'btn btn-primary btn-sm' : 'btn btn-outline-secondary btn-sm';
+    loadDashboardData();
+  }
+
+  function refreshDashboard() {
+    loadDashboardData();
+  }
+
+  function formatCurrency(amount) {
+    var num = parseFloat(amount || 0);
+    if (num >= 10000000) return 'Rs ' + (num / 10000000).toFixed(1) + 'Cr';
+    if (num >= 100000) return 'Rs ' + (num / 100000).toFixed(1) + 'L';
+    if (num >= 1000) return 'Rs ' + (num / 1000).toFixed(0) + 'K';
+    return 'Rs ' + num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+
+  window.switchView = switchView;
+  window.refreshDashboard = refreshDashboard;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadDashboardData);
+  } else {
+    loadDashboardData();
+  }
+
+  setInterval(loadDashboardData, 60000); // Refresh every minute
+})();
+</script>

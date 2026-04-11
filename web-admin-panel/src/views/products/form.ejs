@@ -1,0 +1,89 @@
+<div class="page-header">
+  <div>
+    <h4><%= isEdit ? 'Edit Product' : 'Add Product' %></h4>
+    <div class="page-sub">SKU Code is the unique mandatory identifier for every product.</div>
+  </div>
+  <a href="/products" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i> Back
+  </a>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-box me-2" style="color:var(--secondary);"></i>
+        <%= isEdit ? 'Edit Product Details' : 'New Product' %>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="<%= isEdit ? '/products/' + product.id : '/products' %>">
+
+          <div class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label">SKU Code <span style="color:#EF4444;">*</span></label>
+              <input type="text" name="sku_code" class="form-control"
+                     value="<%= product ? product.sku_code : '' %>"
+                     placeholder="e.g. CBL-001" required
+                     <%= isEdit ? '' : '' %>>
+              <div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">Must be unique across all products</div>
+            </div>
+            <div class="col-md-7">
+              <label class="form-label">Product Name <span style="color:#EF4444;">*</span></label>
+              <input type="text" name="name" class="form-control"
+                     value="<%= product ? product.name : '' %>"
+                     placeholder="e.g. CBL Biscuit 100g" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Brand</label>
+              <input type="text" name="brand" class="form-control"
+                     value="<%= product ? (product.brand || '') : '' %>"
+                     placeholder="e.g. CBL">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Units per Carton <span style="color:#EF4444;">*</span></label>
+              <input type="number" name="units_per_carton" class="form-control"
+                     value="<%= product ? product.units_per_carton : '' %>"
+                     min="1" required placeholder="e.g. 24">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Retail Price (Rs) <span style="color:#EF4444;">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text">Rs</span>
+                <input type="number" name="retail_price" class="form-control"
+                       value="<%= product ? product.retail_price : '' %>"
+                       step="0.01" min="0" required placeholder="0.00">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Wholesale Price (Rs) <span style="color:#EF4444;">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text">Rs</span>
+                <input type="number" name="wholesale_price" class="form-control"
+                       value="<%= product ? product.wholesale_price : '' %>"
+                       step="0.01" min="0" required placeholder="0.00">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Low Stock Alert Threshold</label>
+              <input type="number" name="low_stock_threshold" class="form-control"
+                     value="<%= product ? (product.low_stock_threshold || '') : '' %>"
+                     min="0" placeholder="e.g. 5 (leave blank to disable)">
+              <div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">Alert shown on dashboard when total units ≤ this value</div>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;display:flex;gap:10px;">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i> <%= isEdit ? 'Save Changes' : 'Create Product' %>
+            </button>
+            <a href="/products" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

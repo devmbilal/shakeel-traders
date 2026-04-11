@@ -1,0 +1,99 @@
+<div class="page-header">
+  <div><h4>New Direct Sale</h4><div class="page-sub">Create an instant bill. Stock is deducted immediately on confirmation.</div></div>
+  <a href="/direct-sales" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+
+<div class="card">
+  <div class="card-header"><i class="bi bi-receipt-cutoff me-2" style="color:var(--secondary);"></i>Direct Shop Sale</div>
+  <div class="card-body">
+    <form method="POST" action="/direct-sales" id="dsForm">
+      <div class="row g-3 mb-4">
+        <div class="col-md-5">
+          <label class="form-label">Shop <span style="color:#EF4444;">*</span></label>
+          <select name="shop_id" class="form-select" data-searchable required>
+            <option value="">— Select shop —</option>
+            <% shops.forEach(s => { %>
+              <option value="<%= s.id %>"><%= s.name %> (<%= s.route_name %>)</option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <h6 style="font-family:'Manrope',sans-serif;font-weight:700;margin:0;">Products</h6>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addRow()">
+          <i class="bi bi-plus-lg me-1"></i> Add Product
+        </button>
+      </div>
+
+      <div id="itemsContainer">
+        <div class="item-row row g-2 mb-2 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Product</label>
+            <select name="product_id" class="form-select product-select" data-searchable required>
+              <option value="">— Select —</option>
+              <% products.forEach(p => { %>
+                <option value="<%= p.id %>" data-price="<%= p.retail_price %>" data-upc="<%= p.units_per_carton %>">
+                  <%= p.sku_code %> — <%= p.name %> (Stock: <%= p.current_stock_cartons %>C+<%= p.current_stock_loose %>L)
+                </option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Cartons</label>
+            <input type="number" name="cartons" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Loose Units</label>
+            <input type="number" name="loose_units" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Unit Price (Rs)</label>
+            <input type="number" name="unit_price" class="form-control price-field" step="0.01" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-delete btn-sm w-100" onclick="removeRow(this)">
+              <i class="bi bi-trash"></i> Remove
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <button type="submit" class="btn btn-primary" onclick="return confirm('Create this direct sale bill? Stock will be deducted immediately.')">
+          <i class="bi bi-check-lg me-1"></i> Create Bill
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const productOpts = `<% products.forEach(p => { %><option value="<%= p.id %>" data-price="<%= p.retail_price %>"><%= p.sku_code %> — <%= p.name %></option><% }) %>`;
+
+function addRow() {
+  const c = document.getElementById('itemsContainer');
+  const row = document.createElement('div');
+  row.className = 'item-row row g-2 mb-2 align-items-end';
+  row.innerHTML = `
+    <div class="col-md-4"><select name="product_id" class="form-select product-select" required><option value="">— Select —</option>${productOpts}</select></div>
+    <div class="col-md-2"><input type="number" name="cartons" class="form-control" min="0" value="0"></div>
+    <div class="col-md-2"><input type="number" name="loose_units" class="form-control" min="0" value="0"></div>
+    <div class="col-md-2"><input type="number" name="unit_price" class="form-control price-field" step="0.01" min="0" value="0"></div>
+    <div class="col-md-2"><button type="button" class="btn btn-delete btn-sm w-100" onclick="removeRow(this)"><i class="bi bi-trash"></i> Remove</button></div>
+  `;
+  c.appendChild(row);
+  row.querySelector('.product-select').addEventListener('change', autoFillPrice);
+}
+function removeRow(btn) {
+  const rows = document.querySelectorAll('.item-row');
+  if (rows.length > 1) btn.closest('.item-row').remove();
+}
+function autoFillPrice(e) {
+  const opt = e.target.selectedOptions[0];
+  const price = opt ? opt.dataset.price : 0;
+  const row = e.target.closest('.item-row');
+  if (row) row.querySelector('.price-field').value = price || 0;
+}
+document.querySelectorAll('.product-select').forEach(s => s.addEventListener('change', autoFillPrice));
+</script>

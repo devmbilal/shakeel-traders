@@ -1,0 +1,137 @@
+<div class="page-header">
+  <div>
+    <h4>Shop Management</h4>
+    <div class="page-sub">Manage all shops, routes, and outstanding balances</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/shops/new" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Add Shop</a>
+    <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
+      <i class="bi bi-upload me-1"></i> Import CSV
+    </button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-3">
+  <div class="card-body" style="padding:14px 20px;">
+    <form method="GET" action="/shops" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <input type="text" name="search" class="form-control" placeholder="Search name, owner, phone..." value="<%= filters.search %>">
+      </div>
+      <div class="col-md-2">
+        <select name="route_id" class="form-select" data-searchable>
+          <option value="">All Routes</option>
+          <% routes.forEach(r => { %>
+          <option value="<%= r.id %>" <%= filters.route_id == r.id ? 'selected' : '' %>><%= r.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="shop_type" class="form-select">
+          <option value="">All Types</option>
+          <option value="retail" <%= filters.shop_type === 'retail' ? 'selected' : '' %>>Retail</option>
+          <option value="wholesale" <%= filters.shop_type === 'wholesale' ? 'selected' : '' %>>Wholesale</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="is_active" class="form-select">
+          <option value="">All Status</option>
+          <option value="1" <%= filters.is_active === '1' ? 'selected' : '' %>>Active</option>
+          <option value="0" <%= filters.is_active === '0' ? 'selected' : '' %>>Inactive</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="has_outstanding" class="form-select">
+          <option value="">All Balances</option>
+          <option value="1" <%= filters.has_outstanding === '1' ? 'selected' : '' %>>Has Outstanding</option>
+          <option value="0" <%= filters.has_outstanding === '0' ? 'selected' : '' %>>No Outstanding</option>
+        </select>
+      </div>
+      <div class="col-auto d-flex gap-1">
+        <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i> Filter</button>
+        <a href="/shops" class="btn btn-outline-secondary btn-sm">Clear</a>
+      </div>
+      <div class="col-auto ms-auto" style="font-size:0.78rem;color:var(--text-muted);align-self:center;"><%= shops.length %> shops</div>
+    </form>
+  </div>
+</div>
+
+<% if (pagination && pagination.total > 0) { %>
+  <p class="text-muted small mb-2"><%= pagination.total %> records</p>
+<% } %>
+
+<div class="card">
+  <div class="card-body p-0">
+    <% if (shops.length === 0) { %>
+      <div style="text-align:center;padding:48px;color:var(--text-muted);">
+        <i class="bi bi-shop-window" style="font-size:2.5rem;display:block;margin-bottom:10px;"></i>
+        No shops found. <a href="/shops/new" style="color:var(--secondary);">Add your first shop</a>.
+      </div>
+    <% } else { %>
+      <table class="table mb-0">
+        <thead><tr>
+          <th style="padding-left:20px;">Shop Name</th>
+          <th>Route</th>
+          <th>Type</th>
+          <th>Outstanding</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr></thead>
+        <tbody>
+          <% shops.forEach(s => { const bal = parseFloat(s.outstanding_balance || 0); %>
+          <tr>
+            <td style="padding-left:20px;">
+              <div style="font-weight:600;font-size:0.85rem;"><%= s.name %></div>
+              <% if (s.owner_name) { %><div style="font-size:0.72rem;color:var(--text-muted);"><%= s.owner_name %></div><% } %>
+            </td>
+            <td><span class="badge badge-blue"><%= s.route_name || '—' %></span></td>
+            <td><span class="badge badge-orange" style="text-transform:capitalize;"><%= s.shop_type %></span></td>
+            <td>
+              <% if (bal > 0) { %>
+                <span style="font-weight:700;color:#EF4444;font-family:'Manrope',sans-serif;">Rs <%= bal.toLocaleString() %></span>
+              <% } else if (bal < 0) { %>
+                <span style="font-weight:700;color:#10B981;font-family:'Manrope',sans-serif;">Adv Rs <%= Math.abs(bal).toLocaleString() %></span>
+              <% } else { %>
+                <span style="color:var(--text-muted);">—</span>
+              <% } %>
+            </td>
+            <td><span class="badge <%= s.is_active ? 'badge-active' : 'badge-inactive' %>"><%= s.is_active ? 'Active' : 'Inactive' %></span></td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="/shops/<%= s.id %>" class="btn btn-sm btn-edit btn-icon" title="Edit"><i class="bi bi-pencil"></i></a>
+                <a href="/shops/<%= s.id %>/ledger" class="btn btn-sm btn-assign btn-icon" title="Ledger"><i class="bi bi-journal-text"></i></a>
+              </div>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../layout/pagination', {pagination, queryString}) %>
+
+<!-- Import CSV Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">Import Shops from CSV</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/shops/import" enctype="multipart/form-data">
+        <div class="modal-body">
+          <div class="alert alert-info" style="font-size:0.8rem;">
+            CSV must have columns: <code>name, route_id, shop_type, owner_name, phone, address</code>
+          </div>
+          <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Import</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

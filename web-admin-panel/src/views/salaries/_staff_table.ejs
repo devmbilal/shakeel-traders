@@ -1,0 +1,73 @@
+<% if (!staff || staff.length === 0) { %>
+  <div style="text-align:center;padding:40px;color:var(--text-muted);">
+    <i class="bi bi-people" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+    No <%= staffType.replace('_',' ') %>s found.
+  </div>
+<% } else { %>
+<table class="table mb-0">
+  <thead><tr>
+    <th style="padding-left:20px;">Name</th>
+    <th>Basic Salary</th>
+    <th>Advances</th>
+    <th>Balance</th>
+    <th>Actions</th>
+  </tr></thead>
+  <tbody>
+    <% staff.forEach((s, i) => { const colors = ['avatar-blue','avatar-green','avatar-orange','avatar-purple','avatar-teal']; %>
+    <tr>
+      <td style="padding-left:20px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="avatar avatar-sm <%= colors[i % colors.length] %>"><%= (s.full_name||'').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) %></div>
+          <div>
+            <div style="font-weight:600;font-size:0.82rem;"><%= s.full_name %></div>
+            <% if (s.contact) { %><div style="font-size:0.7rem;color:var(--text-muted);"><%= s.contact %></div><% } %>
+          </div>
+        </div>
+      </td>
+      <td>
+        <% if (s.basic_salary) { %>
+          <span style="font-weight:600;">Rs <%= Number(s.basic_salary).toLocaleString() %></span>
+        <% } else { %>
+          <span style="color:var(--text-muted);">Not set</span>
+        <% } %>
+      </td>
+      <td>
+        <% if (s.total_advances_paid > 0) { %>
+          <span style="color:#EF4444;font-weight:600;">Rs <%= Number(s.total_advances_paid).toLocaleString() %></span>
+        <% } else { %>
+          <span style="color:var(--text-muted);">—</span>
+        <% } %>
+      </td>
+      <td>
+        <% const balance = (s.basic_salary || 0) - (s.total_advances_paid || 0); %>
+        <span style="font-weight:700;color:<%= balance >= 0 ? '#10B981' : '#EF4444' %>;">
+          Rs <%= Number(balance).toLocaleString() %>
+        </span>
+      </td>
+      <td>
+        <div class="d-flex gap-1">
+          <a href="/salaries/<%= staffType %>/<%= s.id %>/ledger" class="btn btn-sm btn-info btn-icon" title="View Ledger">
+            <i class="bi bi-journal-text"></i>
+          </a>
+          <button class="btn btn-sm btn-assign btn-icon" title="Record Salary"
+                  data-bs-toggle="modal" data-bs-target="#salaryModal"
+                  data-staff-id="<%= s.id %>" data-staff-type="<%= staffType %>">
+            <i class="bi bi-cash"></i>
+          </button>
+          <button class="btn btn-sm btn-edit btn-icon" title="Record Advance"
+                  data-bs-toggle="modal" data-bs-target="#advanceModal"
+                  data-staff-id="<%= s.id %>" data-staff-type="<%= staffType %>">
+            <i class="bi bi-plus-circle"></i>
+          </button>
+          <% if (staffType === 'delivery_man' && s.is_active) { %>
+          <form method="POST" action="/salaries/delivery-men/<%= s.id %>/deactivate" class="d-inline" onsubmit="return confirm('Deactivate <%= s.full_name %>?')">
+            <button type="submit" class="btn btn-sm btn-delete btn-icon" title="Deactivate"><i class="bi bi-person-x"></i></button>
+          </form>
+          <% } %>
+        </div>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

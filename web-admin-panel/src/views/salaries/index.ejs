@@ -1,0 +1,132 @@
+<div class="page-header">
+  <div>
+    <h4>Staff Salary Management</h4>
+    <div class="page-sub">Manage salaries, advances, and clearances for all staff</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <ul class="nav nav-tabs px-4 pt-3" id="salaryTabs" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link <%= activeTab === 'salesmen' ? 'active' : '' %>" data-bs-toggle="tab" data-bs-target="#salesmen-pane" type="button">
+          <i class="bi bi-truck me-1"></i> Salesmen
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link <%= activeTab === 'order_bookers' ? 'active' : '' %>" data-bs-toggle="tab" data-bs-target="#ob-pane" type="button">
+          <i class="bi bi-person-walking me-1"></i> Order Bookers
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link <%= activeTab === 'delivery_men' ? 'active' : '' %>" data-bs-toggle="tab" data-bs-target="#dm-pane" type="button">
+          <i class="bi bi-bicycle me-1"></i> Delivery Men
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content p-4">
+
+      <!-- Salesmen Tab -->
+      <div class="tab-pane fade <%= activeTab === 'salesmen' ? 'show active' : '' %>" id="salesmen-pane">
+        <%- include('_staff_table', { staff: salesmen, staffType: 'salesman' }) %>
+      </div>
+
+      <!-- Order Bookers Tab -->
+      <div class="tab-pane fade <%= activeTab === 'order_bookers' ? 'show active' : '' %>" id="ob-pane">
+        <%- include('_staff_table', { staff: orderBookers, staffType: 'order_booker' }) %>
+      </div>
+
+      <!-- Delivery Men Tab -->
+      <div class="tab-pane fade <%= activeTab === 'delivery_men' ? 'show active' : '' %>" id="dm-pane">
+        <div class="d-flex justify-content-end mb-3">
+          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addDmModal">
+            <i class="bi bi-plus-lg me-1"></i> Add Delivery Man
+          </button>
+        </div>
+        <%- include('_staff_table', { staff: deliveryMen, staffType: 'delivery_man' }) %>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Delivery Man Modal -->
+<div class="modal fade" id="addDmModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header"><h6 class="modal-title">Add Delivery Man</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/salaries/delivery-men">
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Full Name <span style="color:#EF4444;">*</span></label><input type="text" name="full_name" class="form-control" required></div>
+          <div class="mb-3"><label class="form-label">Contact</label><input type="text" name="contact" class="form-control"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Record Salary Modal -->
+<div class="modal fade" id="salaryModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h6 class="modal-title">Record Basic Salary</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/salaries/record">
+        <input type="hidden" name="staff_id" id="salaryStaffId">
+        <input type="hidden" name="staff_type" id="salaryStaffType">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Month</label><select name="month" class="form-select" data-searchable required><% for(let m=1;m<=12;m++){%><option value="<%=m%>" <%=now.getMonth()+1===m?'selected':''%>><%=new Date(2000,m-1).toLocaleString('default',{month:'long'})%></option><%}%></select></div>
+            <div class="col-md-6"><label class="form-label">Year</label><input type="number" name="year" class="form-control" value="<%= now.getFullYear() %>" min="2020" max="2030" required></div>
+            <div class="col-12"><label class="form-label">Basic Salary (Rs)</label><div class="input-group"><span class="input-group-text">Rs</span><input type="number" name="basic_salary" class="form-control" step="0.01" min="0" required></div></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Record Advance Modal -->
+<div class="modal fade" id="advanceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h6 class="modal-title">Record Advance</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/salaries/advance">
+        <input type="hidden" name="staff_id" id="advStaffId">
+        <input type="hidden" name="staff_type" id="advStaffType">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Amount (Rs)</label><div class="input-group"><span class="input-group-text">Rs</span><input type="number" name="amount" class="form-control" step="0.01" min="0.01" required></div></div>
+            <div class="col-md-6"><label class="form-label">Date</label><input type="date" name="advance_date" class="form-control" value="<%= now.toISOString().slice(0,10) %>" required></div>
+            <div class="col-12"><label class="form-label">Note</label><input type="text" name="note" class="form-control" placeholder="Optional"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Record Advance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('salaryModal').addEventListener('show.bs.modal', function(e) {
+  const btn = e.relatedTarget;
+  document.getElementById('salaryStaffId').value = btn.dataset.staffId;
+  document.getElementById('salaryStaffType').value = btn.dataset.staffType;
+});
+document.getElementById('advanceModal').addEventListener('show.bs.modal', function(e) {
+  const btn = e.relatedTarget;
+  document.getElementById('advStaffId').value = btn.dataset.staffId;
+  document.getElementById('advStaffType').value = btn.dataset.staffType;
+});
+</script>

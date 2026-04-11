@@ -1,0 +1,48 @@
+<div class="page-header">
+  <div>
+    <h4>Edit Route Assignment</h4>
+    <div class="page-sub">Update assignment details</div>
+  </div>
+  <div>
+    <a href="/route-assignments" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i> Back to Assignments
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="/route-assignments/<%= assignment.id %>/edit">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Date <span style="color:#EF4444;">*</span></label>
+          <input type="date" name="assignment_date" class="form-control" value="<%= assignment.assignment_date %>" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Order Booker <span style="color:#EF4444;">*</span></label>
+          <select name="user_id" class="form-select" data-searchable required>
+            <option value="">— Select booker —</option>
+            <% orderBookers.filter(b => b.is_active).forEach(b => { %>
+            <option value="<%= b.id %>" <%= assignment.user_id == b.id ? 'selected' : '' %>><%= b.full_name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Route <span style="color:#EF4444;">*</span></label>
+          <select name="route_id" class="form-select" data-searchable required>
+            <option value="">— Select route —</option>
+            <% routes.forEach(r => { %>
+            <option value="<%= r.id %>" <%= assignment.route_id == r.id ? 'selected' : '' %>><%= r.name %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg me-1"></i> Update Assignment
+        </button>
+        <a href="/route-assignments" class="btn btn-outline-secondary ms-2">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

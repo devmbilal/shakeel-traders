@@ -1,0 +1,127 @@
+<div class="page-header">
+  <div>
+    <h4>User Management</h4>
+    <div class="page-sub">Manage order bookers and salesmen</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/users/new?role=order_booker" class="btn btn-primary btn-sm">
+      <i class="bi bi-person-plus me-1"></i> Add Order Booker
+    </a>
+    <a href="/users/new?role=salesman" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-person-plus me-1"></i> Add Salesman
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <ul class="nav nav-tabs px-4 pt-3" id="userTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link <%= activeTab === 'order_bookers' ? 'active' : '' %>" id="ob-tab" data-bs-toggle="tab" data-bs-target="#ob-pane" type="button" role="tab">
+          <i class="bi bi-person-walking me-1"></i> Order Bookers
+          <span class="badge badge-blue ms-1"><%= orderBookers.length %></span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link <%= activeTab === 'salesmen' ? 'active' : '' %>" id="sm-tab" data-bs-toggle="tab" data-bs-target="#sm-pane" type="button" role="tab">
+          <i class="bi bi-truck me-1"></i> Salesmen
+          <span class="badge badge-blue ms-1"><%= salesmen.length %></span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Order Bookers -->
+      <div class="tab-pane fade <%= activeTab === 'order_bookers' ? 'show active' : '' %>" id="ob-pane" role="tabpanel">
+        <% if (orderBookers.length === 0) { %>
+          <div style="text-align:center;padding:40px;color:var(--text-muted);">
+            <i class="bi bi-person-x" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+            No order bookers yet. <a href="/users/new?role=order_booker" style="color:var(--secondary);">Add one</a>.
+          </div>
+        <% } else { %>
+          <table class="table mb-0">
+            <thead><tr>
+              <th style="padding-left:20px;">Name</th>
+              <th>Username</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <% orderBookers.forEach((u, i) => { const colors = ['avatar-blue','avatar-green','avatar-orange','avatar-purple','avatar-teal']; %>
+              <tr>
+                <td style="padding-left:20px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="avatar avatar-sm <%= colors[i % colors.length] %>"><%= u.full_name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) %></div>
+                    <span style="font-weight:600;font-size:0.82rem;"><%= u.full_name %></span>
+                  </div>
+                </td>
+                <td><code style="font-size:0.78rem;background:var(--bg);padding:2px 6px;border-radius:4px;"><%= u.username %></code></td>
+                <td style="color:var(--text-secondary);"><%= u.contact || '—' %></td>
+                <td><span class="badge <%= u.is_active ? 'badge-active' : 'badge-inactive' %>"><%= u.is_active ? 'Active' : 'Inactive' %></span></td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="/users/<%= u.id %>/edit" class="btn btn-sm btn-edit btn-icon" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <% if (u.is_active) { %>
+                    <form method="POST" action="/users/<%= u.id %>/deactivate" class="d-inline" onsubmit="return confirm('Deactivate <%= u.full_name %>?')">
+                      <button type="submit" class="btn btn-sm btn-delete btn-icon" title="Deactivate"><i class="bi bi-person-x"></i></button>
+                    </form>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <!-- Salesmen -->
+      <div class="tab-pane fade <%= activeTab === 'salesmen' ? 'show active' : '' %>" id="sm-pane" role="tabpanel">
+        <% if (salesmen.length === 0) { %>
+          <div style="text-align:center;padding:40px;color:var(--text-muted);">
+            <i class="bi bi-truck" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+            No salesmen yet. <a href="/users/new?role=salesman" style="color:var(--secondary);">Add one</a>.
+          </div>
+        <% } else { %>
+          <table class="table mb-0">
+            <thead><tr>
+              <th style="padding-left:20px;">Name</th>
+              <th>Username</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <% salesmen.forEach((u, i) => { const colors = ['avatar-green','avatar-blue','avatar-orange','avatar-purple','avatar-teal']; %>
+              <tr>
+                <td style="padding-left:20px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="avatar avatar-sm <%= colors[i % colors.length] %>"><%= u.full_name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) %></div>
+                    <span style="font-weight:600;font-size:0.82rem;"><%= u.full_name %></span>
+                  </div>
+                </td>
+                <td><code style="font-size:0.78rem;background:var(--bg);padding:2px 6px;border-radius:4px;"><%= u.username %></code></td>
+                <td style="color:var(--text-secondary);"><%= u.contact || '—' %></td>
+                <td><span class="badge <%= u.is_active ? 'badge-active' : 'badge-inactive' %>"><%= u.is_active ? 'Active' : 'Inactive' %></span></td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="/users/<%= u.id %>/edit" class="btn btn-sm btn-edit btn-icon" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <% if (u.is_active) { %>
+                    <form method="POST" action="/users/<%= u.id %>/deactivate" class="d-inline" onsubmit="return confirm('Deactivate <%= u.full_name %>?')">
+                      <button type="submit" class="btn btn-sm btn-delete btn-icon" title="Deactivate"><i class="bi bi-person-x"></i></button>
+                    </form>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/pagination', {pagination: activeTab === 'order_bookers' ? obPagination : smPagination, queryString}) %>

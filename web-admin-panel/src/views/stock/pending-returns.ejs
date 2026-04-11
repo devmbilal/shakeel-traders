@@ -1,0 +1,51 @@
+<div class="page-header">
+  <div><h4>Pending Return Requests</h4><div class="page-sub">Approve salesman returns. Returned stock added back to warehouse on approval.</div></div>
+  <a href="/stock" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Stock Overview</a>
+</div>
+
+<% if (returns.length === 0) { %>
+  <div class="card" style="text-align:center;padding:48px;">
+    <i class="bi bi-check-circle" style="font-size:2rem;color:#10B981;display:block;margin-bottom:8px;"></i>
+    <div style="color:var(--text-muted);">No pending return requests.</div>
+  </div>
+<% } else { %>
+  <% returns.forEach(ret => { %>
+  <div class="card mb-3">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="avatar avatar-sm avatar-green"><%= ret.salesman_name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() %></div>
+        <div>
+          <div style="font-weight:700;"><%= ret.salesman_name %></div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Return Date: <%= ret.return_date %> | Issuance: <%= ret.issuance_date %></div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1rem;color:var(--secondary);">
+          Rs <%= Number(ret.system_sale_value || 0).toFixed(2) %>
+        </div>
+        <div style="font-size:0.7rem;color:var(--text-muted);">System Sale Value</div>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <a href="/stock/returns/<%= ret.id %>" class="btn btn-outline-secondary btn-sm m-3">
+        <i class="bi bi-eye me-1"></i> View Details
+      </a>
+    </div>
+    <div style="padding:12px 20px;border-top:1px solid var(--border);">
+      <form method="POST" action="/stock/returns/<%= ret.id %>/approve" class="d-flex align-items-center gap-3"
+            onsubmit="return confirm('Approve return for <%= ret.salesman_name %>?')">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;">Override Sale Value (Rs):</label>
+          <input type="number" name="final_sale_value" class="form-control form-control-sm"
+                 style="width:140px;" step="0.01" min="0"
+                 placeholder="<%= Number(ret.system_sale_value || 0).toFixed(2) %>">
+          <span style="font-size:0.72rem;color:var(--text-muted);">Leave blank to use system value</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="bi bi-check-lg me-1"></i> Approve Return
+        </button>
+      </form>
+    </div>
+  </div>
+  <% }) %>
+<% } %>

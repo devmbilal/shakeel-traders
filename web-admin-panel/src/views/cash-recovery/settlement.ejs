@@ -1,0 +1,50 @@
+<div class="page-header">
+  <div><h4>Bill Settlement — Delivery Man</h4><div class="page-sub">Record cash brought by delivery man. Full payment clears the bill directly.</div></div>
+</div>
+<div class="d-flex gap-2 mb-3">
+  <a href="/cash-recovery/outstanding" class="btn btn-outline-secondary btn-sm">Outstanding Bills</a>
+  <a href="/cash-recovery/settlement" class="btn btn-dark-primary btn-sm">Bill Settlement (Delivery Man)</a>
+  <a href="/cash-recovery/pending" class="btn btn-outline-secondary btn-sm">Pending Verifications</a>
+  <a href="/cash-recovery/history" class="btn btn-outline-secondary btn-sm">Recovery History</a>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-cash-coin me-2" style="color:var(--secondary);"></i>Record Delivery Man Payment</div>
+      <div class="card-body">
+        <form method="POST" action="/cash-recovery/settlement">
+          <div class="mb-3">
+            <label class="form-label">Bill <span style="color:#EF4444;">*</span></label>
+            <select name="bill_id" class="form-select" data-searchable required>
+              <option value="">— Select bill —</option>
+              <% bills.forEach(b => { %>
+                <option value="<%= b.id %>"><%= b.bill_number %> — <%= b.shop_name %> (Outstanding: Rs <%= Number(b.outstanding_amount).toFixed(2) %>)</option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Delivery Man <span style="color:#EF4444;">*</span></label>
+            <select name="delivery_man_id" class="form-select" data-searchable required>
+              <option value="">— Select delivery man —</option>
+              <% deliveryMen.forEach(d => { %>
+                <option value="<%= d.id %>"><%= d.full_name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Amount Collected (Rs) <span style="color:#EF4444;">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">Rs</span>
+              <input type="number" name="amount_collected" class="form-control" step="0.01" min="0.01" required placeholder="0.00">
+            </div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">Full payment clears the bill. Partial payment moves it to outstanding pool.</div>
+          </div>
+          <button type="submit" class="btn btn-primary" onclick="return confirm('Record this payment?')">
+            <i class="bi bi-check-lg me-1"></i> Record Payment
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

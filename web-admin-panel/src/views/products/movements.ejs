@@ -1,0 +1,44 @@
+<div class="page-header">
+  <div>
+    <h4><%= product.name %> — Stock History</h4>
+    <div class="page-sub">SKU: <%= product.sku_code %> &nbsp;|&nbsp; Current: <%= product.current_stock_cartons %>C + <%= product.current_stock_loose %>L</div>
+  </div>
+  <a href="/products" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+
+<div class="card table-card">
+  <% if (movements.length === 0) { %>
+    <div style="text-align:center;padding:40px;color:var(--text-muted);">No stock movements recorded yet.</div>
+  <% } else { %>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>In (C+L)</th>
+        <th>Out (C+L)</th>
+        <th>Balance After</th>
+        <th>Note</th>
+        <th>By</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% movements.forEach(m => { %>
+      <tr>
+        <td style="font-size:0.78rem;"><%= new Date(m.created_at).toLocaleDateString() %></td>
+        <td>
+          <span class="badge <%= m.movement_type.includes('add') || m.movement_type.includes('receipt') || m.movement_type.includes('return') ? 'badge-approved' : 'badge-open' %>">
+            <%= m.movement_type.replace(/_/g,' ') %>
+          </span>
+        </td>
+        <td style="color:#10B981;font-weight:600;"><%= m.cartons_in %>C + <%= m.loose_in %>L</td>
+        <td style="color:#EF4444;font-weight:600;"><%= m.cartons_out %>C + <%= m.loose_out %>L</td>
+        <td style="font-weight:700;"><%= m.stock_after_cartons %>C + <%= m.stock_after_loose %>L</td>
+        <td style="font-size:0.78rem;color:var(--text-secondary);"><%= m.note || '—' %></td>
+        <td style="font-size:0.78rem;"><%= m.created_by_name %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>

@@ -1,0 +1,109 @@
+<div class="mb-3 d-flex justify-content-between align-items-center">
+  <a href="/shops" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> All Shops
+  </a>
+  <% if (!isNew && shop) { %>
+    <a href="/shops/<%= shop.id %>/ledger" class="btn btn-sm btn-outline-info">
+      <i class="bi bi-journal-text me-1"></i> View Ledger
+    </a>
+  <% } %>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-shop text-primary me-2"></i>
+        <%= isNew ? 'Add New Shop' : 'Edit Shop' %>
+      </div>
+      <div class="card-body p-4">
+        <form method="POST" action="<%= isNew ? '/shops' : '/shops/' + shop.id %>">
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Shop Name <span class="text-danger">*</span></label>
+              <input type="text" name="name" class="form-control" required
+                     value="<%= isNew ? '' : shop.name %>">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Owner Name</label>
+              <input type="text" name="owner_name" class="form-control"
+                     value="<%= isNew ? '' : (shop.owner_name || '') %>">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Phone</label>
+              <input type="text" name="phone" class="form-control"
+                     value="<%= isNew ? '' : (shop.phone || '') %>">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Route <span class="text-danger">*</span></label>
+              <select name="route_id" class="form-select" data-searchable required>
+                <option value="">— Select route —</option>
+                <% routes.forEach(r => { %>
+                  <option value="<%= r.id %>"
+                    <%= (!isNew && shop.route_id == r.id) ? 'selected' : '' %>>
+                    <%= r.name %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">Address</label>
+              <textarea name="address" class="form-control" rows="2"><%= isNew ? '' : (shop.address || '') %></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Shop Type <span class="text-danger">*</span></label>
+              <select name="shop_type" class="form-select">
+                <option value="retail"    <%= (!isNew && shop.shop_type === 'retail')    ? 'selected' : '' %>>Retail</option>
+                <option value="wholesale" <%= (!isNew && shop.shop_type === 'wholesale') ? 'selected' : '' %>>Wholesale</option>
+              </select>
+            </div>
+
+            <div class="col-md-6 d-flex align-items-end">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="price_edit_allowed"
+                       id="priceEditAllowed" value="1"
+                       <%= (!isNew && shop.price_edit_allowed) ? 'checked' : '' %>
+                       onchange="togglePriceFields(this.checked)">
+                <label class="form-check-label fw-semibold" for="priceEditAllowed">
+                  Allow Price Editing
+                </label>
+              </div>
+            </div>
+
+            <div id="priceRangeFields" class="col-12 row g-3"
+                 style="display: <%= (!isNew && shop.price_edit_allowed) ? 'flex' : 'none' %> !important">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Min Price % (e.g. -10 for -10%)</label>
+                <input type="number" name="price_min_pct" class="form-control" step="0.01"
+                       value="<%= isNew ? '' : (shop.price_min_pct || '') %>">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Max Price % (e.g. 5 for +5%)</label>
+                <input type="number" name="price_max_pct" class="form-control" step="0.01"
+                       value="<%= isNew ? '' : (shop.price_max_pct || '') %>">
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i> <%= isNew ? 'Create Shop' : 'Save Changes' %>
+            </button>
+            <a href="/shops" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function togglePriceFields(show) {
+    document.getElementById('priceRangeFields').style.display = show ? 'flex' : 'none';
+  }
+</script>

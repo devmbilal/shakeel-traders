@@ -1,0 +1,24 @@
+<div class="page-header">
+  <div><h4>Consolidated Stock View</h4><div class="page-sub">Total product quantities required across all pending orders</div></div>
+  <a href="/orders" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+<div class="card table-card">
+  <% if (!report.length) { %>
+    <div style="text-align:center;padding:40px;color:var(--text-muted);">No pending orders.</div>
+  <% } else { %>
+  <table class="table">
+    <thead><tr><th>SKU</th><th>Product</th><th>Total Cartons</th><th>Total Loose</th><th>Total Units</th></tr></thead>
+    <tbody>
+      <% report.forEach(r => { %>
+      <tr>
+        <td><code style="font-size:0.75rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;"><%= r.sku_code %></code></td>
+        <td style="font-weight:600;"><%= r.name %></td>
+        <td style="font-weight:700;color:var(--secondary);"><%= r.total_cartons %></td>
+        <td><%= r.total_loose %></td>
+        <td style="font-weight:700;"><%= r.total_cartons * r.units_per_carton + r.total_loose %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
