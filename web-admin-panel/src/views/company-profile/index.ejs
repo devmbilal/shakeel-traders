@@ -57,6 +57,20 @@
                 <input type="text" name="gst_ntn" class="form-control" value="<%= profile.gst_ntn || '' %>" placeholder="Tax registration number">
               </div>
             </div>
+            <div class="col-md-6">
+              <label class="form-label">Sales Tax Number</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                <input type="text" name="sales_tax" class="form-control" value="<%= profile.sales_tax || '' %>" placeholder="Sales tax registration">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">CNIC Number</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                <input type="text" name="cnic" class="form-control" value="<%= profile.cnic || '' %>" placeholder="xxxxx-xxxxxxx-x">
+              </div>
+            </div>
             <div class="col-12">
               <label class="form-label">Company Logo</label>
               <% if (profile.logo_path) { %>

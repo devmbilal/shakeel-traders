@@ -104,9 +104,19 @@ const OrderModel = {
 
   async findBillById(id) {
     const rows = await query(
-      `SELECT b.*, s.name AS shop_name, r.name AS route_name,
-              cp.company_name, cp.owner_name AS company_owner, cp.address AS company_address,
-              cp.phone_1, cp.gst_ntn, cp.logo_path
+      `SELECT b.*, 
+              s.name AS shop_name, 
+              s.owner_name AS shop_owner_name,
+              s.address AS shop_address,
+              r.name AS route_name,
+              cp.company_name, 
+              cp.owner_name AS company_owner, 
+              cp.address AS company_address,
+              cp.phone_1, 
+              cp.gst_ntn, 
+              cp.sales_tax,
+              cp.cnic,
+              cp.logo_path
        FROM bills b
        JOIN shops s ON s.id = b.shop_id
        JOIN routes r ON r.id = s.route_id

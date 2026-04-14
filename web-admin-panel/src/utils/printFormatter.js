@@ -19,6 +19,14 @@ function formatBillForPrint(bill) {
       </tr>`;
   }).join('');
 
+  // Format date as "14 April 2026/Tuesday"
+  const billDate = new Date(bill.bill_date);
+  const formattedDate = billDate.toLocaleDateString('en-GB', { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric'
+  }) + '/' + billDate.toLocaleDateString('en-US', { weekday: 'long' });
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -28,13 +36,63 @@ function formatBillForPrint(bill) {
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Manrope:wght@700;800&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; font-size: 12px; color: #1E293B; padding: 20px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #1E293B; padding-bottom: 12px; }
-    .company-name { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 18px; }
-    .company-sub { font-size: 11px; color: #64748B; margin-top: 2px; }
-    .bill-meta { text-align: right; }
-    .bill-number { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 14px; color: #3B82F6; }
-    .shop-info { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    .header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: flex-start; 
+      margin-bottom: 20px; 
+      border-bottom: 2px solid #1E293B; 
+      padding-bottom: 12px; 
+    }
+    .header-left {
+      flex: 1;
+    }
+    .company-name { 
+      font-family: 'Manrope', sans-serif; 
+      font-weight: 800; 
+      font-size: 18px;
+      margin-bottom: 4px;
+      text-decoration: underline;
+    }
+    .company-info { 
+      font-size: 10px; 
+      line-height: 1.5;
+      color: #1E293B;
+    }
+    .company-info div {
+      margin-bottom: 1px;
+    }
+    .shop-section {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #CBD5E1;
+    }
+    .shop-label {
+      font-weight: 700;
+      display: inline-block;
+      width: 80px;
+    }
+    .header-right { 
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .invoice-title {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+    .invoice-meta {
+      font-size: 10px;
+      line-height: 1.6;
+    }
+    .invoice-meta div {
+      margin-bottom: 2px;
+    }
+    .invoice-meta strong {
+      font-weight: 700;
+    }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; margin-top: 16px; }
     th { background: #1E293B; color: #fff; padding: 7px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; text-align: left; }
     td { padding: 7px 10px; border-bottom: 1px solid #E2E8F0; }
     tr:last-child td { border-bottom: none; }
@@ -48,22 +106,27 @@ function formatBillForPrint(bill) {
 </head>
 <body>
   <div class="header">
-    <div>
-      ${bill.logo_path ? `<img src="${bill.logo_path}" style="height:40px;margin-bottom:6px;display:block;">` : ''}
-      <div class="company-name">${bill.company_name || 'Shakeel Traders'}</div>
-      <div class="company-sub">${bill.company_address || ''}</div>
-      <div class="company-sub">NTN/GST: ${bill.gst_ntn || ''} | ${bill.phone_1 || ''}</div>
+    <div class="header-left">
+      <div class="company-name">${bill.company_name || 'Shakeel Traders (Khurian Wala)'}</div>
+      <div class="company-info">
+        <div>${bill.company_address || 'Karian Wala Road, Adda Chowk Khurainwala'}</div>
+        <div><strong>N.T.N No:</strong> ${bill.gst_ntn || 'Not Available'}</div>
+        <div><strong>Sales Tax #:</strong>${bill.sales_tax || 'Not Available'}</div>
+        <div><strong>CNIC #:</strong> ${bill.cnic || 'Not Available'}</div>
+        <div><strong>M/S:</strong> ${bill.shop_name || ''}</div>
+        <div><strong>Address:</strong> ${bill.shop_address || 'Not Available'}</div>
+      </div>
     </div>
-    <div class="bill-meta">
-      <div class="bill-number">${bill.bill_number}</div>
-      <div style="font-size:11px;color:#64748B;margin-top:4px;">Date: ${bill.bill_date}</div>
-      <div style="font-size:11px;color:#64748B;">Type: ${bill.bill_type.replace(/_/g,' ').toUpperCase()}</div>
+    <div class="header-right">
+      <div class="invoice-title">CASH MEMO / INVOICE</div>
+      <div class="invoice-meta">
+        <div><strong>Invoice No #:</strong> ${bill.bill_number}</div>
+        <div><strong>Date/Day:</strong> ${formattedDate}</div>
+        <div><strong>Route:</strong> ${bill.route_name || 'Not Available'}</div>
+        <div style="margin-top:6px;"><strong>Sales Tax No:</strong> Not Available</div>
+        <div><strong>N.T.N No:</strong> Not Available</div>
+      </div>
     </div>
-  </div>
-
-  <div class="shop-info">
-    <strong>${bill.shop_name}</strong>
-    <span style="margin-left:16px;color:#64748B;">Route: ${bill.route_name || ''}</span>
   </div>
 
   <table>
@@ -85,9 +148,6 @@ function formatBillForPrint(bill) {
     </table>
   </div>
 
-  <div class="footer">
-    Shakeel Traders Distribution Order System | Printed: ${new Date().toLocaleString()}
-  </div>
   <script>window.onload = () => window.print();</script>
 </body>
 </html>`;

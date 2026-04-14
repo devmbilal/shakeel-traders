@@ -55,6 +55,8 @@ const CompanyProfileController = {
         phone_2:      req.body.phone_2,
         email:        req.body.email,
         gst_ntn:      req.body.gst_ntn,
+        sales_tax:    req.body.sales_tax,
+        cnic:         req.body.cnic,
       };
 
       if (req.file) {
