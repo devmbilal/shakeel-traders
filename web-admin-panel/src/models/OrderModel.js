@@ -155,9 +155,13 @@ const OrderModel = {
 
   async listOpenBills() {
     const bills = await query(
-      `SELECT b.*, s.name AS shop_name
+      `SELECT b.*, 
+              s.name AS shop_name,
+              s.address AS shop_address,
+              r.name AS route_name
        FROM bills b
        JOIN shops s ON s.id = b.shop_id
+       JOIN routes r ON r.id = s.route_id
        WHERE b.outstanding_amount > 0
        ORDER BY b.bill_date DESC`
     );
