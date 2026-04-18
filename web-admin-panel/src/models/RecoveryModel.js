@@ -29,7 +29,8 @@ const RecoveryModel = {
   },
 
   async assignBills(billIds, bookerId, adminId) {
-    const today = new Date().toISOString().slice(0, 10);
+    const { mysqlToday } = require('../utils/dateHelper');
+    const today = await mysqlToday();
     const conn = await getConnection();
     try {
       await conn.beginTransaction();

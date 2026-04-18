@@ -28,8 +28,9 @@ class ReportController {
   // 1. Daily Sales Report
   static async dailySalesReport(req, res) {
     try {
+      const { mysqlToday } = require('../utils/dateHelper');
       const { date, export: exportExcel } = req.query;
-      const reportDate = date || new Date().toISOString().split('T')[0];
+      const reportDate = date || await mysqlToday();
       const page = parseInt(req.query.page) || 1;
       const limit = 25;
       
@@ -94,9 +95,11 @@ class ReportController {
   // 2. Monthly Sales Report
   static async monthlySalesReport(req, res) {
     try {
+      const { mysqlTodayAndMonth } = require('../utils/dateHelper');
       const { month, year, export: exportExcel } = req.query;
-      const reportMonth = month || new Date().getMonth() + 1;
-      const reportYear = year || new Date().getFullYear();
+      const dateInfo = await mysqlTodayAndMonth();
+      const reportMonth = month || dateInfo.cur_month;
+      const reportYear  = year  || dateInfo.cur_year;
       const page = parseInt(req.query.page) || 1;
       const limit = 25;
       

@@ -29,6 +29,7 @@ const DashboardController = {
 
   async index(req, res) {
     try {
+      const { query } = require('../config/db');
       const logoRows = await query('SELECT logo_path FROM company_profile WHERE id = 1 LIMIT 1');
       const logoPath = (logoRows[0] && logoRows[0].logo_path) ? logoRows[0].logo_path : null;
       renderWithLayout(req, res, 'dashboard/index', {
@@ -45,21 +46,23 @@ const DashboardController = {
   async getData(req, res) {
     try {
       const view = req.query.view || 'daily';
-      const today = new Date().toISOString().slice(0, 10);
-      const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
-      const firstDayOfYear = new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10);
+      // Use MySQL CURDATE() to avoid JS UTC vs local timezone mismatch
+      const dateRows = await query('SELECT CURDATE() AS today, DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), \'%Y-%m-%d\') AS first_of_month, DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL DAYOFYEAR(CURDATE())-1 DAY), \'%Y-%m-%d\') AS first_of_year');
+      const today           = dateRows[0].today;
+      const firstDayOfMonth = dateRows[0].first_of_month;
+      const firstDayOfYear  = dateRows[0].first_of_year;
 
       let dateFilter, dateParam, dateLabel;
       if (view === 'daily') {
-        dateFilter = 'DATE(b.created_at) = ?';
+        dateFilter = 'b.bill_date = ?';
         dateParam = today;
         dateLabel = 'Today';
       } else if (view === 'monthly') {
-        dateFilter = 'DATE(b.created_at) >= ?';
+        dateFilter = 'b.bill_date >= ?';
         dateParam = firstDayOfMonth;
         dateLabel = 'This Month';
       } else {
-        dateFilter = 'DATE(b.created_at) >= ?';
+        dateFilter = 'b.bill_date >= ?';
         dateParam = firstDayOfYear;
         dateLabel = 'This Year';
       }
@@ -99,7 +102,7 @@ const DashboardController = {
           SUM(gross_amount) AS total_sales,
           SUM(outstanding_amount) AS total_outstanding
          FROM bills
-         WHERE ${dateFilter.replace('b.', '')}
+         WHERE ${dateFilter.replace('b.bill_date', 'bill_date')}
            AND bill_type IN ('order_booker','direct_shop')
          GROUP BY bill_type`,
         [dateParam]
@@ -265,9 +268,9 @@ const DashboardController = {
           (SELECT COUNT(*) FROM orders WHERE status = 'pending') AS pending_orders`
       );
 
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().slice(0, 10);
+      // yesterday = CURDATE() - 1 day (MySQL-based to avoid timezone issues)
+      const yesterdayRows = await query("SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY) AS yesterday");
+      const yesterdayStr = yesterdayRows[0].yesterday;
 
       const unsyncedBookers = await query(
         `SELECT DISTINCT

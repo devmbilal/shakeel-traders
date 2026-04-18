@@ -242,27 +242,82 @@ const OrderController = {
     }
   },
 
-  // GET /orders/bills/print-open
+  // GET /orders/bills/print-open — Selection page
+  async printOpenBillsSelect(req, res) {
+    try {
+      const { renderWithLayout } = require('../utils/render');
+      const billType = req.query.bill_type || 'all';
+
+      let conditions = ['b.outstanding_amount > 0'];
+      const params = [];
+      if (billType === 'order_booker') { conditions.push("b.bill_type = 'order_booker'"); }
+      else if (billType === 'direct_shop') { conditions.push("b.bill_type = 'direct_shop'"); }
+
+      const bills = await query(
+        `SELECT b.id, b.bill_number, b.bill_type, b.bill_date,
+                b.gross_amount, b.net_amount, b.outstanding_amount, b.status,
+                s.name AS shop_name, r.name AS route_name
+         FROM bills b
+         JOIN shops s ON s.id = b.shop_id
+         JOIN routes r ON r.id = s.route_id
+         WHERE ${conditions.join(' AND ')}
+         ORDER BY b.bill_date DESC, b.id DESC`,
+        params
+      );
+
+      renderWithLayout(req, res, 'orders/print-open-select', {
+        title: 'Print Open Bills',
+        bills,
+        billType,
+      });
+    } catch (err) {
+      req.flash('error', 'Failed to load bills.'); res.redirect('/orders/converted');
+    }
+  },
+
+  // POST /orders/bills/print-open — Print selected bills as HTML
   async printOpenBills(req, res) {
     try {
-      const { generateOpenBillsPDF } = require('../utils/pdfGenerator');
-      const bills = await OrderModel.listOpenBills();
-      
-      if (bills.length === 0) {
-        req.flash('error', 'No open bills found.');
-        return res.redirect('/orders/converted');
+      const selectedIds = req.body.bill_ids;
+      if (!selectedIds || (Array.isArray(selectedIds) && selectedIds.length === 0)) {
+        req.flash('error', 'Please select at least one bill.');
+        return res.redirect('/orders/bills/print-open');
       }
 
-      const companyProfile = await query('SELECT * FROM company_profile WHERE id = 1 LIMIT 1');
-      const company = companyProfile[0] || { company_name: 'Shakeel Traders' };
+      const ids = Array.isArray(selectedIds) ? selectedIds.map(Number) : [Number(selectedIds)];
+      const placeholders = ids.map(() => '?').join(',');
 
-      const pdfBuffer = await generateOpenBillsPDF(bills, company);
+      const bills = await query(
+        `SELECT b.*,
+                s.name AS shop_name,
+                s.address AS shop_address,
+                r.name AS route_name,
+                cp.company_name, cp.address AS company_address,
+                cp.gst_ntn, cp.sales_tax, cp.cnic
+         FROM bills b
+         JOIN shops s ON s.id = b.shop_id
+         JOIN routes r ON r.id = s.route_id
+         LEFT JOIN company_profile cp ON cp.id = 1
+         WHERE b.id IN (${placeholders})
+         ORDER BY b.bill_date DESC`,
+        ids
+      );
 
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="open-bills-${Date.now()}.pdf"`);
-      res.send(pdfBuffer);
+      for (const bill of bills) {
+        bill.items = await query(
+          `SELECT bi.*, p.name AS product_name, p.sku_code, p.units_per_carton
+           FROM bill_items bi
+           JOIN products p ON p.id = bi.product_id
+           WHERE bi.bill_id = ?`,
+          [bill.id]
+        );
+      }
+
+      const { formatMultiBillPrint } = require('../utils/printFormatter');
+      res.send(formatMultiBillPrint(bills));
     } catch (err) {
-      req.flash('error', 'Failed to generate PDF.'); res.redirect('/orders/converted');
+      console.error('Print open bills error:', err);
+      req.flash('error', 'Failed to generate print.'); res.redirect('/orders/bills/print-open');
     }
   },
 };

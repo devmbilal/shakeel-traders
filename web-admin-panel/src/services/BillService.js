@@ -36,7 +36,9 @@ const BillService = {
 
     // Generate bill number
     const billNumber = await generateBillNumber(billType, conn);
-    const billDate   = new Date().toISOString().slice(0, 10);
+    // Use MySQL date to avoid UTC timezone mismatch
+    const [[dateRow]] = await conn.query('SELECT CURDATE() AS today');
+    const billDate = dateRow.today;
 
     // Insert bill
     const [billResult] = await conn.query(

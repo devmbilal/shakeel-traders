@@ -1,5 +1,9 @@
 'use strict';
 
+// Set Node.js timezone to Pakistan Standard Time (UTC+5)
+// This ensures new Date() and toISOString() use PKT, matching MySQL CURDATE()
+process.env.TZ = 'Asia/Karachi';
+
 require('dotenv').config();
 const express = require('express');
 const path    = require('path');

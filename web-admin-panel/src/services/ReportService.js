@@ -15,7 +15,7 @@ class ReportService {
         SUM(amount_paid) as amount_paid,
         SUM(outstanding_amount) as outstanding_amount
       FROM bills
-      WHERE DATE(created_at) = ?
+      WHERE bill_date = ?
         AND bill_type IN ('order_booker','direct_shop')
       GROUP BY bill_type
     `, [date]);
@@ -54,7 +54,7 @@ class ReportService {
         SUM(amount_paid) as amount_paid,
         SUM(outstanding_amount) as outstanding_amount
       FROM bills
-      WHERE MONTH(created_at) = ? AND YEAR(created_at) = ?
+      WHERE MONTH(bill_date) = ? AND YEAR(bill_date) = ?
         AND bill_type IN ('order_booker','direct_shop')
       GROUP BY bill_type
     `, [month, year]);

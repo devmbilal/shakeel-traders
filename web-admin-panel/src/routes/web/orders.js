@@ -12,6 +12,7 @@ router.post('/bulk-convert',            OrderController.bulkConvert);
 router.post('/bulk-delete',             OrderController.bulkDelete);
 router.get('/consolidated-selected',    OrderController.consolidatedSelected);
 router.get('/consolidated-pdf',         OrderController.consolidatedPdf);
-router.get('/bills/print-open',         OrderController.printOpenBills);
+router.get('/bills/print-open',         OrderController.printOpenBillsSelect);
+router.post('/bills/print-open',        OrderController.printOpenBills);
 
 module.exports = router;

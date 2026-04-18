@@ -1,0 +1,135 @@
+<div class="page-header">
+  <div>
+    <h4>Print Open Bills</h4>
+    <div class="page-sub">Select bills to print — 2 per page, same format as single bill</div>
+  </div>
+  <a href="/orders/converted" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i> Back
+  </a>
+</div>
+
+<!-- Filter bar -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="GET" action="/orders/bills/print-open" class="d-flex gap-2 align-items-center flex-wrap">
+      <span style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);">Filter by type:</span>
+      <a href="/orders/bills/print-open?bill_type=all"
+         class="btn btn-sm <%= billType === 'all' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">All</a>
+      <a href="/orders/bills/print-open?bill_type=order_booker"
+         class="btn btn-sm <%= billType === 'order_booker' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">Order Booker</a>
+      <a href="/orders/bills/print-open?bill_type=direct_shop"
+         class="btn btn-sm <%= billType === 'direct_shop' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">Direct Shop</a>
+      <span class="ms-auto" style="font-size:0.78rem;color:var(--text-muted);"><%= bills.length %> open bills</span>
+    </form>
+  </div>
+</div>
+
+<% if (bills.length === 0) { %>
+  <div class="card">
+    <div class="card-body text-center py-5" style="color:var(--text-muted);">
+      <i class="bi bi-printer" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+      No open bills found for this filter.
+    </div>
+  </div>
+<% } else { %>
+
+<form method="POST" action="/orders/bills/print-open" target="_blank">
+
+  <!-- Select all + Print button -->
+  <div class="d-flex align-items-center justify-content-between mb-2">
+    <div class="d-flex align-items-center gap-3">
+      <div class="form-check mb-0">
+        <input class="form-check-input" type="checkbox" id="selectAll">
+        <label class="form-check-label fw-semibold" for="selectAll" style="font-size:0.82rem;">Select All</label>
+      </div>
+      <span id="selectedCount" style="font-size:0.78rem;color:var(--text-muted);">0 selected</span>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm" id="printBtn" disabled>
+      <i class="bi bi-printer me-1"></i> Print Selected
+    </button>
+  </div>
+
+  <div class="card table-card">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width:40px;"></th>
+          <th>Bill #</th>
+          <th>Type</th>
+          <th>Shop</th>
+          <th>Route</th>
+          <th>Date</th>
+          <th>Net Amount</th>
+          <th>Outstanding</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% bills.forEach(b => { %>
+        <tr class="bill-row" style="cursor:pointer;" onclick="toggleBill(<%= b.id %>)">
+          <td onclick="event.stopPropagation()">
+            <input class="form-check-input bill-checkbox" type="checkbox"
+                   name="bill_ids" value="<%= b.id %>" id="bill_<%= b.id %>"
+                   onchange="updateCount()">
+          </td>
+          <td>
+            <code style="font-size:0.75rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;">
+              <%= b.bill_number %>
+            </code>
+          </td>
+          <td>
+            <span class="badge <%= b.bill_type === 'order_booker' ? 'badge-blue' : 'badge-orange' %>">
+              <%= b.bill_type === 'order_booker' ? 'Order Booker' : 'Direct Shop' %>
+            </span>
+          </td>
+          <td style="font-weight:600;"><%= b.shop_name %></td>
+          <td style="font-size:0.78rem;color:var(--text-muted);"><%= b.route_name %></td>
+          <td style="font-size:0.78rem;"><%= b.bill_date %></td>
+          <td>Rs <%= Number(b.net_amount).toFixed(2) %></td>
+          <td style="color:#EF4444;font-weight:600;">Rs <%= Number(b.outstanding_amount).toFixed(2) %></td>
+          <td>
+            <span class="badge badge-<%= b.status === 'partially_paid' ? 'partially' : 'open' %>">
+              <%= b.status.replace(/_/g,' ') %>
+            </span>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+</form>
+
+<script>
+  const selectAll  = document.getElementById('selectAll');
+  const printBtn   = document.getElementById('printBtn');
+  const countLabel = document.getElementById('selectedCount');
+
+  function updateCount() {
+    const checked = document.querySelectorAll('.bill-checkbox:checked').length;
+    countLabel.textContent = checked + ' selected';
+    printBtn.disabled = checked === 0;
+    selectAll.indeterminate = checked > 0 && checked < document.querySelectorAll('.bill-checkbox').length;
+    selectAll.checked = checked === document.querySelectorAll('.bill-checkbox').length;
+  }
+
+  function toggleBill(id) {
+    const cb = document.getElementById('bill_' + id);
+    cb.checked = !cb.checked;
+    updateCount();
+  }
+
+  selectAll.addEventListener('change', function () {
+    document.querySelectorAll('.bill-checkbox').forEach(cb => cb.checked = this.checked);
+    updateCount();
+  });
+
+  // Highlight selected rows
+  document.querySelectorAll('.bill-checkbox').forEach(cb => {
+    cb.addEventListener('change', function () {
+      this.closest('tr').style.background = this.checked ? '#EFF6FF' : '';
+    });
+  });
+</script>
+
+<% } %>

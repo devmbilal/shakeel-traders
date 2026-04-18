@@ -8,7 +8,9 @@ const CentralizedCashController = {
 
   async daily(req, res) {
     try {
-      const date = req.query.date || new Date().toISOString().slice(0, 10);
+      const { query: dbQuery } = require('../config/db');
+      const dateRows = await dbQuery('SELECT CURDATE() AS today');
+      const date = req.query.date || dateRows[0].today;
       const entries = await CashModel.getDailyView(date);
       const totals = { salesman_sale: 0, recovery: 0, delivery_man_collection: 0 };
       entries.forEach(e => { totals[e.entry_type] = parseFloat(e.total); });
@@ -26,9 +28,10 @@ const CentralizedCashController = {
 
   async monthly(req, res) {
     try {
-      const now = new Date();
-      const dateFrom = req.query.from || `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-      const dateTo   = req.query.to   || now.toISOString().slice(0, 10);
+      const { mysqlTodayAndMonth } = require('../utils/dateHelper');
+      const dateInfo = await mysqlTodayAndMonth();
+      const dateFrom = req.query.from || dateInfo.first_of_month;
+      const dateTo   = req.query.to   || dateInfo.today;
       
       // Get all rows first
       const rows = await CashModel.getMonthlyView(dateFrom, dateTo);
@@ -57,7 +60,7 @@ const CentralizedCashController = {
 
       renderWithLayout(req, res, 'centralized-cash/index', {
         title: 'Centralized Cash Screen',
-        view: 'monthly', date: new Date().toISOString().slice(0,10),
+        view: 'monthly', date: dateInfo.today,
         totals: { salesman_sale: 0, recovery: 0, delivery_man_collection: 0, grand: 0 },
         monthlyData, dateFrom, dateTo,
         pagination,
@@ -74,7 +77,8 @@ module.exports = CentralizedCashController;
 CentralizedCashController.data = async function(req, res) {
   try {
     const { query } = require('../config/db');
-    const date = req.query.date || new Date().toISOString().slice(0, 10);
+    const dateRows = await query('SELECT CURDATE() AS today');
+    const date = req.query.date || dateRows[0].today;
     const entries = await query(
       'SELECT entry_type, SUM(amount) AS total FROM centralized_cash_entries WHERE cash_date = ? GROUP BY entry_type',
       [date]
