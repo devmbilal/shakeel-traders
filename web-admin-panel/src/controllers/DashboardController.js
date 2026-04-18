@@ -91,7 +91,7 @@ const DashboardController = {
          WHERE is_active = 1`
       );
 
-      // Sales by Channel
+      // Sales by Channel — order_booker and direct_shop from bills, salesman from returns
       const salesByChannel = await query(
         `SELECT 
           bill_type,
@@ -100,15 +100,31 @@ const DashboardController = {
           SUM(outstanding_amount) AS total_outstanding
          FROM bills
          WHERE ${dateFilter.replace('b.', '')}
+           AND bill_type IN ('order_booker','direct_shop')
          GROUP BY bill_type`,
+        [dateParam]
+      );
+
+      // Salesman sales from centralized_cash_entries (posted on return approval)
+      const salesmanCashFilter = view === 'daily'
+        ? 'cash_date = ?'
+        : 'cash_date >= ?';
+      const [salesmanSales] = await query(
+        `SELECT COALESCE(SUM(amount), 0) AS total_sales
+         FROM centralized_cash_entries
+         WHERE entry_type = 'salesman_sale' AND ${salesmanCashFilter}`,
         [dateParam]
       );
 
       const sales = {
         order_booker: { sales: 0, count: 0, outstanding: 0 },
-        salesman: { sales: 0, count: 0, outstanding: 0 },
+        salesman: {
+          sales: parseFloat(salesmanSales.total_sales || 0),
+          count: 0,
+          outstanding: 0
+        },
         direct_shop: { sales: 0, count: 0, outstanding: 0 },
-        total: 0,
+        total: parseFloat(salesmanSales.total_sales || 0),
         totalCount: 0
       };
 
@@ -141,23 +157,28 @@ const DashboardController = {
         [dateParam]
       );
 
-      // Salesman breakdown
+      // Salesman breakdown — sales from centralized_cash_entries, stock sold from return_items
       const salesmanBreakdown = await query(
         `SELECT 
           u.id,
           u.full_name AS salesman_name,
-          COALESCE(SUM(sr.final_sale_value), 0) AS total_sales,
-          COUNT(DISTINCT sr.id) AS return_count
+          COALESCE(SUM(cce.amount), 0) AS total_sales,
+          COALESCE(SUM(ri.sold_cartons), 0) AS total_sold_cartons,
+          COALESCE(SUM(ri.sold_loose), 0) AS total_sold_loose
          FROM users u
-         LEFT JOIN salesman_returns sr ON sr.salesman_id = u.id 
-           AND DATE(sr.return_date) >= ? 
-           AND DATE(sr.return_date) <= ?
+         LEFT JOIN salesman_returns sr ON sr.salesman_id = u.id
+           AND sr.status = 'approved'
+           AND sr.approved_at >= ?
+         LEFT JOIN centralized_cash_entries cce ON cce.reference_id = sr.id
+           AND cce.entry_type = 'salesman_sale'
+           AND cce.cash_date >= ?
+         LEFT JOIN return_items ri ON ri.return_id = sr.id
          WHERE u.role = 'salesman' AND u.is_active = 1
          GROUP BY u.id, u.full_name
          HAVING total_sales > 0
          ORDER BY total_sales DESC
          LIMIT 5`,
-        [view === 'daily' ? today : dateParam, today]
+        [view === 'daily' ? today : dateParam, view === 'daily' ? today : dateParam]
       );
 
 

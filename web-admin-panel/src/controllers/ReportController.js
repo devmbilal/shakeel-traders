@@ -37,28 +37,33 @@ class ReportController {
       
       if (exportExcel === 'excel') {
         const columns = [
-          { header: 'Sales Channel', key: 'channel', width: 20 },
-          { header: 'Bill Count', key: 'bill_count', type: 'number', width: 15 },
-          { header: 'Gross Amount', key: 'gross_amount', type: 'currency', width: 18 },
-          { header: 'Advance Deducted', key: 'advance_deducted', type: 'currency', width: 18 },
-          { header: 'Net Amount', key: 'net_amount', type: 'currency', width: 18 },
-          { header: 'Amount Paid', key: 'amount_paid', type: 'currency', width: 18 },
-          { header: 'Outstanding', key: 'outstanding_amount', type: 'currency', width: 18 }
+          { header: 'Sales Channel',    key: 'channel',            width: 22 },
+          { header: 'Bills / Returns',  key: 'count_label',        width: 16 },
+          { header: 'Sale Amount',      key: 'sale_amount',        type: 'currency', width: 18 },
+          { header: 'Gross Amount',     key: 'gross_amount',       type: 'currency', width: 18 },
+          { header: 'Advance Deducted', key: 'advance_deducted',   type: 'currency', width: 18 },
+          { header: 'Net Amount',       key: 'net_amount',         type: 'currency', width: 18 },
+          { header: 'Outstanding',      key: 'outstanding_amount', type: 'currency', width: 18 }
         ];
-        
+
+        const ob = data.order_booker || {};
+        const sm = data.salesman    || {};
+        const ds = data.direct_shop || {};
+
         const reportData = [
-          { channel: 'Order Booker Sales', ...data.order_booker },
-          { channel: 'Salesman Sales', ...data.salesman },
-          { channel: 'Direct Shop Sales', ...data.direct_shop }
+          { channel: 'Order Booker Sales', count_label: (ob.bill_count||0) + ' bills',   sale_amount: ob.net_amount||0,    gross_amount: ob.gross_amount||0,    advance_deducted: ob.advance_deducted||0, net_amount: ob.net_amount||0,    outstanding_amount: ob.outstanding_amount||0 },
+          { channel: 'Salesman Sales',     count_label: (sm.returns_count||0) + ' returns', sale_amount: sm.sale_value||0, gross_amount: sm.sale_value||0,      advance_deducted: 0,                      net_amount: sm.sale_value||0,    outstanding_amount: 0 },
+          { channel: 'Direct Shop Sales',  count_label: (ds.bill_count||0) + ' bills',   sale_amount: ds.net_amount||0,    gross_amount: ds.gross_amount||0,    advance_deducted: ds.advance_deducted||0, net_amount: ds.net_amount||0,    outstanding_amount: ds.outstanding_amount||0 },
+          { channel: 'TOTAL',              count_label: '',                               sale_amount: data.total||0,       gross_amount: '',                    advance_deducted: '',                     net_amount: data.total||0,       outstanding_amount: '' }
         ];
-        
+
         const buffer = await ExcelExporter.exportToExcel(
           reportData,
           columns,
           'Daily Sales Report',
           { reportTitle: `Daily Sales Report - ${reportDate}` }
         );
-        
+
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename=daily-sales-${reportDate}.xlsx`);
         return res.send(buffer);
@@ -99,28 +104,33 @@ class ReportController {
       
       if (exportExcel === 'excel') {
         const columns = [
-          { header: 'Sales Channel', key: 'channel', width: 20 },
-          { header: 'Bill Count', key: 'bill_count', type: 'number', width: 15 },
-          { header: 'Gross Amount', key: 'gross_amount', type: 'currency', width: 18 },
-          { header: 'Advance Deducted', key: 'advance_deducted', type: 'currency', width: 18 },
-          { header: 'Net Amount', key: 'net_amount', type: 'currency', width: 18 },
-          { header: 'Amount Paid', key: 'amount_paid', type: 'currency', width: 18 },
-          { header: 'Outstanding', key: 'outstanding_amount', type: 'currency', width: 18 }
+          { header: 'Sales Channel',    key: 'channel',            width: 22 },
+          { header: 'Bills / Returns',  key: 'count_label',        width: 16 },
+          { header: 'Sale Amount',      key: 'sale_amount',        type: 'currency', width: 18 },
+          { header: 'Gross Amount',     key: 'gross_amount',       type: 'currency', width: 18 },
+          { header: 'Advance Deducted', key: 'advance_deducted',   type: 'currency', width: 18 },
+          { header: 'Net Amount',       key: 'net_amount',         type: 'currency', width: 18 },
+          { header: 'Outstanding',      key: 'outstanding_amount', type: 'currency', width: 18 }
         ];
-        
+
+        const ob = data.order_booker || {};
+        const sm = data.salesman    || {};
+        const ds = data.direct_shop || {};
+
         const reportData = [
-          { channel: 'Order Booker Sales', ...data.order_booker },
-          { channel: 'Salesman Sales', ...data.salesman },
-          { channel: 'Direct Shop Sales', ...data.direct_shop }
+          { channel: 'Order Booker Sales', count_label: (ob.bill_count||0) + ' bills',      sale_amount: ob.net_amount||0,  gross_amount: ob.gross_amount||0, advance_deducted: ob.advance_deducted||0, net_amount: ob.net_amount||0, outstanding_amount: ob.outstanding_amount||0 },
+          { channel: 'Salesman Sales',     count_label: (sm.returns_count||0) + ' returns', sale_amount: sm.sale_value||0,  gross_amount: sm.sale_value||0,   advance_deducted: 0,                      net_amount: sm.sale_value||0, outstanding_amount: 0 },
+          { channel: 'Direct Shop Sales',  count_label: (ds.bill_count||0) + ' bills',      sale_amount: ds.net_amount||0,  gross_amount: ds.gross_amount||0, advance_deducted: ds.advance_deducted||0, net_amount: ds.net_amount||0, outstanding_amount: ds.outstanding_amount||0 },
+          { channel: 'TOTAL',              count_label: '',                                  sale_amount: data.total||0,     gross_amount: '',                 advance_deducted: '',                     net_amount: data.total||0,    outstanding_amount: '' }
         ];
-        
+
         const buffer = await ExcelExporter.exportToExcel(
           reportData,
           columns,
           'Monthly Sales Report',
           { reportTitle: `Monthly Sales Report - ${reportMonth}/${reportYear}` }
         );
-        
+
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename=monthly-sales-${reportMonth}-${reportYear}.xlsx`);
         return res.send(buffer);
@@ -543,6 +553,7 @@ class ReportController {
       renderWithLayout(req, res, 'reports/supplier-advance', {
         title: 'Supplier Advance Report',
         data: paginatedData,
+        noSelection: false,
         pagination: { page, limit, total, pages: Math.ceil(total / limit) }
       });
     } catch (error) {
@@ -656,6 +667,7 @@ class ReportController {
       renderWithLayout(req, res, 'reports/claims', {
         title: 'Claims Report',
         data: paginatedData,
+        noSelection: false,
         pagination: { page, limit, total, pages: Math.ceil(total / limit) }
       });
     } catch (error) {

@@ -6,7 +6,7 @@
   </div>
 </div>
 
-<% if (noSelection) { %>
+<% if (typeof noSelection !== 'undefined' && noSelection) { %>
 <div class="alert alert-info">
   <i class="bi bi-info-circle me-2"></i>Please select a supplier from the <a href="/reports">Reports page</a> to view the supplier advance report.
 </div>

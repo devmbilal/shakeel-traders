@@ -19,22 +19,32 @@
 </div>
 
 <div class="row g-4 mb-4">
-  <% const channels = [
-    { key: 'order_booker', label: 'Order Booker Sales', color: 'primary' },
-    { key: 'salesman', label: 'Salesman Sales', color: 'success' },
-    { key: 'direct_shop', label: 'Direct Shop Sales', color: 'warning' }
-  ]; %>
+  <%
+    const channels = [
+      { key: 'order_booker', label: 'Order Booker Sales', color: 'primary' },
+      { key: 'salesman',     label: 'Salesman Sales',     color: 'success' },
+      { key: 'direct_shop',  label: 'Direct Shop Sales',  color: 'warning' }
+    ];
+  %>
   <% channels.forEach(ch => { const d = data[ch.key] || {}; %>
   <div class="col-md-4">
     <div class="card h-100">
       <div class="card-header"><i class="bi bi-shop text-<%= ch.color %> me-2"></i><%= ch.label %></div>
       <div class="card-body">
+        <% if (ch.key === 'salesman') { %>
+        <div class="row g-2 text-center">
+          <div class="col-12"><div class="small text-muted">Sale Value (Stock-Based)</div><div class="fw-bold fs-4 text-success">Rs <%= Number(d.sale_value || 0).toLocaleString() %></div></div>
+          <div class="col-12"><div class="small text-muted">Approved Returns</div><div class="fw-semibold"><%= d.returns_count || 0 %> returns</div></div>
+          <div class="col-12"><div class="small text-muted fst-italic">No bills — sales recorded via stock return</div></div>
+        </div>
+        <% } else { %>
         <div class="row g-2 text-center">
           <div class="col-6"><div class="small text-muted">Bills</div><div class="fw-bold fs-5"><%= d.bill_count || 0 %></div></div>
           <div class="col-6"><div class="small text-muted">Net Amount</div><div class="fw-bold fs-5 text-<%= ch.color %>">Rs <%= Number(d.net_amount || 0).toLocaleString() %></div></div>
           <div class="col-6"><div class="small text-muted">Gross</div><div class="fw-semibold">Rs <%= Number(d.gross_amount || 0).toLocaleString() %></div></div>
           <div class="col-6"><div class="small text-muted">Outstanding</div><div class="fw-semibold text-danger">Rs <%= Number(d.outstanding_amount || 0).toLocaleString() %></div></div>
         </div>
+        <% } %>
       </div>
     </div>
   </div>
@@ -47,7 +57,7 @@
     <div class="row text-center">
       <div class="col-md-3"><div class="small text-muted">Total Net Sales</div><div class="fw-bold fs-4 text-primary">Rs <%= Number(data.total || 0).toLocaleString() %></div></div>
       <div class="col-md-3"><div class="small text-muted">Order Booker</div><div class="fw-bold">Rs <%= Number((data.order_booker||{}).net_amount||0).toLocaleString() %></div></div>
-      <div class="col-md-3"><div class="small text-muted">Salesman</div><div class="fw-bold">Rs <%= Number((data.salesman||{}).net_amount||0).toLocaleString() %></div></div>
+      <div class="col-md-3"><div class="small text-muted">Salesman</div><div class="fw-bold">Rs <%= Number((data.salesman||{}).sale_value||0).toLocaleString() %></div></div>
       <div class="col-md-3"><div class="small text-muted">Direct Shop</div><div class="fw-bold">Rs <%= Number((data.direct_shop||{}).net_amount||0).toLocaleString() %></div></div>
     </div>
   </div>

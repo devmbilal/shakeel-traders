@@ -4,7 +4,8 @@ const db = require('../config/db');
 class ReportService {
   // 1. Daily Sales Report
   static async dailySalesReport(date) {
-    const rows = await db.query(`
+    // Order booker + direct shop sales from bills
+    const billRows = await db.query(`
       SELECT 
         bill_type,
         COUNT(*) as bill_count,
@@ -15,21 +16,35 @@ class ReportService {
         SUM(outstanding_amount) as outstanding_amount
       FROM bills
       WHERE DATE(created_at) = ?
+        AND bill_type IN ('order_booker','direct_shop')
       GROUP BY bill_type
     `, [date]);
-    
+
+    // Salesman sales from approved returns (stock-based, no bills)
+    const [salesmanRow] = await db.query(`
+      SELECT 
+        COALESCE(SUM(final_sale_value), 0) AS total_sale_value,
+        COUNT(*) AS returns_count
+      FROM salesman_returns
+      WHERE status = 'approved' AND DATE(approved_at) = ?
+    `, [date]);
+
     return {
       date,
-      order_booker: rows.find(r => r.bill_type === 'order_booker') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
-      salesman: rows.find(r => r.bill_type === 'salesman') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
-      direct_shop: rows.find(r => r.bill_type === 'direct_shop') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
-      total: rows.reduce((sum, r) => sum + parseFloat(r.net_amount || 0), 0)
+      order_booker: billRows.find(r => r.bill_type === 'order_booker') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
+      salesman: {
+        sale_value: parseFloat(salesmanRow.total_sale_value || 0),
+        returns_count: parseInt(salesmanRow.returns_count || 0)
+      },
+      direct_shop: billRows.find(r => r.bill_type === 'direct_shop') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
+      total: billRows.reduce((sum, r) => sum + parseFloat(r.net_amount || 0), 0) +
+             parseFloat(salesmanRow.total_sale_value || 0)
     };
   }
 
   // 2. Monthly Sales Report
   static async monthlySalesReport(month, year) {
-    const rows = await db.query(`
+    const billRows = await db.query(`
       SELECT 
         bill_type,
         COUNT(*) as bill_count,
@@ -40,16 +55,30 @@ class ReportService {
         SUM(outstanding_amount) as outstanding_amount
       FROM bills
       WHERE MONTH(created_at) = ? AND YEAR(created_at) = ?
+        AND bill_type IN ('order_booker','direct_shop')
       GROUP BY bill_type
     `, [month, year]);
-    
+
+    const [salesmanRow] = await db.query(`
+      SELECT 
+        COALESCE(SUM(final_sale_value), 0) AS total_sale_value,
+        COUNT(*) AS returns_count
+      FROM salesman_returns
+      WHERE status = 'approved'
+        AND MONTH(approved_at) = ? AND YEAR(approved_at) = ?
+    `, [month, year]);
+
     return {
       month,
       year,
-      order_booker: rows.find(r => r.bill_type === 'order_booker') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
-      salesman: rows.find(r => r.bill_type === 'salesman') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
-      direct_shop: rows.find(r => r.bill_type === 'direct_shop') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
-      total: rows.reduce((sum, r) => sum + parseFloat(r.net_amount || 0), 0)
+      order_booker: billRows.find(r => r.bill_type === 'order_booker') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
+      salesman: {
+        sale_value: parseFloat(salesmanRow.total_sale_value || 0),
+        returns_count: parseInt(salesmanRow.returns_count || 0)
+      },
+      direct_shop: billRows.find(r => r.bill_type === 'direct_shop') || { bill_count: 0, gross_amount: 0, net_amount: 0 },
+      total: billRows.reduce((sum, r) => sum + parseFloat(r.net_amount || 0), 0) +
+             parseFloat(salesmanRow.total_sale_value || 0)
     };
   }
 
@@ -268,7 +297,7 @@ class ReportService {
     const advances = await db.query(`
       SELECT * FROM supplier_advances 
       WHERE company_id = ? 
-      ORDER BY advance_date DESC
+      ORDER BY payment_date DESC
     `, [companyId]);
     const receipts = await db.query(`
       SELECT 
@@ -318,8 +347,8 @@ class ReportService {
         sr.year,
         sr.basic_salary,
         sr.total_advances_paid,
-        sr.running_balance,
-        sr.clearance_date,
+        (sr.basic_salary - sr.total_advances_paid) AS running_balance,
+        sr.cleared_at,
         CASE 
           WHEN sr.staff_type = 'salesman' THEN (SELECT full_name FROM users WHERE id = sr.staff_id AND role = 'salesman')
           WHEN sr.staff_type = 'order_booker' THEN (SELECT full_name FROM users WHERE id = sr.staff_id AND role = 'order_booker')
@@ -363,7 +392,7 @@ class ReportService {
         c.reason,
         c.status,
         c.cleared_at,
-        u.full_name as cleared_by_name,
+        u.full_name as recorded_by_name,
         GROUP_CONCAT(
           CONCAT(p.name, ' (', ci.cartons, ' cartons, ', ci.loose_units, ' loose)')
           SEPARATOR '; '
@@ -371,7 +400,7 @@ class ReportService {
       FROM claims c
       LEFT JOIN claim_items ci ON ci.claim_id = c.id
       LEFT JOIN products p ON p.id = ci.product_id
-      LEFT JOIN users u ON u.id = c.cleared_by
+      LEFT JOIN users u ON u.id = c.recorded_by
       WHERE c.company_id = ?
       GROUP BY c.id
       ORDER BY c.claim_date DESC

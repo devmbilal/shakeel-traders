@@ -533,7 +533,7 @@
       <div class="db-section">
         <div class="db-section-header">
           <span class="db-section-title">Salesman Sales Breakdown</span>
-          <a href="/direct-sales" style="font-size:0.72rem;font-weight:700;color:var(--secondary);text-decoration:none;">View All</a>
+          <a href="/direct-sales" style="font-size:0.72rem;font-weight:700;color:var(--secondary);text-decoration:none;"></a>
         </div>
         <div class="db-section-body" id="salesmanSalesGraph">
           <div style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:24px 0;">Loading…</div>
@@ -546,7 +546,7 @@
       <div class="db-section">
         <div class="db-section-header">
           <span class="db-section-title">Top Routes by Sales</span>
-          <a href="/routes" style="font-size:0.72rem;font-weight:700;color:var(--secondary);text-decoration:none;">View All</a>
+          <a href="/routes" style="font-size:0.72rem;font-weight:700;color:var(--secondary);text-decoration:none;"></a>
         </div>
         <div class="db-section-body" id="routeBreakdownGraph">
           <div style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:24px 0;">Loading…</div>
@@ -632,7 +632,7 @@
     set('salesOrderBooker',      fmt((sl.order_booker || {}).sales));
     set('salesOrderBookerCount', ((sl.order_booker || {}).count || 0) + ' bills');
     set('salesSalesman',         fmt((sl.salesman || {}).sales));
-    set('salesSalesmanCount',    ((sl.salesman || {}).count || 0) + ' bills');
+    set('salesSalesmanCount',    'Stock-based sales');
     set('salesDirectShop',       fmt((sl.direct_shop || {}).sales));
     set('salesDirectShopCount',  ((sl.direct_shop || {}).count || 0) + ' bills');
 
@@ -670,9 +670,16 @@
     el.innerHTML = data.slice(0, 6).map(function (r) {
       var val = parseFloat(r[valueKey] || 0);
       var pct = max > 0 ? Math.round(val / max * 100) : 0;
+      // For salesman breakdown show cartons+loose instead of bill count
+      var sub = '';
+      if (r.total_sold_cartons !== undefined) {
+        sub = '<span style="font-size:0.68rem;color:var(--text-muted);">' +
+              (r.total_sold_cartons || 0) + ' ctn + ' + (r.total_sold_loose || 0) + ' loose sold</span>';
+      }
       return '<div class="db-bar-row">' +
         '<div class="db-bar-meta">' +
-        '<span class="db-bar-name">' + (r[nameKey] || '—') + '</span>' +
+        '<div><span class="db-bar-name">' + (r[nameKey] || '—') + '</span>' +
+        (sub ? '<br>' + sub : '') + '</div>' +
         '<span class="db-bar-val">' + fmt(val) + '</span>' +
         '</div>' +
         '<div class="db-bar-track">' +
