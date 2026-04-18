@@ -1,9 +1,63 @@
 'use strict';
 
+const multer = require('multer');
 const ProductModel = require('../models/ProductModel');
 const { renderWithLayout } = require('../utils/render');
 
+// ── CSV helpers ────────────────────────────────────────────────────────────
+const csvUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed'));
+    }
+  },
+});
+
+function parseCSV(buffer) {
+  const lines = buffer.toString('utf8').split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim());
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = vals[i] || ''; });
+    return obj;
+  });
+}
+
 const ProductController = {
+  csvUploadMiddleware: csvUpload.single('csv_file'),
+
+  async importCSV(req, res) {
+    try {
+      if (!req.file) {
+        req.flash('error', 'Please upload a CSV file.');
+        return res.redirect('/products');
+      }
+      const rows = parseCSV(req.file.buffer);
+      if (rows.length === 0) {
+        req.flash('error', 'CSV file is empty or has no data rows.');
+        return res.redirect('/products');
+      }
+      const result = await ProductModel.bulkImportFromCSV(rows);
+      const msg = `Imported: ${result.inserted} new, ${result.updated} updated.`;
+      if (result.errors.length > 0) {
+        req.flash('error', msg + ' Errors: ' + result.errors.slice(0, 3).join('; '));
+      } else {
+        req.flash('success', msg);
+      }
+      res.redirect('/products');
+    } catch (err) {
+      console.error(err);
+      req.flash('error', 'CSV import failed: ' + err.message);
+      res.redirect('/products');
+    }
+  },
+
   async index(req, res) {
     try {
       const { paginate } = require('../utils/paginate');

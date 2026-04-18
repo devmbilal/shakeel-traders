@@ -23,6 +23,7 @@
       <table class="table mb-0">
         <thead><tr>
           <th style="padding-left:20px;">Route Name</th>
+          <th>ID</th>
           <th>Shops</th>
           <th>Status</th>
           <th>Actions</th>
@@ -38,6 +39,7 @@
                 <span style="font-weight:600;font-size:0.85rem;"><%= r.name %></span>
               </div>
             </td>
+            <td><code style="background:#F1F5F9;padding:2px 7px;border-radius:5px;font-size:0.8rem;color:var(--text-secondary);">#<%= r.id %></code></td>
             <td><span class="badge badge-blue"><%= r.shop_count %> shops</span></td>
             <td><span class="badge <%= r.is_active ? 'badge-active' : 'badge-inactive' %>"><%= r.is_active ? 'Active' : 'Inactive' %></span></td>
             <td>

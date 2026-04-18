@@ -81,6 +81,48 @@ const ProductModel = {
       [like, like]
     );
   },
+
+  async bulkImportFromCSV(rows) {
+    const results = { inserted: 0, updated: 0, errors: [] };
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      try {
+        // Required fields
+        if (!row.sku_code || !row.name || !row.units_per_carton || !row.retail_price || !row.wholesale_price) {
+          results.errors.push(`Row ${i + 2}: sku_code, name, units_per_carton, retail_price, wholesale_price are required.`);
+          continue;
+        }
+        const existing = await ProductModel.findBySku(row.sku_code.trim());
+        if (existing) {
+          // Update existing product (don't touch stock)
+          await ProductModel.update(existing.id, {
+            sku_code:          row.sku_code.trim(),
+            name:              row.name.trim(),
+            brand:             row.brand ? row.brand.trim() : null,
+            units_per_carton:  parseInt(row.units_per_carton),
+            retail_price:      parseFloat(row.retail_price),
+            wholesale_price:   parseFloat(row.wholesale_price),
+            low_stock_threshold: row.low_stock_threshold ? parseInt(row.low_stock_threshold) : null,
+          });
+          results.updated++;
+        } else {
+          await ProductModel.create({
+            sku_code:          row.sku_code.trim(),
+            name:              row.name.trim(),
+            brand:             row.brand ? row.brand.trim() : null,
+            units_per_carton:  parseInt(row.units_per_carton),
+            retail_price:      parseFloat(row.retail_price),
+            wholesale_price:   parseFloat(row.wholesale_price),
+            low_stock_threshold: row.low_stock_threshold ? parseInt(row.low_stock_threshold) : null,
+          });
+          results.inserted++;
+        }
+      } catch (err) {
+        results.errors.push(`Row ${i + 2}: ${err.message}`);
+      }
+    }
+    return results;
+  },
 };
 
 module.exports = ProductModel;
