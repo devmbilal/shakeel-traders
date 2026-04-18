@@ -362,6 +362,29 @@
             <div class="db-hero-stat-sub" id="stockUnits">— ctn</div>
           </div>
         </div>
+
+        <!-- Mobile App Connection Info -->
+        <div class="db-hero-divider"></div>
+        <div style="max-width:55%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 14px;">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-phone" style="color:rgba(255,255,255,0.5);font-size:0.85rem;"></i>
+            <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);">Mobile App Connection</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span style="font-size:0.68rem;color:rgba(255,255,255,0.4);width:32px;">IP</span>
+            <code id="serverIP" style="font-size:0.82rem;font-weight:700;color:#60A5FA;background:rgba(96,165,250,0.1);padding:2px 8px;border-radius:5px;letter-spacing:0.03em;">—</code>
+            <button onclick="copyToClipboard('serverIP')" title="Copy IP" style="background:none;border:none;padding:0;cursor:pointer;color:rgba(255,255,255,0.3);">
+              <i class="bi bi-copy" style="font-size:0.75rem;"></i>
+            </button>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span style="font-size:0.68rem;color:rgba(255,255,255,0.4);width:32px;">Port</span>
+            <code id="serverPort" style="font-size:0.82rem;font-weight:700;color:#34D399;background:rgba(52,211,153,0.1);padding:2px 8px;border-radius:5px;letter-spacing:0.03em;">—</code>
+            <button onclick="copyToClipboard('serverPort')" title="Copy Port" style="background:none;border:none;padding:0;cursor:pointer;color:rgba(255,255,255,0.3);">
+              <i class="bi bi-copy" style="font-size:0.75rem;"></i>
+            </button>
+          </div>
+        </div>
         <!-- subtle logo watermark -->
         <img src="/images/logo.png" alt="" aria-hidden="true"
           style="position:absolute;bottom:-16px;right:10px;height:150px;width:auto;opacity:1;pointer-events:none;" />
@@ -562,6 +585,11 @@
     set('qs-bookers',  s.active_bookers || 0);
     set('qs-routes',   s.total_routes   || 0);
 
+    /* Server connection info */
+    var srv = data.server || {};
+    set('serverIP',   srv.ip   || '—');
+    set('serverPort', String(srv.port || '—'));
+
     /* Subtitle */
     set('dashSubtitle', 'Real-time overview — ' + (data.dateLabel || 'Today'));
 
@@ -664,7 +692,17 @@
       });
   }
 
-  /* ── Period toggle ── */
+  /* ── Copy to clipboard ── */
+  window.copyToClipboard = function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    navigator.clipboard.writeText(el.textContent.trim()).then(function () {
+      var orig = el.style.background;
+      el.style.background = 'rgba(52,211,153,0.25)';
+      setTimeout(function () { el.style.background = orig; }, 800);
+    });
+  };
+
   window.switchView = function (v) {
     currentView = v;
     ['daily','monthly','yearly'].forEach(function (x) {

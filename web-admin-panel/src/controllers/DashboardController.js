@@ -1,7 +1,18 @@
 'use strict';
 
+const os   = require('os');
 const { query } = require('../config/db');
 const { renderWithLayout } = require('../utils/render');
+
+function getLocalIP() {
+  const ifaces = os.networkInterfaces();
+  for (const name of Object.keys(ifaces)) {
+    for (const iface of ifaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) return iface.address;
+    }
+  }
+  return '127.0.0.1';
+}
 
 const DashboardController = {
 
@@ -298,7 +309,11 @@ const DashboardController = {
           unsyncedBookers
         },
         cash,
-        stats: quickStats
+        stats: quickStats,
+        server: {
+          ip:   getLocalIP(),
+          port: process.env.PORT || 3000
+        }
       });
 
     } catch (err) {
