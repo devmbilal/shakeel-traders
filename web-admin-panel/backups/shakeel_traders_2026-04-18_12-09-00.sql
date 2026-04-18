@@ -295,7 +295,7 @@ CREATE TABLE `company_profile` (
 
 LOCK TABLES `company_profile` WRITE;
 /*!40000 ALTER TABLE `company_profile` DISABLE KEYS */;
-INSERT INTO `company_profile` VALUES (1,'Shakeel Traders','Shakeel Ahmad','Karrianwala Road Khurrianwala','04235000000',NULL,NULL,'NTN-1234567','ST-5643-786','33104-5026301-3',NULL,'2026-04-14 21:31:17');
+INSERT INTO `company_profile` VALUES (1,'Shakeel Traders','Shakeel Ahmad','Karrianwala Road Khurrianwala','04235000000',NULL,NULL,'NTN-1234567','ST-5643-786','33104-5026301-3','/uploads/logos/company-logo.png','2026-04-18 15:52:34');
 /*!40000 ALTER TABLE `company_profile` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -839,7 +839,7 @@ CREATE TABLE `sessions` (
 
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
-INSERT INTO `sessions` VALUES ('l_vL-G1zyR28jbvOgn_N10SEBSr8DKsg',1776595708,'{\"cookie\":{\"originalMaxAge\":86399999,\"expires\":\"2026-04-19T10:40:25.741Z\",\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"flash\":{},\"user\":{\"id\":1,\"full_name\":\"Administrator\",\"username\":\"devmbilal\",\"role\":\"admin\"}}');
+INSERT INTO `sessions` VALUES ('5DfBG1WtR6yvk09PuY2g6GZXu_p0K_TF',1776597460,'{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-04-19T11:00:31.397Z\",\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"flash\":{},\"user\":{\"id\":1,\"full_name\":\"Administrator\",\"username\":\"devmbilal\",\"role\":\"admin\"}}'),('elPNnO66wJHfnLgmJJeqJELf204F5Ier',1776596129,'{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-04-19T10:55:28.795Z\",\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"flash\":{\"error\":[\"Please log in to access this page.\"]}}'),('kAtjsGDYzqSfvVH_aEFaQL-5XUNNEaPX',1776600532,'{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-04-19T12:08:52.265Z\",\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"flash\":{},\"user\":{\"id\":1,\"full_name\":\"Administrator\",\"username\":\"devmbilal\",\"role\":\"admin\"}}');
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1195,4 +1195,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-18 15:48:38
+-- Dump completed on 2026-04-18 17:09:01
