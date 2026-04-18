@@ -199,25 +199,38 @@
       position: relative;
     }
     .topbar-search input {
-      background: var(--bg);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px 12px 8px 36px;
+      padding: 8px 12px 8px 40px;
       font-size: 0.8rem;
       color: var(--text-primary);
       width: 100%;
       outline: none;
-      transition: border-color 0.15s;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
-    .topbar-search input:focus { border-color: var(--secondary); }
-    .topbar-search input::placeholder { color: var(--text-muted); }
+    .topbar-search input:focus { 
+      border-color: var(--secondary); 
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1), 0 1px 2px rgba(0,0,0,0.05);
+      background: #fff;
+    }
+    .topbar-search input::placeholder { 
+      color: var(--text-muted);
+      font-weight: 400;
+    }
     .topbar-search .search-icon {
       position: absolute;
-      left: 11px;
+      left: 12px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+      pointer-events: none;
+    }
+    .topbar-search input:focus + .search-icon {
+      color: var(--secondary);
     }
     .topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
     .topbar-icon-btn {
@@ -539,6 +552,123 @@
       #sidebar.show { transform: translateX(0); }
       #main-content { margin-left: 0; }
     }
+
+    /* ── Search Results Dropdown ─────────────────────────────────────────────── */
+    #searchResults {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+      max-height: 480px;
+      overflow-y: auto;
+      z-index: 9999;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+    }
+    #searchResults::-webkit-scrollbar { width: 5px; }
+    #searchResults::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    .srp-header {
+      padding: 8px 14px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: #F8FAFC;
+      border-radius: 12px 12px 0 0;
+    }
+    .srp-section { padding: 4px 0; }
+    .srp-section.border-bottom { border-bottom: 1px solid var(--border) !important; }
+    .srp-label {
+      padding: 6px 14px 3px;
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .srp-count {
+      background: var(--border);
+      color: var(--text-secondary);
+      border-radius: 10px;
+      padding: 0 6px;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+    .srp-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: background 0.12s;
+      cursor: pointer;
+      gap: 10px;
+    }
+    .srp-row:hover, .srp-row:focus {
+      background: #F1F5F9;
+      color: var(--text-primary);
+      outline: none;
+    }
+    .srp-row-left { flex: 1; min-width: 0; }
+    .srp-row-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .srp-row-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+    .srp-row-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    .srp-amount {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #EF4444;
+    }
+    .srp-stock {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .srp-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .srp-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 16px;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .srp-empty i { font-size: 1.6rem; }
   </style>
   <%- typeof extraHead !== 'undefined' ? extraHead : '' %>
 </head>
@@ -557,15 +687,12 @@
       <!-- Search -->
       <div class="topbar-search d-none d-md-block">
         <i class="bi bi-search search-icon"></i>
-        <input type="text" placeholder="Search orders, SKU, or routes..." />
+        <input type="text" id="globalSearch" placeholder="Search orders, products, shops…" autocomplete="off" />
+        <div id="searchResults" class="d-none"></div>
       </div>
 
       <!-- Actions -->
       <div class="topbar-actions">
-        <a href="#" class="topbar-icon-btn" title="Notifications">
-          <i class="bi bi-bell"></i>
-          <span class="badge-dot"></span>
-        </a>
         <a href="/orders" class="topbar-icon-btn" title="Orders">
           <i class="bi bi-clipboard-check"></i>
         </a>
@@ -643,6 +770,209 @@
         new TomSelect(el, { placeholder: 'Search...', allowEmptyOption: true });
       });
     });
+
+    // ── Global Search ──────────────────────────────────────────────────────────
+    (function () {
+      const inp = document.getElementById('globalSearch');
+      const box = document.getElementById('searchResults');
+      if (!inp || !box) return;
+
+      let timer = null;
+      let lastQuery = '';
+
+      /* ── helpers ── */
+      function show() { box.classList.remove('d-none'); }
+      function hide() { box.classList.add('d-none'); }
+
+      function fmtCurrency(v) {
+        const n = parseFloat(v) || 0;
+        if (n >= 10000000) return 'Rs ' + (n / 10000000).toFixed(1) + 'Cr';
+        if (n >= 100000)   return 'Rs ' + (n / 100000).toFixed(1) + 'L';
+        if (n >= 1000)     return 'Rs ' + (n / 1000).toFixed(0) + 'K';
+        return 'Rs ' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+      }
+
+      function fmtDate(d) {
+        if (!d) return '';
+        return new Date(d).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+
+      function esc(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      /* ── section builder ── */
+      function section(icon, label, count, rows, isLast) {
+        return '<div class="srp-section' + (isLast ? '' : ' border-bottom') + '">' +
+               '<div class="srp-label"><i class="bi ' + icon + '"></i> ' + esc(label) + ' <span class="srp-count">' + count + '</span></div>' +
+               rows +
+               '</div>';
+      }
+
+      function row(href, title, sub, right) {
+        return '<a href="' + href + '" class="srp-row">' +
+               '<div class="srp-row-left"><div class="srp-row-title">' + title + '</div>' +
+               (sub ? '<div class="srp-row-sub">' + sub + '</div>' : '') +
+               '</div>' +
+               (right ? '<div class="srp-row-right">' + right + '</div>' : '') +
+               '</a>';
+      }
+
+      function badge(cls, text) {
+        return '<span class="badge ' + cls + '">' + text + '</span>';
+      }
+
+      /* ── render results ── */
+      function render(data, q) {
+        const hasBills    = data.bills   && data.bills.length;
+        const hasOrders   = data.orders  && data.orders.length;
+        const hasProducts = data.products && data.products.length;
+        const hasShops    = data.shops   && data.shops.length;
+        const hasRoutes   = data.routes  && data.routes.length;
+        const total = (hasBills ? data.bills.length : 0) +
+                      (hasOrders ? data.orders.length : 0) +
+                      (hasProducts ? data.products.length : 0) +
+                      (hasShops ? data.shops.length : 0) +
+                      (hasRoutes ? data.routes.length : 0);
+
+        if (!total) {
+          box.innerHTML = '<div class="srp-empty"><i class="bi bi-search"></i><div>No results for <strong>' + esc(q) + '</strong></div></div>';
+          show();
+          return;
+        }
+
+        let html = '<div class="srp-header">Found <strong>' + total + '</strong> results for <em>"' + esc(q) + '"</em></div>';
+
+        const sections = [];
+
+        if (hasBills) {
+          let rows = '';
+          data.bills.forEach(function(b) {
+            const typeIcon = b.bill_type === 'order_booker' ? 'bi-person-badge' : b.bill_type === 'direct_shop' ? 'bi-shop' : 'bi-truck';
+            const st = b.status === 'cleared' ? badge('badge-approved','Cleared') :
+                       b.status === 'partially_paid' ? badge('badge-partially','Partial') :
+                       badge('badge-pending','Open');
+            rows += row('/orders/converted',
+              '<i class="bi ' + typeIcon + ' me-1"></i>Bill #' + esc(b.bill_number),
+              esc(b.shop_name || '—') + ' &bull; ' + fmtDate(b.bill_date),
+              '<div class="srp-amount">' + fmtCurrency(b.outstanding_amount) + '</div>' + st
+            );
+          });
+          sections.push({ icon: 'bi-cash-coin', label: 'Outstanding Bills', rows: rows, count: data.bills.length });
+        }
+
+        if (hasOrders) {
+          let rows = '';
+          data.orders.forEach(function(o) {
+            const st = o.status === 'converted' ? badge('badge-approved','Converted') :
+                       o.status === 'stock_adjusted' ? badge('badge-blue','Adjusted') :
+                       badge('badge-pending','Pending');
+            rows += row('/orders',
+              'Order #' + esc(o.id),
+              esc(o.shop_name || '—') + ' &bull; ' + fmtDate(o.created_at),
+              st
+            );
+          });
+          sections.push({ icon: 'bi-clipboard-check', label: 'Orders', rows: rows, count: data.orders.length });
+        }
+
+        if (hasProducts) {
+          let rows = '';
+          data.products.forEach(function(p) {
+            const st = p.current_stock_cartons > 10 ? badge('badge-active','In Stock') :
+                       p.current_stock_cartons > 0  ? badge('badge-orange','Low Stock') :
+                       badge('badge-rejected','Out of Stock');
+            rows += row('/products/' + p.id + '/edit',
+              esc(p.name),
+              'SKU: ' + esc(p.sku_code) + (p.brand ? ' &bull; ' + esc(p.brand) : ''),
+              '<div class="srp-stock">' + (p.current_stock_cartons || 0) + ' ctn</div>' + st
+            );
+          });
+          sections.push({ icon: 'bi-box-seam', label: 'Products', rows: rows, count: data.products.length });
+        }
+
+        if (hasShops) {
+          let rows = '';
+          data.shops.forEach(function(s) {
+            rows += row('/shops/' + s.id,
+              esc(s.shop_name),
+              esc(s.shop_owner_name || '—') + (s.route_name ? ' &bull; ' + esc(s.route_name) : ''),
+              badge('badge-blue','Shop')
+            );
+          });
+          sections.push({ icon: 'bi-shop-window', label: 'Shops', rows: rows, count: data.shops.length });
+        }
+
+        if (hasRoutes) {
+          let rows = '';
+          data.routes.forEach(function(r) {
+            rows += row('/routes/' + r.id,
+              esc(r.name),
+              (r.shop_count || 0) + ' shops' + (r.assigned_bookers ? ' &bull; ' + esc(r.assigned_bookers) : ''),
+              badge('badge-blue','Route')
+            );
+          });
+          sections.push({ icon: 'bi-signpost-2', label: 'Routes', rows: rows, count: data.routes.length });
+        }
+
+        sections.forEach(function(s, i) {
+          html += section(s.icon, s.label, s.count, s.rows, i === sections.length - 1);
+        });
+
+        box.innerHTML = html;
+        show();
+      }
+
+      /* ── fetch ── */
+      function doSearch(q) {
+        lastQuery = q;
+        box.innerHTML = '<div class="srp-loading"><div class="spinner-border spinner-border-sm text-primary"></div><span>Searching…</span></div>';
+        show();
+
+        fetch('/api/search?q=' + encodeURIComponent(q))
+          .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function(data) { render(data, q); })
+          .catch(function() {
+            box.innerHTML = '<div class="srp-empty"><i class="bi bi-exclamation-triangle text-danger"></i><div>Search failed — please try again.</div></div>';
+          });
+      }
+
+      /* ── events ── */
+      inp.addEventListener('input', function () {
+        const q = inp.value.trim();
+        clearTimeout(timer);
+        if (q.length < 2) { hide(); return; }
+        timer = setTimeout(function () { doSearch(q); }, 280);
+      });
+
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { hide(); inp.blur(); return; }
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const first = box.querySelector('.srp-row');
+          if (first) first.focus();
+        }
+      });
+
+      inp.addEventListener('focus', function () {
+        if (inp.value.trim().length >= 2 && box.innerHTML.trim()) show();
+      });
+
+      /* keyboard nav inside results */
+      box.addEventListener('keydown', function (e) {
+        const links = Array.from(box.querySelectorAll('.srp-row'));
+        const idx   = links.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown') { e.preventDefault(); (links[idx + 1] || links[0]).focus(); }
+        if (e.key === 'ArrowUp')   { e.preventDefault(); (links[idx - 1] || links[links.length - 1]).focus(); }
+        if (e.key === 'Escape')    { hide(); inp.focus(); }
+      });
+
+      /* close on outside click — use mousedown so it fires before blur */
+      document.addEventListener('mousedown', function (e) {
+        if (!inp.contains(e.target) && !box.contains(e.target)) hide();
+      });
+
+    })();
   </script>
   <%- typeof extraScripts !== 'undefined' ? extraScripts : '' %>
 </body>

@@ -54,6 +54,9 @@ app.use('/api/sync',  require('./routes/api/sync'));
 const { requireAuth } = require('./middleware/auth');
 app.use(requireAuth);
 
+// Search API (requires authentication)
+app.use('/', require('./routes/web/search'));
+
 app.use('/dashboard',         require('./routes/web/dashboard'));
 app.use('/company-profile',   require('./routes/web/companyProfile'));
 app.use('/users',             require('./routes/web/users'));
@@ -72,6 +75,7 @@ app.use('/expenses',          require('./routes/web/expenses'));
 app.use('/reports',           require('./routes/web/reports'));
 app.use('/backup',            require('./routes/web/backup'));
 app.use('/audit-log',         require('./routes/web/auditLog'));
+app.use('/settings',          require('./routes/web/settings'));
 
 
 
