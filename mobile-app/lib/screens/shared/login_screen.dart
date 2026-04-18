@@ -62,13 +62,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontSize: 26,
                       fontWeight: FontWeight.w800)),
               Text('Sign in to your account',
-                  style: GoogleFonts.inter(
-                      color: Colors.white54, fontSize: 13)),
+                  style:
+                      GoogleFonts.inter(color: Colors.white54, fontSize: 13)),
               const SizedBox(height: 48),
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
+                  color: Colors.white.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.white12),
                 ),
@@ -94,8 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Colors.white38,
                             size: 18,
                           ),
-                          onPressed: () =>
-                              setState(() => _obscure = !_obscure),
+                          onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
                       if (auth.error != null) ...[
@@ -103,10 +102,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: AppTheme.danger.withOpacity(0.15),
+                            color: AppTheme.danger.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                                color: AppTheme.danger.withOpacity(0.4)),
+                                color: AppTheme.danger.withValues(alpha: 0.4)),
                           ),
                           child: Row(children: [
                             const Icon(Icons.error_outline,
@@ -153,8 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextButton(
                   onPressed: () => Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) => const ConnectionScreen()),
+                    MaterialPageRoute(builder: (_) => const ConnectionScreen()),
                   ),
                   child: Text('Change Server',
                       style: GoogleFonts.inter(
@@ -185,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
         suffixIcon: suffix,
         labelStyle: GoogleFonts.inter(color: Colors.white54, fontSize: 13),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.07),
+        fillColor: Colors.white.withValues(alpha: 0.07),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.white12),

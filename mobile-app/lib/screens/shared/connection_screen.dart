@@ -41,7 +41,11 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       setState(() => _error = 'Please enter server IP address');
       return;
     }
-    setState(() { _testing = true; _error = null; _connected = false; });
+    setState(() {
+      _testing = true;
+      _error = null;
+      _connected = false;
+    });
     final ok = await ApiService.testConnection(ip, port);
     if (ok) {
       final prefs = await SharedPreferences.getInstance();
@@ -56,27 +60,61 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     });
   }
 
+  void _skip() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+  }
+
+  void _proceed() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primary,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(28),
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 40),
-              // Logo / Brand
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: AppTheme.accent,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.local_shipping_rounded,
-                    color: Colors.white, size: 30),
+              // ── Header row: logo left, skip right ──
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon box (original)
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: AppTheme.accent,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(Icons.local_shipping_rounded,
+                        color: Colors.white, size: 30),
+                  ),
+                  const Spacer(),
+                  // Skip button
+                  TextButton(
+                    onPressed: _skip,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white54,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                    ),
+                    child: Text(
+                      'Skip',
+                      style: GoogleFonts.inter(
+                          fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               Text('Shakeel Traders',
@@ -85,14 +123,15 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                       fontSize: 26,
                       fontWeight: FontWeight.w800)),
               Text('Distribution Order System',
-                  style: GoogleFonts.inter(
-                      color: Colors.white54, fontSize: 13)),
-              const SizedBox(height: 48),
-              // Card
+                  style:
+                      GoogleFonts.inter(color: Colors.white54, fontSize: 13)),
+              const SizedBox(height: 36),
+
+              // ── Connection card ──
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
+                  color: Colors.white.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.white12),
                 ),
@@ -124,14 +163,17 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                       icon: Icons.settings_ethernet_rounded,
                       keyboardType: TextInputType.number,
                     ),
+
+                    // Error
                     if (_error != null) ...[
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppTheme.danger.withOpacity(0.15),
+                          color: AppTheme.danger.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.danger.withOpacity(0.4)),
+                          border: Border.all(
+                              color: AppTheme.danger.withValues(alpha: 0.4)),
                         ),
                         child: Row(children: [
                           const Icon(Icons.error_outline,
@@ -145,14 +187,17 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         ]),
                       ),
                     ],
+
+                    // Success
                     if (_connected) ...[
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppTheme.success.withOpacity(0.15),
+                          color: AppTheme.success.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.success.withOpacity(0.4)),
+                          border: Border.all(
+                              color: AppTheme.success.withValues(alpha: 0.4)),
                         ),
                         child: Row(children: [
                           const Icon(Icons.check_circle_outline,
@@ -164,7 +209,10 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         ]),
                       ),
                     ],
+
                     const SizedBox(height: 20),
+
+                    // Test Connection button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -188,16 +236,14 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                     color: Colors.white)),
                       ),
                     ),
+
+                    // Continue button (shown after successful test)
                     if (_connected) ...[
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const LoginScreen()),
-                          ),
+                          onPressed: _proceed,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -213,6 +259,16 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                       ),
                     ],
                   ],
+                ),
+              ),
+
+              // Skip hint
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  'Already configured? Tap Skip to go directly to login.',
+                  style: GoogleFonts.inter(color: Colors.white24, fontSize: 11),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ],
@@ -240,7 +296,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
         labelStyle: GoogleFonts.inter(color: Colors.white54, fontSize: 13),
         hintStyle: GoogleFonts.inter(color: Colors.white24, fontSize: 13),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.07),
+        fillColor: Colors.white.withValues(alpha: 0.07),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.white12),
