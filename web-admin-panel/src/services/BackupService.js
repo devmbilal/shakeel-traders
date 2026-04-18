@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const util = require('util');
 const execPromise = util.promisify(exec);
+const GoogleDriveService = require('./GoogleDriveService');
 
 class BackupService {
   static getBackupDir() {
@@ -39,13 +40,27 @@ class BackupService {
 
       // Verify file was created
       const stats = await fs.stat(filepath);
-      
+
+      // Upload to Google Drive (non-blocking — failure doesn't break backup)
+      let driveResult = { skipped: true };
+      try {
+        driveResult = await GoogleDriveService.uploadBackup(filepath, filename);
+        if (driveResult.success) {
+          console.log(`[Backup] Drive upload OK → ${driveResult.folder}/${filename}`);
+        } else if (!driveResult.skipped) {
+          console.warn(`[Backup] Drive upload failed: ${driveResult.error}`);
+        }
+      } catch (driveErr) {
+        console.warn('[Backup] Drive upload error:', driveErr.message);
+      }
+
       return {
         success: true,
         filename,
         filepath,
         size: stats.size,
-        timestamp: new Date()
+        timestamp: new Date(),
+        driveUpload: driveResult,
       };
     } catch (error) {
       console.error('Backup failed:', error);

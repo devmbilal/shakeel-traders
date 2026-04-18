@@ -36,6 +36,7 @@ A fully **offline, locally hosted ERP** that replaces Salesflo. Runs on a single
 | Node.js | v18 LTS or higher | https://nodejs.org |
 | MySQL | 8.x | https://dev.mysql.com/downloads/mysql/ |
 | MySQL Workbench (optional) | Latest | https://dev.mysql.com/downloads/workbench/ |
+| Rclone (for Drive backup) | Latest | https://rclone.org/downloads/ |
 | Git (optional) | Latest | https://git-scm.com |
 
 > The machine must be connected to the office Wi-Fi/LAN so mobile devices can reach it.
@@ -229,6 +230,103 @@ To restore: **Backup** page → select file → "Restore"
 
 ---
 
+## 9A. Google Drive Auto-Backup via Rclone
+
+Every backup (automatic or manual) is automatically uploaded to Google Drive using **Rclone** — a free tool that works with a regular Gmail account. No API keys or Google Cloud setup required.
+
+### Step 1 — Download Rclone
+
+1. Go to https://rclone.org/downloads/
+2. Click **Windows** → download the zip
+3. Extract `rclone.exe` — note the full path (e.g. `C:\Users\Muhammad Bilal\Downloads\rclone-v1.73.4-windows-amd64\rclone-v1.73.4-windows-amd64\rclone.exe`)
+
+> **Important:** Rclone only works in **Command Prompt (cmd.exe)**, NOT PowerShell. Always use CMD for rclone commands.
+
+### Step 2 — Configure Google Drive (one time only)
+
+Open **Command Prompt** (search "cmd" in Start menu — not PowerShell) and run:
+
+```cmd
+"C:\path\to\rclone.exe" config
+```
+
+Answer the prompts exactly like this:
+
+```
+e/n/d/r/c/s/q> n                    ← new remote
+name> gdrive                         ← name it (remember this name)
+Storage> 18                          ← Google Drive (number may vary, look for "Google Drive")
+client_id>                           ← press Enter (blank)
+client_secret>                       ← press Enter (blank)
+scope> 1                             ← full access
+root_folder_id>                      ← press Enter (blank)
+service_account_file>                ← press Enter (blank)
+Edit advanced config? n              ← no
+Use auto config? y                   ← yes → browser opens automatically
+```
+
+Browser opens → sign in with your Gmail → click **Allow**
+
+```
+Configure this as a Shared Drive? n  ← no (regular Gmail = no Shared Drive)
+y/e/d> y                             ← confirm
+e/n/d/r/c/s/q> q                    ← quit
+```
+
+### Step 3 — Verify configuration
+
+```cmd
+"C:\path\to\rclone.exe" config show
+```
+
+You should see your remote listed (e.g. `gdrive` or whatever name you chose).
+
+> **Common mistake:** If you named it `gddrive` instead of `gdrive`, use that exact name in `.env`.
+
+### Step 4 — Create Google Drive folder
+
+In your Google Drive, create a folder called `Shakeel Traders Backups`.
+
+### Step 5 — Update `.env`
+
+```env
+RCLONE_ENABLED=true
+RCLONE_EXE=C:\Users\Muhammad Bilal\Downloads\rclone-v1.73.4-windows-amd64\rclone-v1.73.4-windows-amd64\rclone.exe
+RCLONE_REMOTE=gdrive
+RCLONE_DRIVE_PATH=Shakeel Traders Backups
+RCLONE_CONFIG=
+```
+
+> `RCLONE_REMOTE` must exactly match the name you gave during `rclone config`.
+
+### Step 6 — Test
+
+Restart the server, go to **Backup** page → "Run Backup Now". The flash message will confirm Drive upload success with the folder path.
+
+### Drive folder structure
+
+Backups are organized automatically:
+```
+Shakeel Traders Backups/
+  2026/
+    2026-04/
+      shakeel_traders_2026-04-19_00-00.sql
+    2026-05/
+      shakeel_traders_2026-05-01_00-00.sql
+```
+
+### Troubleshooting
+
+| Error | Cause | Fix |
+|---|---|---|
+| `didn't find section in config file` | Remote name mismatch | Run `rclone config show` and copy exact name to `RCLONE_REMOTE` in `.env` |
+| `Service Accounts do not have storage quota` | Using service account instead of OAuth | Use Rclone (this guide) — not Google Cloud service accounts |
+| `Google Drive API has not been enabled` | API disabled in Google Cloud | Not applicable with Rclone — ignore |
+| `rclone not recognized` | Wrong shell (PowerShell) | Always use CMD (cmd.exe), not PowerShell |
+| Upload works in CMD but not from server | Config file path issue | Set `RCLONE_CONFIG` in `.env` to the full path of `rclone.conf` (usually `C:\Users\<name>\AppData\Roaming\rclone\rclone.conf`) |
+
+---
+
 ## 10. System Workflow — How It Works
 
 ### Morning Routine (Admin)
@@ -341,6 +439,8 @@ To restore: **Backup** page → select file → "Restore"
 | Dashboard shows no data | Check DB connection in `.env`, restart server |
 | Logo not showing on dashboard | Upload via Company Profile, refresh dashboard page |
 | Backup fails | Check `backups/` folder exists and has write permissions |
+| Drive upload fails with "didn't find section" | Remote name in `.env` doesn't match `rclone config` name — run `rclone config show` to check |
+| Drive upload fails with "not recognized" | Using PowerShell instead of CMD — set `RCLONE_CONFIG` full path in `.env` |
 | Server won't start | Check `.env` DB credentials, verify MySQL is running |
 
 ---

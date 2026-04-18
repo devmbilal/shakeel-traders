@@ -31,7 +31,13 @@ class BackupController {
       const result = await BackupService.runBackup();
 
       if (result.success) {
-        req.flash('success', `Backup created successfully: ${result.filename}`);
+        let msg = `Backup created: ${result.filename}`;
+        if (result.driveUpload?.success) {
+          msg += ` — uploaded to Google Drive (${result.driveUpload.folder})`;
+        } else if (result.driveUpload?.error) {
+          msg += ` — Drive upload failed: ${result.driveUpload.error}`;
+        }
+        req.flash('success', msg);
       } else {
         req.flash('error', `Backup failed: ${result.error}`);
       }
