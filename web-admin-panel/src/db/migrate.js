@@ -30,9 +30,14 @@ async function runMigrations() {
       await conn.query(sql);
       console.log(`  ✓ ${file}`);
     } catch (err) {
-      console.error(`  ✗ ${file}: ${err.message}`);
-      await conn.end();
-      process.exit(1);
+      // ER_DUP_FIELDNAME (1060) = column already exists — safe to skip
+      if (err.errno === 1060) {
+        console.log(`  ✓ ${file} (columns already exist — skipped)`);
+      } else {
+        console.error(`  ✗ ${file}: ${err.message}`);
+        await conn.end();
+        process.exit(1);
+      }
     }
   }
 
