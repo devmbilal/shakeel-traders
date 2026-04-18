@@ -6,12 +6,23 @@ const { renderWithLayout } = require('../utils/render');
 
 function getLocalIP() {
   const ifaces = os.networkInterfaces();
+  // Adapter names to skip (virtual adapters)
+  const skipNames = ['virtualbox', 'vbox', 'vmware', 'vethernet', 'wsl', 'loopback', 'hyper-v'];
+  let fallback = '127.0.0.1';
+
   for (const name of Object.keys(ifaces)) {
+    const nameLower = name.toLowerCase();
+    // Skip virtual/WSL adapters
+    if (skipNames.some(s => nameLower.includes(s))) continue;
+
     for (const iface of ifaces[name]) {
-      if (iface.family === 'IPv4' && !iface.internal) return iface.address;
+      if (iface.family !== 'IPv4' || iface.internal) continue;
+      const ip = iface.address;
+      if (ip.startsWith('192.168.') || ip.startsWith('10.')) return ip;
+      fallback = ip;
     }
   }
-  return '127.0.0.1';
+  return fallback;
 }
 
 const DashboardController = {
