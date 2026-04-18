@@ -2,10 +2,14 @@
 
 require('dotenv').config();
 const express = require('express');
-const path = require('path');
+const path    = require('path');
+const fs      = require('fs');
 const methodOverride = require('method-override');
-const flash = require('connect-flash');
+const flash          = require('connect-flash');
 const sessionMiddleware = require('./config/session');
+
+// Ensure required upload directories exist
+fs.mkdirSync(path.join(__dirname, 'public/uploads/logos'), { recursive: true });
 
 const app = express();
 

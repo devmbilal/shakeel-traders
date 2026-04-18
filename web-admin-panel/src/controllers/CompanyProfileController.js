@@ -61,13 +61,14 @@ const CompanyProfileController = {
 
       if (req.file) {
         data.logo_path = '/uploads/logos/' + req.file.filename;
+        console.log('[CompanyProfile] Logo saved:', data.logo_path);
       }
 
       await CompanyProfileModel.upsertProfile(data);
       req.flash('success', 'Company profile saved successfully.');
       res.redirect('/company-profile');
     } catch (err) {
-      console.error(err);
+      console.error('[CompanyProfile] Save error:', err);
       req.flash('error', 'Failed to save company profile: ' + err.message);
       res.redirect('/company-profile');
     }

@@ -18,8 +18,11 @@ const DashboardController = {
 
   async index(req, res) {
     try {
+      const logoRows = await query('SELECT logo_path FROM company_profile WHERE id = 1 LIMIT 1');
+      const logoPath = (logoRows[0] && logoRows[0].logo_path) ? logoRows[0].logo_path : null;
       renderWithLayout(req, res, 'dashboard/index', {
         title: 'Dashboard - Shakeel Traders',
+        logoPath,
       });
     } catch (err) {
       console.error('Dashboard error:', err);
@@ -282,6 +285,10 @@ const DashboardController = {
           (SELECT COUNT(*) FROM routes WHERE is_active = 1) AS total_routes`
       );
 
+      // Company logo
+      const logoRows = await query('SELECT logo_path FROM company_profile WHERE id = 1 LIMIT 1');
+      const logoPath = (logoRows[0] && logoRows[0].logo_path) ? logoRows[0].logo_path : '/images/logo.png';
+
       res.json({
         view,
         dateLabel,
@@ -313,7 +320,8 @@ const DashboardController = {
         server: {
           ip:   getLocalIP(),
           port: process.env.PORT || 3000
-        }
+        },
+        logoPath
       });
 
     } catch (err) {

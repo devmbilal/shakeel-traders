@@ -386,8 +386,10 @@
           </div>
         </div>
         <!-- subtle logo watermark -->
-        <img src="/images/logo.png" alt="" aria-hidden="true"
+        <% if (typeof logoPath !== 'undefined' && logoPath) { %>
+        <img id="heroDashLogo" src="<%= logoPath %>?v=<%= Date.now() %>" alt="" aria-hidden="true"
           style="position:absolute;bottom:-16px;right:10px;height:150px;width:auto;opacity:1;pointer-events:none;" />
+        <% } %>
       </div>
     </div>
 
