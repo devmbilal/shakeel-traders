@@ -73,7 +73,8 @@ const DashboardController = {
           SUM(outstanding_amount) AS total_outstanding,
           COUNT(*) AS bill_count
          FROM bills 
-         WHERE status IN ('open', 'partially_paid')`
+         WHERE status IN ('open', 'partially_paid')
+           AND bill_type IN ('order_booker', 'direct_shop')`
       );
 
 

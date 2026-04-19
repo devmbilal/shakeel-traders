@@ -157,7 +157,7 @@ module.exports = { formatBillForPrint, formatMultiBillPrint };
 
 /**
  * Format multiple bills into a single printable HTML page.
- * Two bills per page, separated by a dashed line — same content as single bill.
+ * Two bills per page in fixed equal-height slots — same format as single bill.
  */
 function formatMultiBillPrint(bills) {
   function billHtml(bill) {
@@ -171,7 +171,7 @@ function formatMultiBillPrint(bills) {
         <td>${item.loose_units || 0}</td>
         <td>${units}</td>
         <td>Rs ${Number(item.unit_price || 0).toFixed(2)}</td>
-        <td style="text-align:right;">Rs ${Number(item.line_total || 0).toFixed(2)}</td>
+        <td class="tar">Rs ${Number(item.line_total || 0).toFixed(2)}</td>
       </tr>`;
     }).join('');
 
@@ -181,11 +181,10 @@ function formatMultiBillPrint(bills) {
     }) + '/' + billDate.toLocaleDateString('en-US', { weekday: 'long' });
 
     return `
-    <div class="bill">
-      <div class="bill-header">
-        <div class="header-left">
-          <div class="company-name">${bill.company_name || 'Shakeel Traders'}</div>
-          <div class="company-info">
+      <div class="bh">
+        <div class="bh-left">
+          <div class="co-name">${bill.company_name || 'Shakeel Traders'}</div>
+          <div class="co-info">
             <div>${bill.company_address || ''}</div>
             <div><b>N.T.N No:</b> ${bill.gst_ntn || 'Not Available'}</div>
             <div><b>Sales Tax #:</b> ${bill.sales_tax || 'Not Available'}</div>
@@ -194,28 +193,28 @@ function formatMultiBillPrint(bills) {
             <div><b>Address:</b> ${bill.shop_address || 'Not Available'}</div>
           </div>
         </div>
-        <div class="header-right">
-          <div class="invoice-title">CASH MEMO / INVOICE</div>
-          <div class="invoice-meta">
+        <div class="bh-right">
+          <div class="inv-title">CASH MEMO / INVOICE</div>
+          <div class="inv-meta">
             <div><b>Invoice No #:</b> ${bill.bill_number}</div>
             <div><b>Date/Day:</b> ${formattedDate}</div>
             <div><b>Route:</b> ${bill.route_name || 'Not Available'}</div>
-            <div style="margin-top:4px;"><b>Sales Tax No:</b> Not Available</div>
+            <div style="margin-top:3px;"><b>Sales Tax No:</b> Not Available</div>
             <div><b>N.T.N No:</b> Not Available</div>
           </div>
         </div>
       </div>
       <table>
-        <thead><tr><th>SKU</th><th>Product</th><th>Cartons</th><th>Loose</th><th>Units</th><th>Rate</th><th>Amount</th></tr></thead>
+        <thead><tr><th>SKU</th><th>Product</th><th>Ctn</th><th>Loose</th><th>Units</th><th>Rate</th><th>Amount</th></tr></thead>
         <tbody>${itemRows}</tbody>
       </table>
       <div class="totals">
         <table>
-          <tr><td>Gross Amount</td><td>Rs ${Number(bill.gross_amount || 0).toFixed(2)}</td></tr>
-          ${bill.advance_deducted > 0 ? `<tr><td>Advance Deducted</td><td style="color:#10B981;">- Rs ${Number(bill.advance_deducted).toFixed(2)}</td></tr>` : ''}
-          <tr class="net-row"><td>Net Amount</td><td>Rs ${Number(bill.net_amount || 0).toFixed(2)}</td></tr>
-          <tr><td>Amount Paid</td><td style="color:#10B981;">Rs ${Number(bill.amount_paid || 0).toFixed(2)}</td></tr>
-          <tr class="outstanding-row"><td>Outstanding</td><td>Rs ${Number(bill.outstanding_amount || 0).toFixed(2)}</td></tr>
+          <tr><td>Gross Amount</td><td class="tar">Rs ${Number(bill.gross_amount || 0).toFixed(2)}</td></tr>
+          ${bill.advance_deducted > 0 ? `<tr><td>Advance Deducted</td><td class="tar" style="color:#10B981;">- Rs ${Number(bill.advance_deducted).toFixed(2)}</td></tr>` : ''}
+          <tr class="net-row"><td>Net Amount</td><td class="tar">Rs ${Number(bill.net_amount || 0).toFixed(2)}</td></tr>
+          <tr><td>Amount Paid</td><td class="tar" style="color:#10B981;">Rs ${Number(bill.amount_paid || 0).toFixed(2)}</td></tr>
+          <tr class="out-row"><td>Outstanding</td><td class="tar">Rs ${Number(bill.outstanding_amount || 0).toFixed(2)}</td></tr>
         </table>
       </div>
     </div>`;
@@ -224,15 +223,19 @@ function formatMultiBillPrint(bills) {
   // Group bills in pairs
   const pages = [];
   for (let i = 0; i < bills.length; i += 2) {
-    const top = bills[i];
-    const bottom = bills[i + 1] || null;
-    pages.push({ top, bottom });
+    pages.push({ top: bills[i], bottom: bills[i + 1] || null });
   }
 
   const pagesHtml = pages.map((p, idx) => `
-    <div class="page${idx < pages.length - 1 ? ' page-break' : ''}">
-      ${billHtml(p.top)}
-      ${p.bottom ? `<div class="divider"></div>${billHtml(p.bottom)}` : ''}
+    <div class="page">
+      <div class="bill-slot top">
+        <div class="bill-inner">${billHtml(p.top)}</div>
+      </div>
+      <div class="divider-line"></div>
+      ${p.bottom
+        ? `<div class="bill-slot bottom"><div class="bill-inner">${billHtml(p.bottom)}</div></div>`
+        : `<div class="bill-slot bottom"></div>`
+      }
     </div>`
   ).join('');
 
@@ -244,60 +247,86 @@ function formatMultiBillPrint(bills) {
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Manrope:wght@700;800&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; font-size: 11px; color: #1E293B; }
-    .page { padding: 20px 24px; }
-    .page-break { page-break-after: always; }
-    .bill { padding-bottom: 12px; }
-    .divider {
-      border: none;
-      border-top: 2px dashed #94A3B8;
-      margin: 14px 0;
+    body { font-family: 'Inter', sans-serif; font-size: 10px; color: #1E293B; }
+
+    /* A4 page = 297mm tall. Each bill slot = 148mm. Divider = 1mm. */
+    .page {
+      width: 210mm;
+      height: 297mm;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
     }
-    .bill-header {
+    .page:last-child { page-break-after: auto; }
+
+    .bill-slot {
+      position: absolute;
+      left: 14mm;
+      right: 14mm;
+      height: 143mm;
+      overflow: hidden;
+    }
+    .bill-slot.top    { top: 5mm; }
+    .bill-slot.bottom { top: 152mm; }
+
+    .divider-line {
+      position: absolute;
+      left: 10mm;
+      right: 10mm;
+      top: 149mm;
+      border-top: 1.5px dashed #94A3B8;
+    }
+
+    /* Bill header */
+    .bh {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      border-bottom: 2px solid #1E293B;
-      padding-bottom: 10px;
-      margin-bottom: 0;
-    }
-    .header-left { flex: 1; }
-    .company-name {
-      font-family: 'Manrope', sans-serif;
-      font-weight: 800;
-      font-size: 15px;
-      text-decoration: underline;
-      margin-bottom: 3px;
-    }
-    .company-info { font-size: 9px; line-height: 1.55; }
-    .company-info div { margin-bottom: 1px; }
-    .header-right { text-align: right; flex-shrink: 0; }
-    .invoice-title {
-      font-family: 'Manrope', sans-serif;
-      font-weight: 800;
-      font-size: 13px;
+      border-bottom: 1.5px solid #1E293B;
+      padding-bottom: 5px;
       margin-bottom: 4px;
     }
-    .invoice-meta { font-size: 9px; line-height: 1.6; }
-    .invoice-meta div { margin-bottom: 1px; }
-    table { width: 100%; border-collapse: collapse; margin: 10px 0 8px; }
+    .bh-left { flex: 1; padding-right: 8px; }
+    .co-name {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 12px;
+      text-decoration: underline;
+      margin-bottom: 2px;
+    }
+    .co-info { font-size: 7.5px; line-height: 1.4; }
+    .bh-right { text-align: right; flex-shrink: 0; }
+    .inv-title {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 11px;
+      margin-bottom: 2px;
+    }
+    .inv-meta { font-size: 7.5px; line-height: 1.45; }
+
+    /* Items table */
+    table { width: 100%; border-collapse: collapse; margin: 4px 0 3px; }
     th {
       background: #1E293B; color: #fff;
-      padding: 5px 8px; font-size: 9px;
-      text-transform: uppercase; letter-spacing: 0.04em;
+      padding: 3px 5px; font-size: 7.5px;
+      text-transform: uppercase; letter-spacing: 0.03em;
       text-align: left;
     }
-    td { padding: 5px 8px; border-bottom: 1px solid #E2E8F0; font-size: 9px; }
+    td { padding: 2.5px 5px; border-bottom: 1px solid #E2E8F0; font-size: 7.5px; }
     tr:last-child td { border-bottom: none; }
-    .totals { margin-left: auto; width: 240px; }
+    .tar { text-align: right; }
+
+    /* Totals */
+    .totals { margin-left: auto; width: 200px; margin-top: 3px; }
     .totals table { margin: 0; }
-    .totals td { padding: 3px 8px; font-size: 9px; }
-    .totals td:last-child { text-align: right; }
+    .totals td { padding: 2px 5px; font-size: 7.5px; }
     .net-row td { font-weight: 700; border-top: 1.5px solid #1E293B; }
-    .outstanding-row td { font-weight: 700; color: #EF4444; }
+    .out-row td { font-weight: 700; color: #EF4444; }
+
     @media print {
+      @page { size: A4; margin: 0; }
       body { margin: 0; }
-      .page { padding: 14px 18px; }
+      .page { page-break-after: always; }
+      .page:last-child { page-break-after: auto; }
     }
   </style>
 </head>
