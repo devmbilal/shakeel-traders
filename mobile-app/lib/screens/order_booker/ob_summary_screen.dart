@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../config/app_theme.dart';
 import '../../models/models.dart';
 import '../../services/local_db_service.dart';
+import 'ob_order_booking_screen.dart';
 
 class OBSummaryScreen extends StatefulWidget {
   final ValueNotifier<int>? reloadNotifier;
@@ -76,7 +77,7 @@ class _OBSummaryScreenState extends State<OBSummaryScreen>
           : TabBarView(
               controller: _tabs,
               children: [
-                _OrdersTab(orders: _orders),
+                _OrdersTab(orders: _orders, onRefresh: _load),
                 _RecoveryTab(recoveries: _recoveries),
               ],
             ),
@@ -86,74 +87,162 @@ class _OBSummaryScreenState extends State<OBSummaryScreen>
 
 class _OrdersTab extends StatelessWidget {
   final List<LocalOrder> orders;
-  const _OrdersTab({required this.orders});
+  final VoidCallback onRefresh;
+  const _OrdersTab({required this.orders, required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
     if (orders.isEmpty) {
-      return _Empty(
+      return const _Empty(
           icon: Icons.receipt_long_outlined, text: 'No orders booked today');
     }
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: orders.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) {
-        final o = orders[i];
-        final isSynced = o.status == 'synced';
-        return Container(
-          padding: const EdgeInsets.all(14),
+
+    final grandTotal = orders.fold(0.0, (sum, o) => sum + o.total);
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            itemCount: orders.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (_, i) {
+              final o = orders[i];
+              final isSynced = o.status == 'synced';
+              final isPending = o.status == 'pending_sync';
+              return InkWell(
+                onTap: isPending
+                    ? () async {
+                        final shop = await LocalDbService.getShop(o.shopId);
+                        if (shop == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Shop data not found. Please sync.')),
+                          );
+                          return;
+                        }
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => OBOrderBookingScreen(
+                              shop: shop,
+                              existingOrder: o,
+                            ),
+                          ),
+                        );
+                        onRefresh();
+                      }
+                    : null,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.border),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: isSynced
+                              ? AppTheme.success.withAlpha(20)
+                              : AppTheme.warning.withAlpha(20),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          isSynced
+                              ? Icons.check_circle_rounded
+                              : Icons.pending_rounded,
+                          color: isSynced ? AppTheme.success : AppTheme.warning,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(o.shopName,
+                                style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                    color: AppTheme.textPrimary)),
+                            Text(
+                                '${o.items.length} products · ${_formatTime(o.createdAtDevice)}',
+                                style: GoogleFonts.inter(
+                                    fontSize: 11, color: AppTheme.textMuted)),
+                            Text(
+                              'Rs ${o.total.toStringAsFixed(0)}',
+                              style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.accent),
+                            ),
+                            if (o.stockCheckNote != null)
+                              Text('⚠ ${o.stockCheckNote}',
+                                  style: GoogleFonts.inter(
+                                      fontSize: 11, color: AppTheme.warning)),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _StatusBadge(
+                            label: isSynced ? 'Synced' : 'Pending',
+                            color:
+                                isSynced ? AppTheme.success : AppTheme.warning,
+                          ),
+                          if (isPending) ...[
+                            const SizedBox(height: 4),
+                            Icon(Icons.edit_rounded,
+                                size: 14, color: AppTheme.textMuted),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        // Grand total footer
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppTheme.border),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: isSynced
-                      ? AppTheme.success.withAlpha(20)
-                      : AppTheme.warning.withAlpha(20),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  isSynced ? Icons.check_circle_rounded : Icons.pending_rounded,
-                  color: isSynced ? AppTheme.success : AppTheme.warning,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(o.shopName,
-                        style: GoogleFonts.inter(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                            color: AppTheme.textPrimary)),
-                    Text(
-                        '${o.items.length} products · ${_formatTime(o.createdAtDevice)}',
-                        style: GoogleFonts.inter(
-                            fontSize: 11, color: AppTheme.textMuted)),
-                    if (o.stockCheckNote != null)
-                      Text('⚠ ${o.stockCheckNote}',
-                          style: GoogleFonts.inter(
-                              fontSize: 11, color: AppTheme.warning)),
-                  ],
-                ),
-              ),
-              _StatusBadge(
-                label: isSynced ? 'Synced' : 'Pending',
-                color: isSynced ? AppTheme.success : AppTheme.warning,
+            border: Border(top: BorderSide(color: AppTheme.border)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(10),
+                blurRadius: 4,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-        );
-      },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Grand Total (${orders.length} orders)',
+                  style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textSecondary)),
+              Text('Rs ${grandTotal.toStringAsFixed(0)}',
+                  style: GoogleFonts.manrope(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.accent)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -173,7 +262,7 @@ class _RecoveryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (recoveries.isEmpty) {
-      return _Empty(
+      return const _Empty(
           icon: Icons.payments_outlined, text: 'No recovery bills today');
     }
     return ListView.separated(

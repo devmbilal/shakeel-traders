@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../config/app_theme.dart';
 import '../../models/models.dart';
 import '../../services/local_db_service.dart';
@@ -31,11 +32,12 @@ class _OBRoutesScreenState extends State<OBRoutesScreen> {
 
   Future<void> _load() async {
     final routes = await LocalDbService.getRoutes();
-    if (mounted)
+    if (mounted) {
       setState(() {
         _routes = routes;
         _loading = false;
       });
+    }
   }
 
   @override
@@ -53,7 +55,7 @@ class _OBRoutesScreenState extends State<OBRoutesScreen> {
           ? const Center(
               child: CircularProgressIndicator(color: AppTheme.accent))
           : _routes.isEmpty
-              ? _EmptyState(
+              ? const _EmptyState(
                   icon: Icons.map_outlined,
                   title: 'No Routes Assigned',
                   subtitle: 'Do a morning sync to download today\'s routes.',
@@ -99,11 +101,12 @@ class _RouteCardState extends State<_RouteCard> {
   Future<void> _load() async {
     final shops = await LocalDbService.getShopsByRoute(widget.route.id);
     final rec = shops.where((s) => s.hasRecoveryBill).length;
-    if (mounted)
+    if (mounted) {
       setState(() {
         _shopCount = shops.length;
         _recoveryCount = rec;
       });
+    }
   }
 
   @override
@@ -164,6 +167,9 @@ class _RouteCardState extends State<_RouteCard> {
   }
 }
 
+// ── Shop filter enum ──────────────────────────────────────────────────────────
+enum _ShopFilter { all, remaining, orderBooked }
+
 class _ShopsScreen extends StatefulWidget {
   final LocalRoute route;
   const _ShopsScreen({required this.route});
@@ -174,14 +180,16 @@ class _ShopsScreen extends StatefulWidget {
 class _ShopsScreenState extends State<_ShopsScreen> {
   List<LocalShop> _shops = [];
   List<LocalShop> _filtered = [];
+  Set<int> _bookedShopIds = {};
   bool _loading = true;
   final _searchCtrl = TextEditingController();
+  _ShopFilter _activeFilter = _ShopFilter.all;
 
   @override
   void initState() {
     super.initState();
     _load();
-    _searchCtrl.addListener(_filter);
+    _searchCtrl.addListener(_applyFilter);
   }
 
   @override
@@ -191,26 +199,42 @@ class _ShopsScreenState extends State<_ShopsScreen> {
   }
 
   Future<void> _load() async {
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
     final shops = await LocalDbService.getShopsByRoute(widget.route.id);
-    if (mounted)
+    final bookedIds =
+        await LocalDbService.getBookedShopIds(widget.route.id, today);
+    if (mounted) {
       setState(() {
         _shops = shops;
-        _filtered = shops;
+        _bookedShopIds = bookedIds;
         _loading = false;
       });
+      _applyFilter();
+    }
   }
 
-  void _filter() {
+  void _applyFilter() {
     final q = _searchCtrl.text.toLowerCase();
-    setState(() {
-      _filtered = q.isEmpty
-          ? _shops
-          : _shops
-              .where((s) =>
-                  s.name.toLowerCase().contains(q) ||
-                  (s.ownerName?.toLowerCase().contains(q) ?? false))
-              .toList();
-    });
+    List<LocalShop> result = q.isEmpty
+        ? List.of(_shops)
+        : _shops
+            .where((s) =>
+                s.name.toLowerCase().contains(q) ||
+                (s.ownerName?.toLowerCase().contains(q) ?? false))
+            .toList();
+
+    switch (_activeFilter) {
+      case _ShopFilter.remaining:
+        result = result.where((s) => !_bookedShopIds.contains(s.id)).toList();
+        break;
+      case _ShopFilter.orderBooked:
+        result = result.where((s) => _bookedShopIds.contains(s.id)).toList();
+        break;
+      case _ShopFilter.all:
+        break;
+    }
+
+    setState(() => _filtered = result);
   }
 
   @override
@@ -225,8 +249,9 @@ class _ShopsScreenState extends State<_ShopsScreen> {
       ),
       body: Column(
         children: [
+          // Search bar
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
@@ -246,12 +271,50 @@ class _ShopsScreenState extends State<_ShopsScreen> {
               ),
             ),
           ),
+          // Filter toggle
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Row(
+              children: [
+                _FilterChip(
+                  label: 'All',
+                  selected: _activeFilter == _ShopFilter.all,
+                  color: AppTheme.accent,
+                  onTap: () {
+                    setState(() => _activeFilter = _ShopFilter.all);
+                    _applyFilter();
+                  },
+                ),
+                const SizedBox(width: 8),
+                _FilterChip(
+                  label: 'Remaining',
+                  selected: _activeFilter == _ShopFilter.remaining,
+                  color: Colors.red.shade400,
+                  onTap: () {
+                    setState(() => _activeFilter = _ShopFilter.remaining);
+                    _applyFilter();
+                  },
+                ),
+                const SizedBox(width: 8),
+                _FilterChip(
+                  label: 'Order Booked',
+                  selected: _activeFilter == _ShopFilter.orderBooked,
+                  color: Colors.green.shade500,
+                  onTap: () {
+                    setState(() => _activeFilter = _ShopFilter.orderBooked);
+                    _applyFilter();
+                  },
+                ),
+              ],
+            ),
+          ),
+          // Shop list
           Expanded(
             child: _loading
                 ? const Center(
                     child: CircularProgressIndicator(color: AppTheme.accent))
                 : _filtered.isEmpty
-                    ? _EmptyState(
+                    ? const _EmptyState(
                         icon: Icons.store_outlined,
                         title: 'No Shops',
                         subtitle: 'No shops found in this route.')
@@ -259,15 +322,23 @@ class _ShopsScreenState extends State<_ShopsScreen> {
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                         itemCount: _filtered.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 8),
-                        itemBuilder: (_, i) => _ShopTile(
-                          shop: _filtered[i],
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) =>
-                                    OBOrderBookingScreen(shop: _filtered[i])),
-                          ),
-                        ),
+                        itemBuilder: (_, i) {
+                          final shop = _filtered[i];
+                          return _ShopTile(
+                            shop: shop,
+                            isBooked: _bookedShopIds.contains(shop.id),
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        OBOrderBookingScreen(shop: shop)),
+                              );
+                              // Refresh booked status after returning
+                              _load();
+                            },
+                          );
+                        },
                       ),
           ),
         ],
@@ -276,13 +347,52 @@ class _ShopsScreenState extends State<_ShopsScreen> {
   }
 }
 
-class _ShopTile extends StatelessWidget {
-  final LocalShop shop;
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Color color;
   final VoidCallback onTap;
-  const _ShopTile({required this.shop, required this.onTap});
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? color : color.withAlpha(20),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color, width: selected ? 0 : 1),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : color,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShopTile extends StatelessWidget {
+  final LocalShop shop;
+  final bool isBooked;
+  final VoidCallback onTap;
+  const _ShopTile(
+      {required this.shop, required this.isBooked, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final isWholesale = shop.shopType == 'wholesale';
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
@@ -291,7 +401,10 @@ class _ShopTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppTheme.border),
+          border: Border.all(
+            color: isBooked ? Colors.green.shade400 : Colors.red.shade300,
+            width: 1.5,
+          ),
         ),
         child: Row(
           children: [
@@ -299,11 +412,15 @@ class _ShopTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppTheme.bg,
+                color: isBooked ? Colors.green.shade50 : Colors.red.shade50,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.store_rounded,
-                  color: AppTheme.textSecondary, size: 20),
+              child: Icon(
+                isBooked ? Icons.check_circle_rounded : Icons.store_rounded,
+                color:
+                    isBooked ? Colors.green.shade500 : AppTheme.textSecondary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -322,7 +439,31 @@ class _ShopTile extends StatelessWidget {
                 ],
               ),
             ),
-            if (shop.hasRecoveryBill)
+            // Shop type badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: isWholesale
+                    ? AppTheme.accent.withAlpha(25)
+                    : Colors.blueGrey.withAlpha(25),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isWholesale
+                      ? AppTheme.accent.withAlpha(80)
+                      : Colors.blueGrey.withAlpha(80),
+                ),
+              ),
+              child: Text(
+                isWholesale ? 'Wholesale' : 'Retail',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: isWholesale ? AppTheme.accent : Colors.blueGrey,
+                ),
+              ),
+            ),
+            if (shop.hasRecoveryBill) ...[
+              const SizedBox(width: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -336,6 +477,7 @@ class _ShopTile extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: AppTheme.warning)),
               ),
+            ],
             const SizedBox(width: 8),
             const Icon(Icons.arrow_forward_ios_rounded,
                 size: 13, color: AppTheme.textMuted),

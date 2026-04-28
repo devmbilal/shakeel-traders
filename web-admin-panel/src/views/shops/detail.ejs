@@ -75,16 +75,16 @@
             </div>
 
             <div id="priceRangeFields" class="col-12 row g-3"
-                 style="display: <%= (!isNew && shop.price_edit_allowed) ? 'flex' : 'none' %> !important">
+                 style="display: <%= (!isNew && shop.price_edit_allowed) ? 'flex' : 'none' %>">
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Min Price % (e.g. -10 for -10%)</label>
-                <input type="number" name="price_min_pct" class="form-control" step="0.01"
-                       value="<%= isNew ? '' : (shop.price_min_pct || '') %>">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold">Max Price % (e.g. 5 for +5%)</label>
-                <input type="number" name="price_max_pct" class="form-control" step="0.01"
-                       value="<%= isNew ? '' : (shop.price_max_pct || '') %>">
+                <label class="form-label fw-semibold">Max Discount % <span class="text-muted fw-normal">(e.g. 5 = up to 5% off)</span></label>
+                <input type="number" id="priceMaxDiscountInput" name="price_max_discount_pct"
+                       class="form-control" step="0.01" min="0" max="100"
+                       placeholder="e.g. 5"
+                       value="<%= isNew ? '' : (shop.price_max_discount_pct || '') %>">
+                <div class="form-text text-muted">
+                  Order booker can give a discount of 0% to this %. Price cannot go above base price.
+                </div>
               </div>
             </div>
           </div>
@@ -104,6 +104,10 @@
 
 <script>
   function togglePriceFields(show) {
-    document.getElementById('priceRangeFields').style.display = show ? 'flex' : 'none';
+    const wrapper = document.getElementById('priceRangeFields');
+    const input = document.getElementById('priceMaxDiscountInput');
+    wrapper.style.display = show ? 'flex' : 'none';
+    // Clear value when hiding so 0 is not accidentally submitted
+    if (!show) input.value = '';
   }
 </script>

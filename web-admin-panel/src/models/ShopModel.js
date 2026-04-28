@@ -116,8 +116,8 @@ const ShopModel = {
     const result = await query(`
       INSERT INTO shops
         (name, owner_name, phone, address, route_id, shop_type,
-         price_edit_allowed, price_min_pct, price_max_pct)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+         price_edit_allowed, price_max_discount_pct)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       data.name,
       data.owner_name   || null,
@@ -126,18 +126,18 @@ const ShopModel = {
       data.route_id,
       data.shop_type    || 'retail',
       data.price_edit_allowed ? 1 : 0,
-      data.price_min_pct != null && data.price_min_pct !== '' ? data.price_min_pct : null,
-      data.price_max_pct != null && data.price_max_pct !== '' ? data.price_max_pct : null,
+      data.price_max_discount_pct != null && data.price_max_discount_pct !== '' ? data.price_max_discount_pct : 0,
     ]);
     return result.insertId;
   },
 
   async update(id, data) {
+    const discount = parseFloat(data.price_max_discount_pct);
     await query(`
       UPDATE shops SET
         name = ?, owner_name = ?, phone = ?, address = ?,
         route_id = ?, shop_type = ?,
-        price_edit_allowed = ?, price_min_pct = ?, price_max_pct = ?
+        price_edit_allowed = ?, price_max_discount_pct = ?
       WHERE id = ?
     `, [
       data.name,
@@ -147,8 +147,7 @@ const ShopModel = {
       data.route_id,
       data.shop_type    || 'retail',
       data.price_edit_allowed ? 1 : 0,
-      data.price_min_pct != null && data.price_min_pct !== '' ? data.price_min_pct : null,
-      data.price_max_pct != null && data.price_max_pct !== '' ? data.price_max_pct : null,
+      isNaN(discount) ? 0 : discount,
       id,
     ]);
   },

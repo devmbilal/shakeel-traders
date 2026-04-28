@@ -14,9 +14,36 @@ class LocalDbService {
     final dbPath = await getDatabasesPath();
     return openDatabase(
       join(dbPath, 'shakeel_traders.db'),
-      version: 1,
+      version: 3,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
+  }
+
+  static Future<void> _onUpgrade(
+      Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add units_per_carton to existing local_order_items rows
+      await db.execute(
+          'ALTER TABLE local_order_items ADD COLUMN units_per_carton INTEGER DEFAULT 1');
+      // Create shop_price_history table for price history tracking
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS shop_price_history (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          shop_id INTEGER NOT NULL, product_id INTEGER NOT NULL,
+          unit_price REAL NOT NULL, order_date TEXT NOT NULL
+        )
+      ''');
+      await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_sph ON shop_price_history (shop_id, product_id, order_date)');
+    }
+    if (oldVersion < 3) {
+      // Replace price_min_pct + price_max_pct with single price_max_discount_pct
+      // SQLite doesn't support DROP COLUMN, so we add the new column and keep old ones
+      // (they will be ignored by the model). Fresh installs use the new schema.
+      await db.execute(
+          'ALTER TABLE local_shops ADD COLUMN price_max_discount_pct REAL DEFAULT 0');
+    }
   }
 
   static Future<void> _onCreate(Database db, int version) async {
@@ -31,7 +58,7 @@ class LocalDbService {
         name TEXT NOT NULL, owner_name TEXT, phone TEXT, address TEXT,
         shop_type TEXT DEFAULT 'retail',
         price_edit_allowed INTEGER DEFAULT 0,
-        price_min_pct REAL DEFAULT 0, price_max_pct REAL DEFAULT 0,
+        price_max_discount_pct REAL DEFAULT 0,
         outstanding_balance REAL DEFAULT 0,
         has_recovery_bill INTEGER DEFAULT 0
       )
@@ -67,7 +94,7 @@ class LocalDbService {
         order_local_id TEXT NOT NULL, product_id INTEGER NOT NULL,
         product_name TEXT NOT NULL, sku_code TEXT NOT NULL,
         cartons INTEGER DEFAULT 0, loose_units INTEGER DEFAULT 0,
-        unit_price REAL NOT NULL
+        unit_price REAL NOT NULL, units_per_carton INTEGER DEFAULT 1
       )
     ''');
     await db.execute('''
@@ -110,6 +137,15 @@ class LocalDbService {
         returned_cartons INTEGER DEFAULT 0, returned_loose INTEGER DEFAULT 0
       )
     ''');
+    await db.execute('''
+      CREATE TABLE shop_price_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        shop_id INTEGER NOT NULL, product_id INTEGER NOT NULL,
+        unit_price REAL NOT NULL, order_date TEXT NOT NULL
+      )
+    ''');
+    await db.execute(
+        'CREATE INDEX idx_sph ON shop_price_history (shop_id, product_id, order_date)');
   }
 
   // ── Routes ──────────────────────────────────────────────────────────────────
@@ -206,15 +242,46 @@ class LocalDbService {
     return (rows.first['last_price'] as num).toDouble();
   }
 
+  static Future<List<double>> getLastThreePrices(
+      int shopId, int productId) async {
+    final d = await db;
+    final rows = await d.rawQuery(
+      'SELECT unit_price FROM shop_price_history '
+      'WHERE shop_id = ? AND product_id = ? '
+      'ORDER BY order_date DESC LIMIT 3',
+      [shopId, productId],
+    );
+    return rows.map((r) => (r['unit_price'] as num).toDouble()).toList();
+  }
+
   // ── Orders ───────────────────────────────────────────────────────────────────
   static Future<void> saveOrder(LocalOrder order) async {
     final d = await db;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
     await d.insert('local_orders', order.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
     await d.delete('local_order_items',
         where: 'order_local_id = ?', whereArgs: [order.localId]);
     for (final item in order.items) {
       await d.insert('local_order_items', item.toMap());
+      // Write price history row
+      await d.insert('shop_price_history', {
+        'shop_id': order.shopId,
+        'product_id': item.productId,
+        'unit_price': item.unitPrice,
+        'order_date': today,
+      });
+      // Prune to keep only the 3 most recent rows per (shop_id, product_id)
+      await d.rawDelete(
+        'DELETE FROM shop_price_history '
+        'WHERE shop_id = ? AND product_id = ? '
+        'AND id NOT IN ('
+        '  SELECT id FROM shop_price_history '
+        '  WHERE shop_id = ? AND product_id = ? '
+        '  ORDER BY order_date DESC LIMIT 3'
+        ')',
+        [order.shopId, item.productId, order.shopId, item.productId],
+      );
     }
   }
 
@@ -257,6 +324,16 @@ class LocalDbService {
     final d = await db;
     await d.update('local_orders', {'status': status},
         where: 'local_id = ?', whereArgs: [localId]);
+  }
+
+  static Future<Set<int>> getBookedShopIds(int routeId, String today) async {
+    final d = await db;
+    final rows = await d.rawQuery(
+      'SELECT DISTINCT shop_id FROM local_orders '
+      'WHERE route_id = ? AND created_at_device LIKE ?',
+      [routeId, '$today%'],
+    );
+    return rows.map((r) => (r['shop_id'] as int)).toSet();
   }
 
   // ── Recovery Assignments ─────────────────────────────────────────────────────

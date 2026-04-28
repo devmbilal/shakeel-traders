@@ -24,7 +24,7 @@ class SyncService {
       const [shopRows] = await pool.query(
         `SELECT s.id, s.name AS shop_name, s.owner_name, s.phone, s.address,
                 s.route_id, s.shop_type, s.price_edit_allowed,
-                s.price_min_pct, s.price_max_pct,
+                s.price_max_discount_pct,
                 COALESCE((
                   SELECT SUM(sa.remaining_balance)
                   FROM shop_advances sa

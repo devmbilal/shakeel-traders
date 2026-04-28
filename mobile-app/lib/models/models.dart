@@ -46,8 +46,9 @@ class LocalShop {
   final String? address;
   final String shopType;
   final bool priceEditAllowed;
-  final double priceMinPct;
-  final double priceMaxPct;
+
+  /// Maximum discount percentage allowed (0 to N%). Price must be >= basePrice * (1 - maxDiscountPct/100).
+  final double priceMaxDiscountPct;
   final double outstandingBalance;
   bool hasRecoveryBill;
 
@@ -60,8 +61,7 @@ class LocalShop {
     this.address,
     this.shopType = 'retail',
     this.priceEditAllowed = false,
-    this.priceMinPct = 0,
-    this.priceMaxPct = 0,
+    this.priceMaxDiscountPct = 0,
     this.outstandingBalance = 0,
     this.hasRecoveryBill = false,
   });
@@ -75,8 +75,9 @@ class LocalShop {
         address: m['address'] as String?,
         shopType: (m['shop_type'] as String?) ?? 'retail',
         priceEditAllowed: _toBool(m['price_edit_allowed']),
-        priceMinPct: _toDouble(m['price_min_pct']),
-        priceMaxPct: _toDouble(m['price_max_pct']),
+        priceMaxDiscountPct: _toDouble(m['price_max_discount_pct'] ??
+            // backward-compat: if old min/max fields exist, derive from them
+            m['price_max_pct']),
         outstandingBalance: _toDouble(m['outstanding_balance']),
         hasRecoveryBill: _toBool(m['has_recovery_bill']),
       );
@@ -90,8 +91,7 @@ class LocalShop {
         'address': address,
         'shop_type': shopType,
         'price_edit_allowed': priceEditAllowed ? 1 : 0,
-        'price_min_pct': priceMinPct,
-        'price_max_pct': priceMaxPct,
+        'price_max_discount_pct': priceMaxDiscountPct,
         'outstanding_balance': outstandingBalance,
         'has_recovery_bill': hasRecoveryBill ? 1 : 0,
       };
@@ -176,6 +176,36 @@ class ShopLastPrice {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+class ShopPriceHistory {
+  final int shopId;
+  final int productId;
+  final double unitPrice;
+  final String orderDate;
+
+  const ShopPriceHistory({
+    required this.shopId,
+    required this.productId,
+    required this.unitPrice,
+    required this.orderDate,
+  });
+
+  factory ShopPriceHistory.fromMap(Map<String, dynamic> m) => ShopPriceHistory(
+        shopId: _toInt(m['shop_id']),
+        productId: _toInt(m['product_id']),
+        unitPrice: _toDouble(m['unit_price']),
+        orderDate: (m['order_date'] ?? '') as String,
+      );
+
+  Map<String, dynamic> toMap() => {
+        'shop_id': shopId,
+        'product_id': productId,
+        'unit_price': unitPrice,
+        'order_date': orderDate,
+      };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 class LocalOrderItem {
   final String orderLocalId;
   final int productId;
@@ -184,6 +214,7 @@ class LocalOrderItem {
   int cartons;
   int looseUnits;
   double unitPrice;
+  final int unitsPerCarton;
 
   LocalOrderItem({
     required this.orderLocalId,
@@ -193,6 +224,7 @@ class LocalOrderItem {
     this.cartons = 0,
     this.looseUnits = 0,
     required this.unitPrice,
+    this.unitsPerCarton = 1,
   });
 
   factory LocalOrderItem.fromMap(Map<String, dynamic> m) => LocalOrderItem(
@@ -203,6 +235,9 @@ class LocalOrderItem {
         cartons: _toInt(m['cartons']),
         looseUnits: _toInt(m['loose_units']),
         unitPrice: _toDouble(m['unit_price']),
+        unitsPerCarton: _toInt(m['units_per_carton']) == 0
+            ? 1
+            : _toInt(m['units_per_carton']),
       );
 
   Map<String, dynamic> toMap() => {
@@ -213,6 +248,7 @@ class LocalOrderItem {
         'cartons': cartons,
         'loose_units': looseUnits,
         'unit_price': unitPrice,
+        'units_per_carton': unitsPerCarton,
       };
 }
 
@@ -263,7 +299,7 @@ class LocalOrder {
   double get total => items.fold(
       0,
       (sum, i) =>
-          sum + (i.cartons * i.unitPrice) + (i.looseUnits * i.unitPrice));
+          sum + (i.cartons * i.unitsPerCarton + i.looseUnits) * i.unitPrice);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

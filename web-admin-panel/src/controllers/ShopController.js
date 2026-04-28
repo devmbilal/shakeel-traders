@@ -90,6 +90,8 @@ const ShopController = {
   // POST /shops
   async create(req, res) {
     try {
+      const rawDiscount = req.body.price_max_discount_pct;
+      const parsedDiscount = parseFloat(rawDiscount);
       const data = {
         name:               req.body.name,
         owner_name:         req.body.owner_name,
@@ -98,8 +100,7 @@ const ShopController = {
         route_id:           req.body.route_id,
         shop_type:          req.body.shop_type || 'retail',
         price_edit_allowed: req.body.price_edit_allowed ? 1 : 0,
-        price_min_pct:      req.body.price_min_pct || null,
-        price_max_pct:      req.body.price_max_pct || null,
+        price_max_discount_pct: isNaN(parsedDiscount) ? 0 : parsedDiscount,
       };
       const id = await ShopModel.create(data);
       req.flash('success', `Shop "${data.name}" created.`);
@@ -160,6 +161,8 @@ const ShopController = {
   // POST /shops/:id
   async update(req, res) {
     try {
+      const rawDiscount = req.body.price_max_discount_pct;
+      const parsedDiscount = parseFloat(rawDiscount);
       const data = {
         name:               req.body.name,
         owner_name:         req.body.owner_name,
@@ -168,8 +171,7 @@ const ShopController = {
         route_id:           req.body.route_id,
         shop_type:          req.body.shop_type || 'retail',
         price_edit_allowed: req.body.price_edit_allowed ? 1 : 0,
-        price_min_pct:      req.body.price_min_pct || null,
-        price_max_pct:      req.body.price_max_pct || null,
+        price_max_discount_pct: isNaN(parsedDiscount) ? 0 : parsedDiscount,
       };
       await ShopModel.update(req.params.id, data);
       req.flash('success', 'Shop updated successfully.');

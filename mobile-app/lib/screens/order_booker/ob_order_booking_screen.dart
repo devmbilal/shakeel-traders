@@ -8,7 +8,9 @@ import '../../services/local_db_service.dart';
 
 class OBOrderBookingScreen extends StatefulWidget {
   final LocalShop shop;
-  const OBOrderBookingScreen({super.key, required this.shop});
+  final LocalOrder? existingOrder; // null = new order, non-null = edit mode
+  const OBOrderBookingScreen(
+      {super.key, required this.shop, this.existingOrder});
 
   @override
   State<OBOrderBookingScreen> createState() => _OBOrderBookingScreenState();
@@ -18,12 +20,16 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
   List<LocalProduct> _allProducts = [];
   List<LocalProduct> _filtered = [];
   final Map<int, _OrderEntry> _entries = {};
+  Map<int, List<double>> _priceHistory = {};
   final _searchCtrl = TextEditingController();
   bool _loading = true;
+  late String _localId;
 
   @override
   void initState() {
     super.initState();
+    // Reuse existing localId in edit mode, generate new one for new orders
+    _localId = widget.existingOrder?.localId ?? const Uuid().v4();
     _load();
     _searchCtrl.addListener(_filter);
   }
@@ -36,10 +42,35 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
 
   Future<void> _load() async {
     final products = await LocalDbService.getProducts();
+
+    // Pre-populate entries from existing order (edit mode)
+    if (widget.existingOrder != null) {
+      for (final item in widget.existingOrder!.items) {
+        _entries[item.productId] = _OrderEntry(
+          cartons: item.cartons,
+          loose: item.looseUnits,
+          price: item.unitPrice,
+        );
+      }
+    }
+
+    // Load price history for price-editable shops
+    final history = <int, List<double>>{};
+    if (widget.shop.priceEditAllowed) {
+      for (final p in products) {
+        final prices =
+            await LocalDbService.getLastThreePrices(widget.shop.id, p.id);
+        if (prices.isNotEmpty) {
+          history[p.id] = prices;
+        }
+      }
+    }
+
     if (mounted) {
       setState(() {
         _allProducts = products;
         _filtered = products;
+        _priceHistory = history;
         _loading = false;
       });
     }
@@ -61,6 +92,10 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
   int get _itemCount =>
       _entries.values.where((e) => e.cartons > 0 || e.loose > 0).length;
 
+  /// Compute basePrice for a product based on shop type
+  double _basePrice(LocalProduct p) =>
+      widget.shop.shopType == 'wholesale' ? p.wholesalePrice : p.retailPrice;
+
   Future<void> _saveOrder() async {
     final activeEntries = _entries.entries
         .where((e) => e.value.cartons > 0 || e.value.loose > 0)
@@ -73,28 +108,28 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
       return;
     }
 
-    final localId = const Uuid().v4();
     final now = DateTime.now().toIso8601String();
 
     final items = activeEntries.map((e) {
       final product = _allProducts.firstWhere((p) => p.id == e.key);
       return LocalOrderItem(
-        orderLocalId: localId,
+        orderLocalId: _localId,
         productId: product.id,
         productName: product.name,
         skuCode: product.skuCode,
         cartons: e.value.cartons,
         looseUnits: e.value.loose,
         unitPrice: e.value.price,
+        unitsPerCarton: product.unitsPerCarton,
       );
     }).toList();
 
     final order = LocalOrder(
-      localId: localId,
+      localId: _localId,
       shopId: widget.shop.id,
       routeId: widget.shop.routeId,
       shopName: widget.shop.name,
-      createdAtDevice: now,
+      createdAtDevice: widget.existingOrder?.createdAtDevice ?? now,
       items: items,
     );
 
@@ -103,7 +138,9 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Order saved — ${items.length} products'),
+          content: Text(widget.existingOrder != null
+              ? 'Order updated — ${items.length} products'
+              : 'Order saved — ${items.length} products'),
           backgroundColor: AppTheme.success,
         ),
       );
@@ -113,6 +150,7 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWholesale = widget.shop.shopType == 'wholesale';
     return Scaffold(
       backgroundColor: AppTheme.bg,
       appBar: AppBar(
@@ -124,8 +162,34 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w700)),
-            Text('Order Booking',
-                style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+            Row(
+              children: [
+                Text(
+                  widget.existingOrder != null ? 'Edit Order' : 'Order Booking',
+                  style: GoogleFonts.inter(color: Colors.white60, fontSize: 11),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: isWholesale
+                        ? Colors.amber.withAlpha(60)
+                        : Colors.white.withAlpha(40),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    isWholesale ? 'Wholesale' : 'Retail',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color:
+                          isWholesale ? Colors.amber.shade200 : Colors.white70,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
         backgroundColor: AppTheme.primary,
@@ -183,15 +247,16 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
                         separatorBuilder: (_, __) => const SizedBox(height: 8),
                         itemBuilder: (_, i) {
                           final p = _filtered[i];
-                          final entry = _entries[p.id] ??
-                              _OrderEntry(price: p.retailPrice);
+                          final basePrice = _basePrice(p);
+                          final entry =
+                              _entries[p.id] ?? _OrderEntry(price: basePrice);
                           return _ProductRow(
                             product: p,
                             entry: entry,
-                            shopLastPrice: null, // loaded lazily
+                            basePrice: basePrice,
+                            priceHistory: _priceHistory[p.id] ?? [],
                             shopPriceEditAllowed: widget.shop.priceEditAllowed,
-                            shopMinPct: widget.shop.priceMinPct,
-                            shopMaxPct: widget.shop.priceMaxPct,
+                            shopMaxDiscountPct: widget.shop.priceMaxDiscountPct,
                             onChanged: (e) {
                               setState(() => _entries[p.id] = e);
                             },
@@ -208,11 +273,15 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _saveOrder,
                   icon: const Icon(Icons.save_rounded, color: Colors.white),
-                  label: Text('Save Order ($_itemCount products)',
-                      style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                          color: Colors.white)),
+                  label: Text(
+                    widget.existingOrder != null
+                        ? 'Update Order ($_itemCount products)'
+                        : 'Save Order ($_itemCount products)',
+                    style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: Colors.white),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.success,
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -335,11 +404,15 @@ class _OBOrderBookingScreenState extends State<OBOrderBookingScreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text('Confirm & Save Order',
-                      style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: Colors.white)),
+                  child: Text(
+                    widget.existingOrder != null
+                        ? 'Confirm & Update Order'
+                        : 'Confirm & Save Order',
+                    style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: Colors.white),
+                  ),
                 ),
               ),
             ),
@@ -365,19 +438,21 @@ class _OrderEntry {
 class _ProductRow extends StatefulWidget {
   final LocalProduct product;
   final _OrderEntry entry;
-  final double? shopLastPrice;
+  final double basePrice;
+  final List<double> priceHistory;
   final bool shopPriceEditAllowed;
-  final double shopMinPct;
-  final double shopMaxPct;
+
+  /// Maximum discount % allowed (0 to N). Price must be >= basePrice * (1 - maxDiscountPct/100).
+  final double shopMaxDiscountPct;
   final ValueChanged<_OrderEntry> onChanged;
 
   const _ProductRow({
     required this.product,
     required this.entry,
-    required this.shopLastPrice,
+    required this.basePrice,
+    required this.priceHistory,
     required this.shopPriceEditAllowed,
-    required this.shopMinPct,
-    required this.shopMaxPct,
+    required this.shopMaxDiscountPct,
     required this.onChanged,
   });
 
@@ -390,6 +465,8 @@ class _ProductRowState extends State<_ProductRow> {
   late TextEditingController _looseCtrl;
   late TextEditingController _priceCtrl;
   bool _expanded = false;
+  bool _priceError = false;
+  bool _snackbarPending = false;
 
   @override
   void initState() {
@@ -412,11 +489,58 @@ class _ProductRowState extends State<_ProductRow> {
 
   bool get _hasQty => widget.entry.cartons > 0 || widget.entry.loose > 0;
 
+  double get _minAllowed =>
+      widget.basePrice * (1 - widget.shopMaxDiscountPct / 100);
+
+  void _showSnackbar(String message, {Color? color}) {
+    if (_snackbarPending) return;
+    _snackbarPending = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _snackbarPending = false;
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(
+            content: Text(message),
+            backgroundColor: color,
+            duration: const Duration(seconds: 3),
+          ));
+      }
+    });
+  }
+
   void _update() {
     final c = int.tryParse(_cartonsCtrl.text) ?? 0;
     final l = int.tryParse(_looseCtrl.text) ?? 0;
-    final p = double.tryParse(_priceCtrl.text) ?? widget.product.retailPrice;
-    widget.onChanged(widget.entry.copyWith(cartons: c, loose: l, price: p));
+    double p = double.tryParse(_priceCtrl.text) ?? widget.basePrice;
+
+    bool hasError = false;
+
+    if (widget.shopPriceEditAllowed) {
+      final minAllowed = _minAllowed;
+      if (p < minAllowed) {
+        hasError = true;
+        _showSnackbar(
+          'Price too low. Max discount is ${widget.shopMaxDiscountPct.toStringAsFixed(0)}% '
+          '(min Rs ${minAllowed.toStringAsFixed(0)})',
+          color: Colors.red.shade600,
+        );
+      } else if (p > widget.basePrice) {
+        p = widget.basePrice;
+        _priceCtrl.text = p.toStringAsFixed(0);
+        _showSnackbar(
+            'Price cannot exceed base price (Rs ${widget.basePrice.toStringAsFixed(0)})');
+      }
+    }
+
+    setState(() => _priceError = hasError);
+
+    if (!hasError) {
+      widget.onChanged(widget.entry.copyWith(cartons: c, loose: l, price: p));
+    } else {
+      widget.onChanged(widget.entry
+          .copyWith(cartons: c, loose: l, price: widget.entry.price));
+    }
   }
 
   @override
@@ -426,8 +550,12 @@ class _ProductRowState extends State<_ProductRow> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: _hasQty ? AppTheme.accent : AppTheme.border,
-          width: _hasQty ? 1.5 : 1,
+          color: _priceError
+              ? Colors.red.shade400
+              : _hasQty
+                  ? AppTheme.accent
+                  : AppTheme.border,
+          width: (_priceError || _hasQty) ? 1.5 : 1,
         ),
       ),
       child: Column(
@@ -455,8 +583,7 @@ class _ProductRowState extends State<_ProductRow> {
                                 style: GoogleFonts.inter(
                                     fontSize: 11, color: AppTheme.textMuted)),
                             const SizedBox(width: 8),
-                            Text(
-                                'Rs ${widget.product.retailPrice.toStringAsFixed(0)}',
+                            Text('Rs ${widget.basePrice.toStringAsFixed(0)}',
                                 style: GoogleFonts.inter(
                                     fontSize: 11,
                                     color: AppTheme.accent,
@@ -471,7 +598,23 @@ class _ProductRowState extends State<_ProductRow> {
                       ],
                     ),
                   ),
-                  if (_hasQty)
+                  if (_priceError)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Price error',
+                        style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.red.shade600),
+                      ),
+                    )
+                  else if (_hasQty)
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
@@ -503,6 +646,7 @@ class _ProductRowState extends State<_ProductRow> {
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Divider(height: 1),
                   const SizedBox(height: 12),
@@ -531,19 +675,54 @@ class _ProductRowState extends State<_ProductRow> {
                           onChanged: (_) => _update(),
                           readOnly: !widget.shopPriceEditAllowed,
                           isDecimal: true,
+                          hasError: _priceError,
                         ),
                       ),
                     ],
                   ),
-                  if (widget.shopLastPrice != null) ...[
-                    const SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Last price: Rs ${widget.shopLastPrice!.toStringAsFixed(0)}',
-                        style: GoogleFonts.inter(
-                            fontSize: 11, color: AppTheme.textMuted),
-                      ),
+                  // Price history — shown only for price-editable shops
+                  if (widget.shopPriceEditAllowed &&
+                      widget.priceHistory.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text('Prev prices: ',
+                            style: GoogleFonts.inter(
+                                fontSize: 11, color: AppTheme.textMuted)),
+                        ...widget.priceHistory.map((price) => Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.accent.withAlpha(15),
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                      color: AppTheme.accent.withAlpha(50)),
+                                ),
+                                child: Text(
+                                  'Rs ${price.toStringAsFixed(0)}',
+                                  style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.accent),
+                                ),
+                              ),
+                            )),
+                      ],
+                    ),
+                  ],
+                  // Discount hint for editable shops
+                  if (widget.shopPriceEditAllowed) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Max discount: ${widget.shopMaxDiscountPct.toStringAsFixed(0)}% '
+                      '(min Rs ${_minAllowed.toStringAsFixed(0)})',
+                      style: GoogleFonts.inter(
+                          fontSize: 10,
+                          color: _priceError
+                              ? Colors.red.shade600
+                              : AppTheme.textMuted),
                     ),
                   ],
                 ],
@@ -561,6 +740,7 @@ class _QtyField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final bool readOnly;
   final bool isDecimal;
+  final bool hasError;
 
   const _QtyField({
     required this.controller,
@@ -568,6 +748,7 @@ class _QtyField extends StatelessWidget {
     required this.onChanged,
     this.readOnly = false,
     this.isDecimal = false,
+    this.hasError = false,
   });
 
   @override
@@ -586,7 +767,11 @@ class _QtyField extends StatelessWidget {
       style: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: readOnly ? AppTheme.textMuted : AppTheme.textPrimary),
+          color: hasError
+              ? Colors.red.shade600
+              : readOnly
+                  ? AppTheme.textMuted
+                  : AppTheme.textPrimary),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.inter(fontSize: 11, color: AppTheme.textMuted),
@@ -594,15 +779,19 @@ class _QtyField extends StatelessWidget {
         fillColor: readOnly ? AppTheme.bg : Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppTheme.border),
+          borderSide: BorderSide(
+              color: hasError ? Colors.red.shade400 : AppTheme.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppTheme.border),
+          borderSide: BorderSide(
+              color: hasError ? Colors.red.shade400 : AppTheme.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppTheme.accent, width: 1.5),
+          borderSide: BorderSide(
+              color: hasError ? Colors.red.shade600 : AppTheme.accent,
+              width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       ),
