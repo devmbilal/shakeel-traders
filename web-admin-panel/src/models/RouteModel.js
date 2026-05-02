@@ -55,7 +55,9 @@ const RouteModel = {
   // Shops not yet in this route (for the "add shop" dropdown)
   async getShopsNotInRoute(routeId) {
     return query(
-      'SELECT id, name FROM shops WHERE (route_id != ? OR route_id IS NULL) AND is_active = 1 ORDER BY name ASC',
+      `SELECT id, name FROM shops
+       WHERE (route_id IS NULL OR route_id != ?) AND is_active = 1
+       ORDER BY name ASC`,
       [routeId]
     );
   },
@@ -64,7 +66,10 @@ const RouteModel = {
   async searchShopsNotInRoute(routeId, term) {
     const searchPattern = `%${term}%`;
     return query(
-      'SELECT id, name, owner_name FROM shops WHERE (route_id != ? OR route_id IS NULL) AND is_active = 1 AND (name LIKE ? OR owner_name LIKE ?) ORDER BY name ASC LIMIT 20',
+      `SELECT id, name, owner_name FROM shops
+       WHERE (route_id IS NULL OR route_id != ?) AND is_active = 1
+         AND (name LIKE ? OR owner_name LIKE ?)
+       ORDER BY name ASC LIMIT 20`,
       [routeId, searchPattern, searchPattern]
     );
   },
@@ -81,9 +86,12 @@ const RouteModel = {
   },
 
   async removeShopFromRouteById(routeId, shopId) {
-    // Remove shop from route by setting route_id to NULL
-    // This allows shops to be temporarily unassigned
-    await query('UPDATE shops SET route_id = NULL WHERE id = ? AND route_id = ?', [shopId, routeId]);
+    // Set route_id to NULL — shop exists but is unassigned.
+    // Admin can reassign it to any route from Shop Management.
+    await query(
+      'UPDATE shops SET route_id = NULL WHERE id = ? AND route_id = ?',
+      [shopId, routeId]
+    );
   },
 
   // ── Route Assignments ──────────────────────────────────────────────────────

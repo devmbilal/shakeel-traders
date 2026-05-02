@@ -33,19 +33,24 @@
       </div>
     </div>
 
-    <div class="card">
+    <!-- Add Shop to Route -->
+    <div class="card" style="overflow:visible;">
       <div class="card-header">Add Shop to Route</div>
-      <div class="card-body">
-        <div class="mb-2">
-          <input 
-            type="text" 
-            id="shopSearch" 
-            class="form-control" 
-            placeholder="Search shops by name or owner..."
-            autocomplete="off"
-          >
+      <div class="card-body" style="overflow:visible;">
+        <div style="position:relative;">
+          <input type="text" id="shopSearch" class="form-control"
+                 placeholder="Type shop name to search..."
+                 autocomplete="off" oninput="shopSearchInput(this.value)">
+          <div id="shopDropdown"
+               style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+                      background:#fff;border:1px solid #CBD5E1;border-radius:8px;
+                      box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:9999;
+                      max-height:280px;overflow-y:auto;">
+          </div>
         </div>
-        <div id="searchResults" class="list-group" style="max-height: 300px; overflow-y: auto;"></div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;">
+          Shows shops not yet in this route (including unassigned shops).
+        </div>
       </div>
     </div>
   </div>
@@ -72,7 +77,7 @@
               <th>Status</th>
               <th>Actions</th>
             </tr></thead>
-            <tbody id="shopsTableBody">
+            <tbody>
               <% shops.forEach(s => { %>
               <tr>
                 <td style="padding-left:20px;">
@@ -97,159 +102,107 @@
 </div>
 
 <script>
-(function() {
-  const routeId = <%= route.id %>;
-  let debounceTimer;
+  var ROUTE_ID = <%= route.id %>;
+  var searchTimer = null;
 
-  // Debounced shop search
-  const searchInput = document.getElementById('shopSearch');
-  const searchResults = document.getElementById('searchResults');
-
-  searchInput.addEventListener('input', function() {
-    clearTimeout(debounceTimer);
-    const query = this.value.trim();
-
-    if (query.length < 2) {
-      searchResults.innerHTML = '';
+  function shopSearchInput(val) {
+    clearTimeout(searchTimer);
+    var dropdown = document.getElementById('shopDropdown');
+    if (!val || val.trim().length < 2) {
+      dropdown.style.display = 'none';
+      dropdown.innerHTML = '';
       return;
     }
-
-    debounceTimer = setTimeout(async () => {
-      try {
-        const response = await fetch(`/routes/${routeId}/shops/search?q=${encodeURIComponent(query)}`);
-        if (!response.ok) {
-          throw new Error('Search failed');
-        }
-        const shops = await response.json();
-        
-        if (shops.length === 0) {
-          searchResults.innerHTML = '<div class="list-group-item text-muted">No shops found</div>';
-        } else {
-          searchResults.innerHTML = shops.map(shop => `
-            <button 
-              class="list-group-item list-group-item-action" 
-              onclick="addShop(${shop.id}, '${shop.name.replace(/'/g, "\\'")}')">
-              <div style="font-weight:600;">${shop.name}</div>
-              <div style="font-size:0.82rem;color:var(--text-muted);">${shop.owner_name || '—'}</div>
-            </button>
-          `).join('');
-        }
-      } catch (err) {
-        console.error('Search error:', err);
-        searchResults.innerHTML = '<div class="list-group-item text-danger">Search failed. Please try again.</div>';
-      }
+    searchTimer = setTimeout(function() {
+      fetch('/routes/' + ROUTE_ID + '/shops/search?q=' + encodeURIComponent(val.trim()))
+        .then(function(r) { return r.json(); })
+        .then(function(shops) {
+          if (!shops || shops.length === 0) {
+            dropdown.innerHTML = '<div style="padding:12px 16px;color:#94A3B8;font-size:0.82rem;">No shops found</div>';
+          } else {
+            dropdown.innerHTML = shops.map(function(s) {
+              return '<div onclick="addShop(' + s.id + ')" '
+                + 'style="padding:10px 16px;cursor:pointer;border-bottom:1px solid #F1F5F9;" '
+                + 'onmouseover="this.style.background=\'#F8FAFC\'" '
+                + 'onmouseout="this.style.background=\'#fff\'">'
+                + '<div style="font-weight:600;font-size:0.85rem;">' + s.name + '</div>'
+                + '<div style="font-size:0.75rem;color:#94A3B8;">' + (s.owner_name || '—') + '</div>'
+                + '</div>';
+            }).join('');
+          }
+          dropdown.style.display = 'block';
+        })
+        .catch(function(err) {
+          console.error('Search error:', err);
+          dropdown.innerHTML = '<div style="padding:12px 16px;color:#EF4444;font-size:0.82rem;">Search failed</div>';
+          dropdown.style.display = 'block';
+        });
     }, 300);
-  });
-
-  // Add shop to route
-  window.addShop = async function(shopId, shopName) {
-    try {
-      const response = await fetch(`/routes/${routeId}/shops`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ shop_id: shopId })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add shop');
-      }
-
-      // Clear search
-      searchInput.value = '';
-      searchResults.innerHTML = '';
-
-      // Reload shop list
-      await reloadShopList();
-      
-      // Show success message (optional)
-      console.log(`Shop "${shopName}" added successfully`);
-    } catch (err) {
-      console.error('Add shop error:', err);
-      alert('Failed to add shop. Please try again.');
-    }
-  };
-
-  // Remove shop from route
-  window.removeShop = async function(shopId) {
-    if (!confirm('Remove this shop from the route?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/routes/${routeId}/shops/${shopId}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to remove shop');
-      }
-
-      // Reload shop list
-      await reloadShopList();
-      
-      console.log('Shop removed successfully');
-    } catch (err) {
-      console.error('Remove shop error:', err);
-      alert('Failed to remove shop. Please try again.');
-    }
-  };
-
-  // Reload shop list
-  async function reloadShopList() {
-    try {
-      const response = await fetch(`/routes/${routeId}/shops/list`);
-      if (!response.ok) {
-        throw new Error('Failed to load shops');
-      }
-      const shops = await response.json();
-      
-      // Update shop count
-      document.getElementById('shopCount').textContent = `${shops.length} shops`;
-      
-      // Update shop list
-      const container = document.getElementById('shopsListContainer');
-      if (shops.length === 0) {
-        container.innerHTML = `
-          <div style="text-align:center;padding:40px;color:var(--text-muted);">
-            <i class="bi bi-shop-window" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
-            No shops assigned to this route yet.
-          </div>
-        `;
-      } else {
-        container.innerHTML = `
-          <table class="table mb-0">
-            <thead><tr>
-              <th style="padding-left:20px;">Shop Name</th>
-              <th>Owner</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr></thead>
-            <tbody id="shopsTableBody">
-              ${shops.map(s => `
-                <tr>
-                  <td style="padding-left:20px;">
-                    <a href="/shops/${s.id}" style="font-weight:600;color:var(--secondary);text-decoration:none;">${s.name}</a>
-                    ${s.phone ? `<div style="font-size:0.72rem;color:var(--text-muted);">${s.phone}</div>` : ''}
-                  </td>
-                  <td style="color:var(--text-secondary);font-size:0.82rem;">${s.owner_name || '—'}</td>
-                  <td><span class="badge badge-blue" style="text-transform:capitalize;">${s.shop_type}</span></td>
-                  <td><span class="badge ${s.is_active ? 'badge-active' : 'badge-inactive'}">${s.is_active ? 'Active' : 'Inactive'}</span></td>
-                  <td>
-                    <a href="/shops/${s.id}" class="btn btn-sm btn-assign btn-icon me-1" title="View Shop"><i class="bi bi-arrow-right"></i></a>
-                    <button class="btn btn-sm btn-delete btn-icon" onclick="removeShop(${s.id})" title="Remove from Route"><i class="bi bi-x-lg"></i></button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        `;
-      }
-    } catch (err) {
-      console.error('Reload shop list error:', err);
-    }
   }
-})();
+
+  function addShop(shopId) {
+    fetch('/routes/' + ROUTE_ID + '/shops', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shop_id: shopId })
+    })
+    .then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      document.getElementById('shopSearch').value = '';
+      document.getElementById('shopDropdown').style.display = 'none';
+      document.getElementById('shopDropdown').innerHTML = '';
+      reloadShopList();
+    })
+    .catch(function(err) {
+      alert('Failed to add shop: ' + err.message);
+    });
+  }
+
+  function removeShop(shopId) {
+    if (!confirm('Remove this shop from the route? It will become unassigned.')) return;
+    fetch('/routes/' + ROUTE_ID + '/shops/' + shopId, { method: 'DELETE' })
+    .then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      reloadShopList();
+    })
+    .catch(function(err) {
+      alert('Failed to remove shop: ' + err.message);
+    });
+  }
+
+  function reloadShopList() {
+    fetch('/routes/' + ROUTE_ID + '/shops/list')
+    .then(function(r) { return r.json(); })
+    .then(function(shops) {
+      document.getElementById('shopCount').textContent = shops.length + ' shops';
+      var container = document.getElementById('shopsListContainer');
+      if (shops.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:40px;color:#94A3B8;"><i class="bi bi-shop-window" style="font-size:2rem;display:block;margin-bottom:8px;"></i>No shops assigned to this route yet.</div>';
+      } else {
+        container.innerHTML = '<table class="table mb-0"><thead><tr>'
+          + '<th style="padding-left:20px;">Shop Name</th><th>Owner</th><th>Type</th><th>Status</th><th>Actions</th>'
+          + '</tr></thead><tbody>'
+          + shops.map(function(s) {
+            return '<tr>'
+              + '<td style="padding-left:20px;"><a href="/shops/' + s.id + '" style="font-weight:600;color:var(--secondary);text-decoration:none;">' + s.name + '</a>'
+              + (s.phone ? '<div style="font-size:0.72rem;color:#94A3B8;">' + s.phone + '</div>' : '') + '</td>'
+              + '<td style="color:#64748B;font-size:0.82rem;">' + (s.owner_name || '—') + '</td>'
+              + '<td><span class="badge badge-blue" style="text-transform:capitalize;">' + s.shop_type + '</span></td>'
+              + '<td><span class="badge ' + (s.is_active ? 'badge-active' : 'badge-inactive') + '">' + (s.is_active ? 'Active' : 'Inactive') + '</span></td>'
+              + '<td><a href="/shops/' + s.id + '" class="btn btn-sm btn-assign btn-icon me-1"><i class="bi bi-arrow-right"></i></a>'
+              + '<button class="btn btn-sm btn-delete btn-icon" onclick="removeShop(' + s.id + ')"><i class="bi bi-x-lg"></i></button></td>'
+              + '</tr>';
+          }).join('')
+          + '</tbody></table>';
+      }
+    })
+    .catch(function(err) { console.error('Reload error:', err); });
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('shopSearch').contains(e.target)) {
+      document.getElementById('shopDropdown').style.display = 'none';
+    }
+  });
 </script>

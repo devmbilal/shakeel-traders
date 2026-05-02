@@ -7,16 +7,22 @@ class BackupController {
   // Backup management page
   static async index(req, res) {
     try {
+      const { query } = require('../config/db');
       const backups = await BackupService.listBackups();
-      
+
       // Format file sizes
       backups.forEach(backup => {
         backup.sizeFormatted = BackupService.formatFileSize(backup.size);
       });
 
+      // Load saved backup time
+      const [profileRows] = await query('SELECT backup_time FROM company_profile WHERE id = 1').then(r => [r]);
+      const backupTime = (profileRows && profileRows[0]?.backup_time) || '23:00';
+
       renderWithLayout(req, res, 'backup/index', {
         title: 'Database Backup',
-        backups
+        backups,
+        backupTime,
       });
     } catch (error) {
       console.error('Error loading backup page:', error);
@@ -145,19 +151,26 @@ class BackupController {
     try {
       const { backupTime } = req.body;
 
-      if (!backupTime) {
-        req.flash('error', 'Please provide a backup time');
+      if (!backupTime || !/^\d{2}:\d{2}$/.test(backupTime)) {
+        req.flash('error', 'Invalid backup time format. Use HH:MM (e.g. 23:00).');
         return res.redirect('/backup');
       }
 
-      // TODO: Save backup time to config file or database
-      // For now, just show success message
-      req.flash('success', `Backup time set to ${backupTime}. Note: Automatic backups require cron job configuration.`);
+      const { query } = require('../config/db');
+      await query(
+        'UPDATE company_profile SET backup_time = ? WHERE id = 1',
+        [backupTime]
+      );
 
+      // Reschedule the cron job with the new time
+      const CronScheduler = require('../config/cron');
+      CronScheduler.reschedule(backupTime);
+
+      req.flash('success', `Auto-backup time updated to ${backupTime}.`);
       res.redirect('/backup');
     } catch (error) {
       console.error('Error saving backup settings:', error);
-      req.flash('error', 'Failed to save settings');
+      req.flash('error', 'Failed to save settings: ' + error.message);
       res.redirect('/backup');
     }
   }

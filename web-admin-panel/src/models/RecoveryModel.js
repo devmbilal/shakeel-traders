@@ -5,7 +5,7 @@ const AuditModel = require('./AuditModel');
 
 const RecoveryModel = {
   async listOutstandingBills(filters = {}) {
-    const conditions = ['b.outstanding_amount > 0', 'b.status != \'cleared\''];
+    const conditions = ['b.outstanding_amount > 0', "b.status != 'cleared'"];
     const params = [];
 
     // Exclude bills already actively assigned
@@ -26,6 +26,64 @@ const RecoveryModel = {
        ORDER BY b.bill_date ASC`,
       params
     );
+  },
+
+  async listAssignedBills(filters = {}) {
+    const conditions = ["bra.status IN ('assigned','partially_recovered')", 'b.outstanding_amount > 0'];
+    const params = [];
+
+    if (filters.route_id)  { conditions.push('s.route_id = ?');  params.push(filters.route_id); }
+    if (filters.booker_id) { conditions.push('bra.assigned_to_booker_id = ?'); params.push(filters.booker_id); }
+
+    return query(
+      `SELECT b.*, s.name AS shop_name, r.name AS route_name,
+              bra.id AS assignment_id, bra.assigned_date, bra.status AS assignment_status,
+              u.full_name AS booker_name
+       FROM bill_recovery_assignments bra
+       JOIN bills b ON b.id = bra.bill_id
+       JOIN shops s ON s.id = b.shop_id
+       JOIN routes r ON r.id = s.route_id
+       JOIN users u ON u.id = bra.assigned_to_booker_id
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY bra.assigned_date ASC, b.bill_date ASC`,
+      params
+    );
+  },
+
+  async returnToPool(assignmentId, adminId) {
+    const conn = await getConnection();
+    try {
+      await conn.beginTransaction();
+
+      const [[assignment]] = await conn.query(
+        `SELECT * FROM bill_recovery_assignments WHERE id = ? FOR UPDATE`,
+        [assignmentId]
+      );
+      if (!assignment) throw new Error('Assignment not found');
+      if (!['assigned', 'partially_recovered'].includes(assignment.status)) {
+        throw new Error('This bill is not currently assigned');
+      }
+
+      await conn.query(
+        `UPDATE bill_recovery_assignments SET status = 'returned_to_pool', returned_at = NOW() WHERE id = ?`,
+        [assignmentId]
+      );
+
+      await AuditModel.insertLog({
+        userId: adminId,
+        action: 'RETURN_BILL_TO_POOL',
+        entityType: 'bill_recovery_assignments',
+        entityId: assignmentId,
+        newValue: { assignment_id: assignmentId, returned_by: adminId },
+      }, conn);
+
+      await conn.commit();
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
   },
 
   async assignBills(billIds, bookerId, adminId) {

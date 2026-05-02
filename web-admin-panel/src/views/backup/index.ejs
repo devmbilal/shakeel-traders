@@ -21,9 +21,9 @@
         <form method="POST" action="/backup/settings">
           <div class="mb-3">
             <label class="form-label">Automatic Backup Time</label>
-            <input type="time" name="backupTime" class="form-control" value="02:00" />
+            <input type="time" name="backupTime" class="form-control" value="<%= backupTime || '23:00' %>" />
             <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">
-              Daily automatic backup time (requires cron job configuration)
+              Daily automatic backup time (Asia/Karachi timezone)
             </div>
           </div>
           <button type="submit" class="btn btn-sm btn-dark-primary w-100">

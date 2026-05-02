@@ -13,18 +13,32 @@ const CashRecoveryController = {
   async outstanding(req, res) {
     try {
       const filters = { route_id: req.query.route_id || '', shop_id: req.query.shop_id || '' };
-      const [bills, bookers, routes, shops] = await Promise.all([
+      const assignedFilters = { route_id: req.query.route_id || '', booker_id: req.query.booker_id || '' };
+      const [bills, assignedBills, bookers, routes, shops] = await Promise.all([
         RecoveryModel.listOutstandingBills(filters),
+        RecoveryModel.listAssignedBills(assignedFilters),
         UserModel.listByRole('order_booker'),
         RouteModel.listAll(),
         ShopModel.listAll({ is_active: '1' }),
       ]);
       renderWithLayout(req, res, 'cash-recovery/outstanding', {
         title: 'Cash Recovery — Outstanding Bills',
-        bills, bookers, routes, shops, filters,
+        bills, assignedBills: assignedBills || [], bookers, routes, shops, filters,
       });
     } catch (err) {
       req.flash('error', 'Failed to load outstanding bills.'); res.redirect('/dashboard');
+    }
+  },
+
+  // POST /cash-recovery/return/:assignmentId
+  async returnToPool(req, res) {
+    try {
+      await RecoveryModel.returnToPool(req.params.assignmentId, req.session.user.id);
+      req.flash('success', 'Bill returned to outstanding pool.');
+      res.redirect('/cash-recovery/outstanding');
+    } catch (err) {
+      req.flash('error', err.message);
+      res.redirect('/cash-recovery/outstanding');
     }
   },
 

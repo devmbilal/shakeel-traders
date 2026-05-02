@@ -36,7 +36,7 @@ const ShopModel = {
     const rows = await query(`
       SELECT COUNT(*) AS total
       FROM shops s
-      JOIN routes r ON r.id = s.route_id
+      LEFT JOIN routes r ON r.id = s.route_id
       ${where}
     `, params);
     return rows[0].total;
@@ -92,10 +92,10 @@ const ShopModel = {
         ), 0) AS outstanding_balance`;
 
     return query(`
-      SELECT s.*, r.name AS route_name,
+      SELECT s.*, COALESCE(r.name, '— Unassigned —') AS route_name,
         ${outstandingBalanceSelect}
       FROM shops s
-      JOIN routes r ON r.id = s.route_id
+      LEFT JOIN routes r ON r.id = s.route_id
       ${where}
       ORDER BY s.name ASC
       LIMIT ? OFFSET ?
@@ -104,9 +104,9 @@ const ShopModel = {
 
   async findById(id) {
     const rows = await query(`
-      SELECT s.*, r.name AS route_name
+      SELECT s.*, COALESCE(r.name, '— Unassigned —') AS route_name
       FROM shops s
-      JOIN routes r ON r.id = s.route_id
+      LEFT JOIN routes r ON r.id = s.route_id
       WHERE s.id = ? LIMIT 1
     `, [id]);
     return rows[0] || null;
@@ -137,17 +137,19 @@ const ShopModel = {
       UPDATE shops SET
         name = ?, owner_name = ?, phone = ?, address = ?,
         route_id = ?, shop_type = ?,
-        price_edit_allowed = ?, price_max_discount_pct = ?
+        price_edit_allowed = ?, price_max_discount_pct = ?,
+        is_active = ?
       WHERE id = ?
     `, [
       data.name,
       data.owner_name   || null,
       data.phone        || null,
       data.address      || null,
-      data.route_id,
+      data.route_id     || null,
       data.shop_type    || 'retail',
       data.price_edit_allowed ? 1 : 0,
       isNaN(discount) ? 0 : discount,
+      data.is_active !== undefined ? (data.is_active ? 1 : 0) : 1,
       id,
     ]);
   },

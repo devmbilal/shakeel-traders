@@ -168,10 +168,11 @@ const ShopController = {
         owner_name:         req.body.owner_name,
         phone:              req.body.phone,
         address:            req.body.address,
-        route_id:           req.body.route_id,
+        route_id:           req.body.route_id || null,
         shop_type:          req.body.shop_type || 'retail',
         price_edit_allowed: req.body.price_edit_allowed ? 1 : 0,
         price_max_discount_pct: isNaN(parsedDiscount) ? 0 : parsedDiscount,
+        is_active:          req.body.is_active ? 1 : 0,
       };
       await ShopModel.update(req.params.id, data);
       req.flash('success', 'Shop updated successfully.');
