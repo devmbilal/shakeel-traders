@@ -9,10 +9,12 @@ const RouteAssignmentController = {
   async index(req, res) {
     try {
       const today = await mysqlToday();
-      const [orderBookers, routes, todayAssignments] = await Promise.all([
+      const selectedDate = req.query.date || today;
+      const [orderBookers, routes, todayAssignments, selectedDateAssignments] = await Promise.all([
         UserModel.listByRole('order_booker'),
         RouteModel.listAll(),
         RouteModel.getAssignmentsByDate(today),
+        selectedDate !== today ? RouteModel.getAssignmentsByDate(selectedDate) : Promise.resolve(null),
       ]);
       renderWithLayout(req, res, 'route-assignments/index', {
         title: 'Route Assignment',
@@ -21,9 +23,9 @@ const RouteAssignmentController = {
         todayAssignments,
         today,
         activeTab: req.query.tab || 'assign',
-        byDateAssignments: [],
+        byDateAssignments: selectedDateAssignments || todayAssignments,
         byBookerAssignments: [],
-        selectedDate: today,
+        selectedDate,
         selectedBookerId: null,
       });
     } catch (err) {
@@ -41,6 +43,7 @@ const RouteAssignmentController = {
         req.flash('error', 'Please select an order booker, date, and at least one route.');
         return res.redirect('/route-assignments');
       }
+      // Allow any date — past, present, or future
       const errors = [];
       for (const routeId of ids) {
         try {
@@ -52,7 +55,7 @@ const RouteAssignmentController = {
         }
       }
       if (errors.length > 0) { req.flash('error', errors.join(' ')); }
-      else { req.flash('success', `${ids.length} route(s) assigned successfully.`); }
+      else { req.flash('success', `${ids.length} route(s) assigned for ${assignment_date}.`); }
       res.redirect('/route-assignments');
     } catch (err) {
       console.error(err);

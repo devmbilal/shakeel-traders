@@ -156,8 +156,8 @@ const RouteModel = {
       FROM orders o
       JOIN route_assignments ra ON ra.id = ?
       WHERE o.route_id = ra.route_id
-        AND o.booker_id = ra.user_id
-        AND DATE(o.created_at) = ra.assignment_date
+        AND o.order_booker_id = ra.user_id
+        AND DATE(o.created_at_device) = ra.assignment_date
     `, [assignmentId]);
     return rows[0].order_count;
   },
