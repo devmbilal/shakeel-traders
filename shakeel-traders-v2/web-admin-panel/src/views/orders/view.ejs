@@ -1,0 +1,442 @@
+<div class="page-header">
+  <div>
+    <h4>Order Details</h4>
+    <div class="page-sub">Review and edit order items, quantities, and prices before converting to bill</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/orders" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i> Back to Orders
+    </a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="mb-1">Order #<%= order.id %></h5>
+        <div style="font-size:0.85rem;color:var(--text-muted);">
+          <strong>Shop:</strong> <%= order.shop_name %> 
+          <span class="badge <%= order.shop_type === 'wholesale' ? 'bg-success' : 'bg-primary' %>" style="font-size:0.7rem;">
+            <%= order.shop_type.toUpperCase() %>
+          </span>
+          &nbsp;|&nbsp;
+          <strong>Route:</strong> <%= order.route_name %> &nbsp;|&nbsp;
+          <strong>Order Booker:</strong> <%= order.booker_name %>
+        </div>
+        <div style="font-size:0.85rem;color:var(--text-muted);">
+          <strong>Date:</strong> <%= new Date(order.created_at_device).toLocaleString() %> &nbsp;|&nbsp;
+          <strong>Status:</strong> <span class="badge <%= order.status === 'stock_adjusted' ? 'badge-orange' : 'badge-pending' %>">
+            <%= order.status.replace(/_/g,' ') %>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <% if (order.stock_check_note) { %>
+  <div class="alert alert-warning m-3 mb-0">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <strong>Stock Adjustment:</strong> <%= order.stock_check_note %>
+  </div>
+  <% } %>
+
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="mb-0">Order Items</h6>
+      <button type="button" class="btn btn-sm btn-success" onclick="showAddProductModal()">
+        <i class="bi bi-plus-circle me-1"></i> Add Product
+      </button>
+    </div>
+    
+    <form method="POST" action="/orders/<%= order.id %>/update-prices" id="priceForm">
+      <div class="table-responsive">
+        <table class="table table-sm table-hover">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product</th>
+              <th style="width:100px;">Cartons</th>
+              <th style="width:100px;">Loose</th>
+              <th>Total Units</th>
+              <th style="width:120px;">Unit Price (Rs.)</th>
+              <th>Suggested</th>
+              <th class="text-end">Line Total (Rs.)</th>
+              <th style="width:60px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="itemsTableBody">
+            <% 
+            let grandTotal = 0;
+            order.items.forEach((item, index) => { 
+              const totalUnits = (item.final_cartons * item.units_per_carton) + item.final_loose;
+              // Ensure prices are numbers - handle both string and number from database
+              const wholesalePrice = parseFloat(item.wholesale_price) || 0;
+              const retailPrice = parseFloat(item.retail_price) || 0;
+              const suggestedPrice = Number(order.shop_type === 'wholesale' ? wholesalePrice : retailPrice) || 0;
+              const lineTotal = totalUnits * parseFloat(item.unit_price);
+              grandTotal += lineTotal;
+              
+              // Check if custom price is used
+              const isCustomPrice = Math.abs(parseFloat(item.unit_price) - suggestedPrice) > 0.01;
+            %>
+            <tr data-item-index="<%= index %>" data-product-id="<%= item.product_id %>">
+              <td><code><%= item.sku_code %></code></td>
+              <td>
+                <%= item.product_name %>
+                <% if (isCustomPrice) { %>
+                  <span class="badge bg-info text-white" style="font-size:0.7rem;">Custom Price</span>
+                <% } %>
+                <input type="hidden" name="items[<%= index %>][id]" value="<%= item.id %>">
+                <input type="hidden" name="items[<%= index %>][product_id]" value="<%= item.product_id %>">
+                <input type="hidden" class="units-per-carton" value="<%= item.units_per_carton %>">
+                <input type="hidden" class="suggested-price" value="<%= suggestedPrice.toFixed(2) %>">
+              </td>
+              <td>
+                <input 
+                  type="number" 
+                  min="0"
+                  name="items[<%= index %>][final_cartons]" 
+                  value="<%= item.final_cartons %>"
+                  class="form-control form-control-sm cartons-input"
+                  data-index="<%= index %>"
+                >
+              </td>
+              <td>
+                <input 
+                  type="number" 
+                  min="0"
+                  name="items[<%= index %>][final_loose]" 
+                  value="<%= item.final_loose %>"
+                  class="form-control form-control-sm loose-input"
+                  data-index="<%= index %>"
+                >
+              </td>
+              <td>
+                <strong class="total-units" data-index="<%= index %>"><%= totalUnits %></strong>
+              </td>
+              <td>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  name="items[<%= index %>][unit_price]" 
+                  value="<%= parseFloat(item.unit_price).toFixed(2) %>"
+                  class="form-control form-control-sm price-input"
+                  data-index="<%= index %>"
+                  required
+                >
+              </td>
+              <td>
+                <div style="font-size:0.75rem;">
+                  <div>R: <%= retailPrice.toFixed(2) %></div>
+                  <div>W: <%= wholesalePrice.toFixed(2) %></div>
+                  <button type="button" class="btn btn-link btn-sm p-0" 
+                          onclick="applySuggestedPrice(<%= index %>)" 
+                          style="font-size:0.7rem;">
+                    Use <%= order.shop_type === 'wholesale' ? 'W' : 'R' %>
+                  </button>
+                </div>
+              </td>
+              <td class="text-end">
+                <strong class="line-total" data-index="<%= index %>">
+                  Rs. <%= lineTotal.toFixed(2) %>
+                </strong>
+              </td>
+              <td class="text-center">
+                <button type="button" class="btn btn-sm btn-outline-danger" 
+                        onclick="removeItem(<%= index %>)"
+                        title="Remove item">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="7" class="text-end"><strong>Grand Total:</strong></td>
+              <td class="text-end">
+                <strong id="grandTotal" style="font-size:1.1rem;color:var(--primary);">
+                  Rs. <%= grandTotal.toFixed(2) %>
+                </strong>
+              </td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end mt-3">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-save me-1"></i> Save Changes
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-success"
+          onclick="convertToBill()"
+        >
+          <i class="bi bi-receipt me-1"></i> Convert to Bill
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Product to Order</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Search Product</label>
+          <input type="text" class="form-control" id="productSearch" placeholder="Search by SKU or name...">
+          <div id="productResults" class="mt-2" style="max-height:300px;overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const shopType = '<%= order.shop_type %>';
+let itemCounter = <%= order.items.length %>;
+let allProducts = [];
+
+// Fetch all products for search
+async function loadProducts() {
+  try {
+    const response = await fetch('/api/products/active');
+    if (response.ok) {
+      allProducts = await response.json();
+    }
+  } catch (err) {
+    console.error('Failed to load products:', err);
+  }
+}
+
+// Show add product modal
+function showAddProductModal() {
+  const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+  modal.show();
+  document.getElementById('productSearch').focus();
+}
+
+// Search products
+document.addEventListener('DOMContentLoaded', function() {
+  loadProducts();
+  
+  const searchInput = document.getElementById('productSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+      const resultsDiv = document.getElementById('productResults');
+      
+      if (query.length < 2) {
+        resultsDiv.innerHTML = '';
+        return;
+      }
+      
+      const filtered = allProducts.filter(p => 
+        p.sku_code.toLowerCase().includes(query) || 
+        p.name.toLowerCase().includes(query)
+      ).slice(0, 10);
+      
+      if (filtered.length === 0) {
+        resultsDiv.innerHTML = '<div class="text-muted p-2">No products found</div>';
+        return;
+      }
+      
+      resultsDiv.innerHTML = filtered.map(p => {
+        const suggestedPrice = shopType === 'wholesale' ? p.wholesale_price : p.retail_price;
+        return `
+          <div class="border p-2 mb-1" style="cursor:pointer;" onclick="addProductToOrder(${p.id}, '${p.sku_code}', '${p.name.replace(/'/g, "\\'")}', ${p.units_per_carton}, ${p.retail_price}, ${p.wholesale_price})">
+            <div><strong>${p.sku_code}</strong> - ${p.name}</div>
+            <div style="font-size:0.75rem;color:#666;">
+              Retail: Rs. ${parseFloat(p.retail_price).toFixed(2)} | Wholesale: Rs. ${parseFloat(p.wholesale_price).toFixed(2)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    });
+  }
+  
+  // Attach event listeners to existing inputs
+  attachInputListeners();
+});
+
+// Add product to order
+function addProductToOrder(productId, skuCode, productName, unitsPerCarton, retailPrice, wholesalePrice) {
+  // Check if product already exists
+  const existing = document.querySelector(`tr[data-product-id="${productId}"]`);
+  if (existing) {
+    alert('Product already exists in order');
+    return;
+  }
+  
+  const suggestedPrice = shopType === 'wholesale' ? wholesalePrice : retailPrice;
+  const index = itemCounter++;
+  
+  const tbody = document.getElementById('itemsTableBody');
+  const newRow = document.createElement('tr');
+  newRow.setAttribute('data-item-index', index);
+  newRow.setAttribute('data-product-id', productId);
+  newRow.setAttribute('data-is-new', 'true');
+  
+  newRow.innerHTML = `
+    <td><code>${skuCode}</code></td>
+    <td>
+      ${productName}
+      <span class="badge bg-success text-white" style="font-size:0.7rem;">NEW</span>
+      <input type="hidden" name="items[${index}][id]" value="0">
+      <input type="hidden" name="items[${index}][product_id]" value="${productId}">
+      <input type="hidden" class="units-per-carton" value="${unitsPerCarton}">
+      <input type="hidden" class="suggested-price" value="${suggestedPrice.toFixed(2)}">
+    </td>
+    <td>
+      <input type="number" min="0" name="items[${index}][final_cartons]" value="0"
+             class="form-control form-control-sm cartons-input" data-index="${index}">
+    </td>
+    <td>
+      <input type="number" min="0" name="items[${index}][final_loose]" value="0"
+             class="form-control form-control-sm loose-input" data-index="${index}">
+    </td>
+    <td><strong class="total-units" data-index="${index}">0</strong></td>
+    <td>
+      <input type="number" step="0.01" name="items[${index}][unit_price]" 
+             value="${suggestedPrice.toFixed(2)}"
+             class="form-control form-control-sm price-input" data-index="${index}" required>
+    </td>
+    <td>
+      <div style="font-size:0.75rem;">
+        <div>R: ${parseFloat(retailPrice).toFixed(2)}</div>
+        <div>W: ${parseFloat(wholesalePrice).toFixed(2)}</div>
+        <button type="button" class="btn btn-link btn-sm p-0" 
+                onclick="applySuggestedPrice(${index})" 
+                style="font-size:0.7rem;">
+          Use ${shopType === 'wholesale' ? 'W' : 'R'}
+        </button>
+      </div>
+    </td>
+    <td class="text-end">
+      <strong class="line-total" data-index="${index}">Rs. 0.00</strong>
+    </td>
+    <td class="text-center">
+      <button type="button" class="btn btn-sm btn-outline-danger" 
+              onclick="removeItem(${index})" title="Remove item">
+        <i class="bi bi-trash"></i>
+      </button>
+    </td>
+  `;
+  
+  tbody.appendChild(newRow);
+  attachInputListeners();
+  
+  // Close modal
+  const modal = bootstrap.Modal.getInstance(document.getElementById('addProductModal'));
+  modal.hide();
+  document.getElementById('productSearch').value = '';
+  document.getElementById('productResults').innerHTML = '';
+  
+  // Focus on cartons input
+  newRow.querySelector('.cartons-input').focus();
+}
+
+// Remove item from order
+function removeItem(index) {
+  if (!confirm('Remove this item from the order?')) return;
+  
+  const row = document.querySelector(`tr[data-item-index="${index}"]`);
+  if (row) {
+    row.remove();
+    recalculateGrandTotal();
+  }
+}
+
+// Apply suggested price based on shop type
+function applySuggestedPrice(index) {
+  const row = document.querySelector(`tr[data-item-index="${index}"]`);
+  const suggestedPrice = row.querySelector('.suggested-price').value;
+  const priceInput = row.querySelector('.price-input');
+  priceInput.value = suggestedPrice;
+  calculateLineTotal(index);
+}
+
+// Calculate total units
+function calculateTotalUnits(index) {
+  const row = document.querySelector(`tr[data-item-index="${index}"]`);
+  const cartons = parseInt(row.querySelector('.cartons-input').value) || 0;
+  const loose = parseInt(row.querySelector('.loose-input').value) || 0;
+  const unitsPerCarton = parseInt(row.querySelector('.units-per-carton').value) || 1;
+  
+  return (cartons * unitsPerCarton) + loose;
+}
+
+// Calculate line total
+function calculateLineTotal(index) {
+  const row = document.querySelector(`tr[data-item-index="${index}"]`);
+  const totalUnits = calculateTotalUnits(index);
+  const unitPrice = parseFloat(row.querySelector('.price-input').value) || 0;
+  const lineTotal = totalUnits * unitPrice;
+  
+  row.querySelector('.total-units').textContent = totalUnits;
+  row.querySelector('.line-total').textContent = `Rs. ${lineTotal.toFixed(2)}`;
+  
+  recalculateGrandTotal();
+}
+
+// Recalculate grand total
+function recalculateGrandTotal() {
+  let grandTotal = 0;
+  document.querySelectorAll('tr[data-item-index]').forEach(row => {
+    const index = row.getAttribute('data-item-index');
+    const totalUnits = calculateTotalUnits(index);
+    const unitPrice = parseFloat(row.querySelector('.price-input').value) || 0;
+    grandTotal += totalUnits * unitPrice;
+  });
+  
+  document.getElementById('grandTotal').textContent = `Rs. ${grandTotal.toFixed(2)}`;
+}
+
+// Attach input listeners
+function attachInputListeners() {
+  document.querySelectorAll('.cartons-input, .loose-input, .price-input').forEach(input => {
+    input.removeEventListener('input', handleInput);
+    input.addEventListener('input', handleInput);
+  });
+}
+
+function handleInput(e) {
+  const index = e.target.getAttribute('data-index');
+  calculateLineTotal(index);
+}
+
+// Convert to bill
+function convertToBill() {
+  if (!confirm('Convert this order to a bill? Stock will be deducted immediately.')) return;
+  
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/orders/<%= order.id %>/convert';
+  document.body.appendChild(form);
+  form.submit();
+}
+</script>
+
+<style>
+.badge-pending {
+  background-color: #fbbf24;
+  color: #1f2937;
+}
+.badge-orange {
+  background-color: #f97316;
+  color: white;
+}
+.price-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+</style>

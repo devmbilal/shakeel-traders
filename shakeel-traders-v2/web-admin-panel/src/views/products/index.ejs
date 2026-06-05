@@ -21,6 +21,9 @@
       <a href="/products" class="btn btn-sm <%= filter === '' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">All</a>
       <a href="/products?filter=active" class="btn btn-sm <%= filter === 'active' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">Active</a>
       <a href="/products?filter=inactive" class="btn btn-sm <%= filter === 'inactive' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">Inactive</a>
+      <a href="/products?filter=low_stock" class="btn btn-sm <%= filter === 'low_stock' ? 'btn-dark-primary' : 'btn-outline-secondary' %>">
+        <i class="bi bi-exclamation-triangle me-1"></i>Low Stock
+      </a>
       <span class="ms-auto" style="font-size:0.78rem;color:var(--text-muted);"><%= products.length %> products</span>
     </div>
   </div>
@@ -93,20 +96,45 @@
             <a href="/products/<%= p.id %>/movements" class="btn btn-icon btn-outline-secondary" title="Stock History">
               <i class="bi bi-clock-history"></i>
             </a>
-            <% if (p.is_active) { %>
-              <form method="POST" action="/products/<%= p.id %>/deactivate" class="d-inline"
-                    onsubmit="return confirm('Deactivate <%= p.name %>?')">
-                <button type="submit" class="btn btn-icon btn-delete" title="Deactivate">
-                  <i class="bi bi-slash-circle"></i>
-                </button>
-              </form>
-            <% } else { %>
-              <form method="POST" action="/products/<%= p.id %>/activate" class="d-inline">
-                <button type="submit" class="btn btn-icon btn-assign" title="Reactivate">
-                  <i class="bi bi-check-circle"></i>
-                </button>
-              </form>
-            <% } %>
+            
+            <!-- Quick Actions Dropdown -->
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" title="Quick Actions">
+                <i class="bi bi-lightning-charge"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><h6 class="dropdown-header">Quick Actions</h6></li>
+                <li>
+                  <a class="dropdown-item" href="javascript:void(0)" onclick="showQuickPriceUpdate(<%= p.id %>, <%= p.retail_price %>, <%= p.wholesale_price %>)">
+                    <i class="bi bi-cash text-primary me-2"></i> Update Prices
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="javascript:void(0)" onclick="showQuickThresholdUpdate(<%= p.id %>, <%= p.low_stock_threshold || 'null' %>)">
+                    <i class="bi bi-speedometer2 text-warning me-2"></i> Set Low Stock Alert
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <% if (p.is_active) { %>
+                  <li>
+                    <form method="POST" action="/products/<%= p.id %>/deactivate" class="d-inline"
+                          onsubmit="return confirm('Deactivate <%= p.name %>?')">
+                      <button type="submit" class="dropdown-item text-danger">
+                        <i class="bi bi-slash-circle me-2"></i> Deactivate Product
+                      </button>
+                    </form>
+                  </li>
+                <% } else { %>
+                  <li>
+                    <form method="POST" action="/products/<%= p.id %>/activate" class="d-inline">
+                      <button type="submit" class="dropdown-item text-success">
+                        <i class="bi bi-check-circle me-2"></i> Reactivate Product
+                      </button>
+                    </form>
+                  </li>
+                <% } %>
+              </ul>
+            </div>
           </div>
         </td>
       </tr>
@@ -117,6 +145,61 @@
 </div>
 
 <%- include('../layout/pagination', {pagination, queryString}) %>
+
+<!-- Quick Price Update Modal -->
+<div class="modal fade" id="quickPriceModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">Update Prices</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="priceProductId">
+        <div class="mb-3">
+          <label class="form-label">Retail Price (Rs)</label>
+          <input type="number" id="quickRetailPrice" class="form-control" min="0" step="0.01" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Wholesale Price (Rs)</label>
+          <input type="number" id="quickWholesalePrice" class="form-control" min="0" step="0.01" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="applyQuickPriceUpdate()">
+          <i class="bi bi-check-lg me-1"></i> Update
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Threshold Update Modal -->
+<div class="modal fade" id="quickThresholdModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">Set Low Stock Alert</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="thresholdProductId">
+        <div class="mb-3">
+          <label class="form-label">Low Stock Threshold (units)</label>
+          <input type="number" id="quickThreshold" class="form-control" min="0" step="1" placeholder="Leave empty to disable">
+          <div class="form-text">Alert when total stock (cartons + loose) falls to or below this value</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="applyQuickThresholdUpdate()">
+          <i class="bi bi-check-lg me-1"></i> Update
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Import Products Modal -->
 <div class="modal fade" id="importProductsModal" tabindex="-1">
@@ -191,5 +274,120 @@ document.getElementById('productSearch').addEventListener('input', function(e) {
       row.style.display = 'none';
     }
   });
+});
+
+// Quick price update
+function showQuickPriceUpdate(productId, retailPrice, wholesalePrice) {
+  document.getElementById('priceProductId').value = productId;
+  document.getElementById('quickRetailPrice').value = parseFloat(retailPrice).toFixed(2);
+  document.getElementById('quickWholesalePrice').value = parseFloat(wholesalePrice).toFixed(2);
+  const modal = new bootstrap.Modal(document.getElementById('quickPriceModal'));
+  modal.show();
+  setTimeout(() => document.getElementById('quickRetailPrice').focus(), 300);
+}
+
+function applyQuickPriceUpdate() {
+  const productId = document.getElementById('priceProductId').value;
+  const retailPrice = parseFloat(document.getElementById('quickRetailPrice').value);
+  const wholesalePrice = parseFloat(document.getElementById('quickWholesalePrice').value);
+  
+  if (isNaN(retailPrice) || retailPrice < 0) {
+    alert('Please enter a valid retail price');
+    return;
+  }
+  if (isNaN(wholesalePrice) || wholesalePrice < 0) {
+    alert('Please enter a valid wholesale price');
+    return;
+  }
+  
+  const modal = bootstrap.Modal.getInstance(document.getElementById('quickPriceModal'));
+  modal.hide();
+  
+  fetch(`/products/${productId}/quick-price-update`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ retail_price: retailPrice, wholesale_price: wholesalePrice })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.reload();
+    } else {
+      alert('Failed: ' + (data.message || 'Unknown error'));
+    }
+  })
+  .catch(err => alert('Error: ' + err.message));
+}
+
+// Quick threshold update
+function showQuickThresholdUpdate(productId, currentThreshold) {
+  document.getElementById('thresholdProductId').value = productId;
+  document.getElementById('quickThreshold').value = currentThreshold !== null ? currentThreshold : '';
+  const modal = new bootstrap.Modal(document.getElementById('quickThresholdModal'));
+  modal.show();
+  setTimeout(() => document.getElementById('quickThreshold').focus(), 300);
+}
+
+function applyQuickThresholdUpdate() {
+  const productId = document.getElementById('thresholdProductId').value;
+  const thresholdInput = document.getElementById('quickThreshold').value.trim();
+  const threshold = thresholdInput === '' ? null : parseFloat(thresholdInput);
+  
+  if (threshold !== null && (isNaN(threshold) || threshold < 0)) {
+    alert('Please enter a valid threshold value');
+    return;
+  }
+  
+  const modal = bootstrap.Modal.getInstance(document.getElementById('quickThresholdModal'));
+  modal.hide();
+  
+  fetch(`/products/${productId}/quick-threshold-update`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ low_stock_threshold: threshold })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.reload();
+    } else {
+      alert('Failed: ' + (data.message || 'Unknown error'));
+    }
+  })
+  .catch(err => alert('Error: ' + err.message));
+}
+
+// Allow Enter key in modals
+document.addEventListener('DOMContentLoaded', function() {
+  const retailInput = document.getElementById('quickRetailPrice');
+  const wholesaleInput = document.getElementById('quickWholesalePrice');
+  const thresholdInput = document.getElementById('quickThreshold');
+  
+  if (retailInput) {
+    retailInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        wholesaleInput.focus();
+      }
+    });
+  }
+  
+  if (wholesaleInput) {
+    wholesaleInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyQuickPriceUpdate();
+      }
+    });
+  }
+  
+  if (thresholdInput) {
+    thresholdInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyQuickThresholdUpdate();
+      }
+    });
+  }
 });
 </script>

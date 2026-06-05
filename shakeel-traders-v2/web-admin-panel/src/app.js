@@ -62,6 +62,9 @@ app.use('/api/sync',  require('./routes/api/sync'));
 const { requireAuth } = require('./middleware/auth');
 app.use(requireAuth);
 
+// API routes (requires authentication)
+app.use('/api/products', require('./routes/api/products'));
+
 // Search API (requires authentication)
 app.use('/', require('./routes/web/search'));
 

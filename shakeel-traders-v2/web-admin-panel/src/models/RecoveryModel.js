@@ -18,10 +18,10 @@ const RecoveryModel = {
     if (filters.shop_id)   { conditions.push('b.shop_id = ?');   params.push(filters.shop_id); }
 
     return query(
-      `SELECT b.*, s.name AS shop_name, r.name AS route_name
+      `SELECT b.*, s.name AS shop_name, COALESCE(r.name, '— Unassigned —') AS route_name
        FROM bills b
        JOIN shops s ON s.id = b.shop_id
-       JOIN routes r ON r.id = s.route_id
+       LEFT JOIN routes r ON r.id = s.route_id
        WHERE ${conditions.join(' AND ')}
        ORDER BY b.bill_date ASC`,
       params
@@ -36,13 +36,13 @@ const RecoveryModel = {
     if (filters.booker_id) { conditions.push('bra.assigned_to_booker_id = ?'); params.push(filters.booker_id); }
 
     return query(
-      `SELECT b.*, s.name AS shop_name, r.name AS route_name,
+      `SELECT b.*, s.name AS shop_name, COALESCE(r.name, '— Unassigned —') AS route_name,
               bra.id AS assignment_id, bra.assigned_date, bra.status AS assignment_status,
               u.full_name AS booker_name
        FROM bill_recovery_assignments bra
        JOIN bills b ON b.id = bra.bill_id
        JOIN shops s ON s.id = b.shop_id
-       JOIN routes r ON r.id = s.route_id
+       LEFT JOIN routes r ON r.id = s.route_id
        JOIN users u ON u.id = bra.assigned_to_booker_id
        WHERE ${conditions.join(' AND ')}
        ORDER BY bra.assigned_date ASC, b.bill_date ASC`,

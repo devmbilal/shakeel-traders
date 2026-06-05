@@ -162,6 +162,58 @@ const ProductController = {
     }
   },
 
+  // POST /products/:id/quick-price-update (AJAX)
+  async quickPriceUpdate(req, res) {
+    try {
+      const { retail_price, wholesale_price } = req.body;
+      
+      const retail = parseFloat(retail_price);
+      const wholesale = parseFloat(wholesale_price);
+      
+      if (isNaN(retail) || retail < 0) {
+        return res.json({ success: false, message: 'Invalid retail price' });
+      }
+      if (isNaN(wholesale) || wholesale < 0) {
+        return res.json({ success: false, message: 'Invalid wholesale price' });
+      }
+      
+      await ProductModel.updatePrices(req.params.id, { retail_price: retail, wholesale_price: wholesale });
+      
+      res.json({ 
+        success: true, 
+        message: `Prices updated: Retail Rs ${retail.toFixed(2)}, Wholesale Rs ${wholesale.toFixed(2)}` 
+      });
+    } catch (err) {
+      console.error(err);
+      res.json({ success: false, message: 'Failed to update: ' + err.message });
+    }
+  },
+
+  // POST /products/:id/quick-threshold-update (AJAX)
+  async quickThresholdUpdate(req, res) {
+    try {
+      const { low_stock_threshold } = req.body;
+      
+      const threshold = low_stock_threshold !== null && low_stock_threshold !== '' 
+        ? parseFloat(low_stock_threshold) 
+        : null;
+      
+      if (threshold !== null && (isNaN(threshold) || threshold < 0)) {
+        return res.json({ success: false, message: 'Invalid threshold value' });
+      }
+      
+      await ProductModel.updateStockThreshold(req.params.id, threshold);
+      
+      res.json({ 
+        success: true, 
+        message: threshold !== null ? `Low stock threshold set to ${threshold} units` : 'Low stock threshold removed'
+      });
+    } catch (err) {
+      console.error(err);
+      res.json({ success: false, message: 'Failed to update: ' + err.message });
+    }
+  },
+
   async movements(req, res) {
     try {
       const [product, movements] = await Promise.all([
@@ -172,6 +224,16 @@ const ProductController = {
       renderWithLayout(req, res, 'products/movements', { title: `${product.name} — Stock History`, product, movements });
     } catch (err) {
       req.flash('error', 'Failed to load movements.'); res.redirect('/products');
+    }
+  },
+
+  // API endpoint for fetching active products
+  async getActiveProducts(req, res) {
+    try {
+      const products = await ProductModel.listAll('active', { limit: 10000, offset: 0 });
+      res.json(products);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch products' });
     }
   },
 };

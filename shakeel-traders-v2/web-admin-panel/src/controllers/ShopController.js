@@ -258,6 +258,37 @@ const ShopController = {
     }
   },
 
+  // POST /shops/:id/quick-price-edit (AJAX)
+  async quickPriceEdit(req, res) {
+    try {
+      const { price_edit_allowed, price_max_discount_pct } = req.body;
+      
+      // Validate inputs
+      const allowed = price_edit_allowed ? 1 : 0;
+      const discount = parseFloat(price_max_discount_pct) || 0;
+      
+      if (discount < 0 || discount > 100) {
+        return res.json({ success: false, message: 'Discount must be between 0 and 100%.' });
+      }
+      
+      // Update only price-related fields using dedicated method
+      const data = {
+        price_edit_allowed: allowed,
+        price_max_discount_pct: discount,
+      };
+      
+      await ShopModel.updatePriceSettings(req.params.id, data);
+      
+      res.json({ 
+        success: true, 
+        message: `Price settings updated: ${allowed ? 'Allowed' : 'Disallowed'} (${discount}% discount)` 
+      });
+    } catch (err) {
+      console.error(err);
+      res.json({ success: false, message: 'Failed to update: ' + err.message });
+    }
+  },
+
   // GET /shops/:id/ledger/export
   async exportLedger(req, res) {
     try {

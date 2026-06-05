@@ -24,6 +24,7 @@ router.post('/import',
 router.get('/:id/ledger/export',  ShopController.exportLedger);
 router.get('/:id/ledger',         ShopController.ledger);
 router.post('/:id/advance',       ShopController.addAdvance);
+router.post('/:id/quick-price-edit', ShopController.quickPriceEdit);
 router.get('/:id',                ShopController.detail);
 router.post('/:id',               ShopController.update);
 

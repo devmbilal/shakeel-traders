@@ -4,17 +4,27 @@ const { query } = require('../config/db');
 
 const ProductModel = {
   async countAll(filter = '') {
-    const where = filter === 'active'   ? 'WHERE is_active = 1'
-                : filter === 'inactive' ? 'WHERE is_active = 0'
-                : '';
+    let where = '';
+    if (filter === 'active') {
+      where = 'WHERE is_active = 1';
+    } else if (filter === 'inactive') {
+      where = 'WHERE is_active = 0';
+    } else if (filter === 'low_stock') {
+      where = 'WHERE is_active = 1 AND low_stock_threshold IS NOT NULL AND (current_stock_cartons * units_per_carton + current_stock_loose) <= low_stock_threshold';
+    }
     const rows = await query(`SELECT COUNT(*) AS total FROM products ${where}`);
     return rows[0].total;
   },
 
   async listAll(filter = '', { limit = 25, offset = 0 } = {}) {
-    const where = filter === 'active'   ? 'WHERE is_active = 1'
-                : filter === 'inactive' ? 'WHERE is_active = 0'
-                : '';
+    let where = '';
+    if (filter === 'active') {
+      where = 'WHERE is_active = 1';
+    } else if (filter === 'inactive') {
+      where = 'WHERE is_active = 0';
+    } else if (filter === 'low_stock') {
+      where = 'WHERE is_active = 1 AND low_stock_threshold IS NOT NULL AND (current_stock_cartons * units_per_carton + current_stock_loose) <= low_stock_threshold';
+    }
     return query(`SELECT * FROM products ${where} ORDER BY name ASC LIMIT ? OFFSET ?`, [limit, offset]);
   },
 
@@ -56,6 +66,23 @@ const ProductModel = {
 
   async activate(id) {
     await query('UPDATE products SET is_active = 1 WHERE id = ?', [id]);
+  },
+
+  async updatePrices(id, data) {
+    const retailPrice = parseFloat(data.retail_price);
+    const wholesalePrice = parseFloat(data.wholesale_price);
+    await query(
+      `UPDATE products SET retail_price = ?, wholesale_price = ? WHERE id = ?`,
+      [retailPrice, wholesalePrice, id]
+    );
+  },
+
+  async updateStockThreshold(id, threshold) {
+    const value = threshold !== null && threshold !== '' ? parseFloat(threshold) : null;
+    await query(
+      `UPDATE products SET low_stock_threshold = ? WHERE id = ?`,
+      [value, id]
+    );
   },
 
   async getStockMovements(productId) {

@@ -95,6 +95,91 @@ const OrderController = {
     }
   },
 
+  // GET /orders/:id/view — View order details with prices
+  async viewOrder(req, res) {
+    try {
+      const order = await OrderModel.findById(req.params.id);
+      if (!order) {
+        req.flash('error', 'Order not found.');
+        return res.redirect('/orders');
+      }
+      renderWithLayout(req, res, 'orders/view', {
+        title: 'View Order Details',
+        order,
+      });
+    } catch (err) {
+      req.flash('error', 'Failed to load order.'); res.redirect('/orders');
+    }
+  },
+
+  // POST /orders/:id/update-prices — Update order item prices and quantities
+  async updateOrderPrices(req, res) {
+    try {
+      const orderId = req.params.id;
+      const items = req.body.items; // Array or object of {id, product_id, final_cartons, final_loose, unit_price}
+      
+      if (!items || (Array.isArray(items) && items.length === 0) || (typeof items === 'object' && Object.keys(items).length === 0)) {
+        req.flash('error', 'No items to update.');
+        return res.redirect(`/orders/${orderId}/view`);
+      }
+
+      // Handle both array and object formats
+      const itemsArray = Array.isArray(items) ? items : Object.values(items);
+
+      // Get existing order items
+      const existingItems = await query(
+        'SELECT id, product_id FROM order_items WHERE order_id = ?',
+        [orderId]
+      );
+      const existingIds = existingItems.map(item => item.id);
+      const submittedIds = itemsArray.filter(item => parseInt(item.id) > 0).map(item => parseInt(item.id));
+
+      // Delete removed items (items that exist in DB but not in submission)
+      const removedIds = existingIds.filter(id => !submittedIds.includes(id));
+      for (const id of removedIds) {
+        await query('DELETE FROM order_items WHERE id = ? AND order_id = ?', [id, orderId]);
+      }
+
+      // Update existing items and insert new items
+      for (const item of itemsArray) {
+        const itemId = parseInt(item.id);
+        const productId = parseInt(item.product_id);
+        const finalCartons = parseInt(item.final_cartons) || 0;
+        const finalLoose = parseInt(item.final_loose) || 0;
+        const unitPrice = parseFloat(item.unit_price);
+
+        // Skip if no quantity
+        if (finalCartons === 0 && finalLoose === 0) continue;
+
+        if (itemId > 0) {
+          // Update existing item
+          await query(
+            `UPDATE order_items 
+             SET final_cartons = ?, final_loose = ?, unit_price = ?
+             WHERE id = ? AND order_id = ?`,
+            [finalCartons, finalLoose, unitPrice, itemId, orderId]
+          );
+        } else {
+          // Insert new item (id = 0 means new)
+          // Get ordered quantities (same as final for new items)
+          await query(
+            `INSERT INTO order_items 
+             (order_id, product_id, ordered_cartons, ordered_loose, final_cartons, final_loose, unit_price)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [orderId, productId, finalCartons, finalLoose, finalCartons, finalLoose, unitPrice]
+          );
+        }
+      }
+
+      req.flash('success', 'Order updated successfully.');
+      res.redirect(`/orders/${orderId}/view`);
+    } catch (err) {
+      console.error('Update prices error:', err);
+      req.flash('error', 'Failed to update order.'); 
+      res.redirect('/orders');
+    }
+  },
+
   // POST /orders/:id/convert
   async convertToBill(req, res) {
     try {

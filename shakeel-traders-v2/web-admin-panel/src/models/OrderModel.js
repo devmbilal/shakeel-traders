@@ -47,7 +47,8 @@ const OrderModel = {
 
   async findById(id) {
     const rows = await query(
-      `SELECT o.*, u.full_name AS booker_name, s.name AS shop_name, r.name AS route_name
+      `SELECT o.*, u.full_name AS booker_name, s.name AS shop_name, 
+              s.shop_type, r.name AS route_name
        FROM orders o
        JOIN users u ON u.id = o.order_booker_id
        JOIN shops s ON s.id = o.shop_id
@@ -58,7 +59,8 @@ const OrderModel = {
     if (!rows.length) return null;
     const order = rows[0];
     order.items = await query(
-      `SELECT oi.*, p.name AS product_name, p.sku_code, p.units_per_carton
+      `SELECT oi.*, p.name AS product_name, p.sku_code, p.units_per_carton,
+              p.retail_price, p.wholesale_price
        FROM order_items oi
        JOIN products p ON p.id = oi.product_id
        WHERE oi.order_id = ?`,

@@ -154,6 +154,20 @@ const ShopModel = {
     ]);
   },
 
+  async updatePriceSettings(id, data) {
+    const discount = parseFloat(data.price_max_discount_pct);
+    await query(`
+      UPDATE shops SET
+        price_edit_allowed = ?,
+        price_max_discount_pct = ?
+      WHERE id = ?
+    `, [
+      data.price_edit_allowed ? 1 : 0,
+      isNaN(discount) ? 0 : discount,
+      id,
+    ]);
+  },
+
   async bulkImportFromCSV(rows) {
     const results = { inserted: 0, errors: [] };
     for (let i = 0; i < rows.length; i++) {

@@ -73,9 +73,10 @@
           <th style="padding-left:20px;">Shop Name</th>
           <th>Route</th>
           <th>Type</th>
+          <th>Price Edit</th>
           <th>Outstanding</th>
           <th>Status</th>
-          <th>Actions</th>
+          <th style="width:200px;">Actions</th>
         </tr></thead>
         <tbody>
           <% shops.forEach(s => { const bal = parseFloat(s.outstanding_balance || 0); %>
@@ -86,6 +87,16 @@
             </td>
             <td><span class="badge badge-blue"><%= s.route_name || '—' %></span></td>
             <td><span class="badge badge-orange" style="text-transform:capitalize;"><%= s.shop_type %></span></td>
+            <td>
+              <% if (s.price_edit_allowed) { %>
+                <div style="font-size:0.75rem;">
+                  <span class="badge bg-success">Allowed</span>
+                  <div class="text-muted mt-1">Max: <%= parseFloat(s.price_max_discount_pct || 0).toFixed(0) %>%</div>
+                </div>
+              <% } else { %>
+                <span class="badge bg-secondary">Not Allowed</span>
+              <% } %>
+            </td>
             <td>
               <% if (bal > 0) { %>
                 <span style="font-weight:700;color:#EF4444;font-family:'Manrope',sans-serif;">Rs <%= bal.toLocaleString() %></span>
@@ -98,8 +109,83 @@
             <td><span class="badge <%= s.is_active ? 'badge-active' : 'badge-inactive' %>"><%= s.is_active ? 'Active' : 'Inactive' %></span></td>
             <td>
               <div class="d-flex gap-1">
-                <a href="/shops/<%= s.id %>" class="btn btn-sm btn-edit btn-icon" title="Edit"><i class="bi bi-pencil"></i></a>
-                <a href="/shops/<%= s.id %>/ledger" class="btn btn-sm btn-assign btn-icon" title="Ledger"><i class="bi bi-journal-text"></i></a>
+                <a href="/shops/<%= s.id %>" class="btn btn-sm btn-edit btn-icon" title="Edit Shop"><i class="bi bi-pencil"></i></a>
+                <a href="/shops/<%= s.id %>/ledger" class="btn btn-sm btn-assign btn-icon" title="View Ledger"><i class="bi bi-journal-text"></i></a>
+                
+                <!-- Quick Actions Dropdown -->
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" title="Quick Actions">
+                    <i class="bi bi-lightning-charge"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><h6 class="dropdown-header">Price Edit Permissions</h6></li>
+                    <% if (!s.price_edit_allowed) { %>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 1, 0)">
+                          <i class="bi bi-check-circle text-success me-2"></i> Allow Price Edit (0% discount)
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 1, 2)">
+                          <i class="bi bi-check-circle text-success me-2"></i> Allow with 2% Discount
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 1, 5)">
+                          <i class="bi bi-check-circle text-success me-2"></i> Allow with 5% Discount
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 1, 10)">
+                          <i class="bi bi-check-circle text-success me-2"></i> Allow with 10% Discount
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 1, 15)">
+                          <i class="bi bi-check-circle text-success me-2"></i> Allow with 15% Discount
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="showCustomDiscount(<%= s.id %>)">
+                          <i class="bi bi-input-cursor text-primary me-2"></i> Custom Discount %
+                        </a>
+                      </li>
+                    <% } else { %>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 0, 0)">
+                          <i class="bi bi-x-circle text-danger me-2"></i> Disallow Price Edit
+                        </a>
+                      </li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><h6 class="dropdown-header">Change Discount %</h6></li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 1, 2)">
+                          <i class="bi bi-arrow-repeat me-2"></i> Change to 2%
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 1, 5)">
+                          <i class="bi bi-arrow-repeat me-2"></i> Change to 5%
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 1, 10)">
+                          <i class="bi bi-arrow-repeat me-2"></i> Change to 10%
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="quickSetPriceEdit(<%= s.id %>, 1, 15)">
+                          <i class="bi bi-arrow-repeat me-2"></i> Change to 15%
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="showCustomDiscount(<%= s.id %>)">
+                          <i class="bi bi-input-cursor text-primary me-2"></i> Custom Discount %
+                        </a>
+                      </li>
+                    <% } %>
+                  </ul>
+                </div>
               </div>
             </td>
           </tr>
@@ -153,3 +239,123 @@
     </div>
   </div>
 </div>
+
+<!-- Custom Discount Modal -->
+<div class="modal fade" id="customDiscountModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">Set Custom Discount</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Max Discount Percentage</label>
+          <div class="input-group">
+            <input type="number" id="customDiscountInput" class="form-control" min="0" max="100" step="0.1" placeholder="e.g., 12.5">
+            <span class="input-group-text">%</span>
+          </div>
+          <div class="form-text">Enter the maximum discount percentage allowed (0-100)</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="applyCustomDiscount()">
+          <i class="bi bi-check-lg me-1"></i> Apply
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentShopId = null;
+
+// Quick set price edit permissions
+function quickSetPriceEdit(shopId, allowed, discountPct) {
+  const action = allowed ? 'allow' : 'disallow';
+  const msg = allowed 
+    ? `Allow price editing with ${discountPct}% max discount for this shop?`
+    : `Disallow price editing for this shop?`;
+  
+  if (!confirm(msg)) return;
+  
+  // Show loading indicator
+  const dropdown = event.target.closest('.dropdown-menu');
+  if (dropdown) {
+    dropdown.style.opacity = '0.5';
+    dropdown.style.pointerEvents = 'none';
+  }
+  
+  fetch(`/shops/${shopId}/quick-price-edit`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      price_edit_allowed: allowed,
+      price_max_discount_pct: discountPct
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Reload page to show updated status
+      window.location.reload();
+    } else {
+      alert('Failed to update: ' + (data.message || 'Unknown error'));
+      if (dropdown) {
+        dropdown.style.opacity = '1';
+        dropdown.style.pointerEvents = 'auto';
+      }
+    }
+  })
+  .catch(err => {
+    alert('Error: ' + err.message);
+    if (dropdown) {
+      dropdown.style.opacity = '1';
+      dropdown.style.pointerEvents = 'auto';
+    }
+  });
+}
+
+// Show custom discount modal
+function showCustomDiscount(shopId) {
+  currentShopId = shopId;
+  document.getElementById('customDiscountInput').value = '';
+  const modal = new bootstrap.Modal(document.getElementById('customDiscountModal'));
+  modal.show();
+  setTimeout(() => document.getElementById('customDiscountInput').focus(), 300);
+}
+
+// Apply custom discount
+function applyCustomDiscount() {
+  const input = document.getElementById('customDiscountInput');
+  const discountPct = parseFloat(input.value);
+  
+  if (isNaN(discountPct) || discountPct < 0 || discountPct > 100) {
+    alert('Please enter a valid discount percentage between 0 and 100');
+    input.focus();
+    return;
+  }
+  
+  const modal = bootstrap.Modal.getInstance(document.getElementById('customDiscountModal'));
+  modal.hide();
+  
+  // Call the quick set function
+  quickSetPriceEdit(currentShopId, 1, discountPct);
+}
+
+// Allow Enter key in custom discount modal
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('customDiscountInput');
+  if (input) {
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyCustomDiscount();
+      }
+    });
+  }
+});
+</script>

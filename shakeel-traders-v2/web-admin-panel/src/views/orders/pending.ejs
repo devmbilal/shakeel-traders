@@ -90,6 +90,9 @@
             <i class="bi bi-exclamation-triangle-fill text-warning"></i>
           </span>
         <% } %>
+        <a href="/orders/<%= order.id %>/view" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-eye me-1"></i> View/Edit
+        </a>
         <form method="POST" action="/orders/<%= order.id %>/convert"
               onsubmit="return confirm('Convert this order to a bill? Stock will be deducted immediately.')">
           <button type="submit" class="btn btn-primary btn-sm">

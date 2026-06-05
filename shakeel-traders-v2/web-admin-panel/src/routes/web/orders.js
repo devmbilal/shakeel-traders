@@ -6,6 +6,8 @@ const OrderController = require('../../controllers/OrderController');
 router.get('/',                         OrderController.pendingOrders);
 router.get('/converted',                OrderController.convertedBills);
 router.get('/consolidated',             OrderController.consolidated);
+router.get('/:id/view',                 OrderController.viewOrder);
+router.post('/:id/update-prices',       OrderController.updateOrderPrices);
 router.post('/:id/convert',             OrderController.convertToBill);
 router.get('/bills/:id/print',          OrderController.printBill);
 router.post('/bulk-convert',            OrderController.bulkConvert);

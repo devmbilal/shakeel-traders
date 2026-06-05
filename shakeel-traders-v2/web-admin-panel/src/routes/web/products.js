@@ -19,6 +19,8 @@ router.get('/:id/edit',          ProductController.editForm);
 router.post('/:id',              ProductController.update);
 router.post('/:id/deactivate',   ProductController.deactivate);
 router.post('/:id/activate',     ProductController.activate);
+router.post('/:id/quick-price-update', ProductController.quickPriceUpdate);
+router.post('/:id/quick-threshold-update', ProductController.quickThresholdUpdate);
 router.get('/:id/movements',     ProductController.movements);
 
 module.exports = router;

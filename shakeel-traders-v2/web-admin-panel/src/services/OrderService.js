@@ -24,8 +24,9 @@ const OrderService = {
       if (order.status === 'cancelled') throw new Error('Order is cancelled');
 
       // Fetch order items with product info
+      // Use oi.unit_price (custom price from mobile app) instead of p.retail_price
       const [items] = await conn.query(
-        `SELECT oi.*, p.units_per_carton, p.retail_price AS unit_price
+        `SELECT oi.*, p.units_per_carton, oi.unit_price
          FROM order_items oi
          JOIN products p ON p.id = oi.product_id
          WHERE oi.order_id = ?`,
