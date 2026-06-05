@@ -1,0 +1,42 @@
+<div class="page-header">
+  <div><h4>Pending Recovery Verifications</h4><div class="page-sub">Verify cash collections uploaded by order bookers</div></div>
+</div>
+<div class="d-flex gap-2 mb-3">
+  <a href="/cash-recovery/outstanding" class="btn btn-outline-secondary btn-sm">Outstanding Bills</a>
+  <a href="/cash-recovery/settlement" class="btn btn-outline-secondary btn-sm">Bill Settlement (Delivery Man)</a>
+  <a href="/cash-recovery/pending" class="btn btn-dark-primary btn-sm">Pending Verifications</a>
+  <a href="/cash-recovery/history" class="btn btn-outline-secondary btn-sm">Recovery History</a>
+</div>
+
+<% if (collections.length === 0) { %>
+  <div class="card" style="text-align:center;padding:48px;">
+    <i class="bi bi-check-circle" style="font-size:2rem;color:#10B981;display:block;margin-bottom:8px;"></i>
+    <div style="color:var(--text-muted);">No pending verifications.</div>
+  </div>
+<% } else { %>
+<div class="card table-card">
+  <table class="table">
+    <thead><tr><th>Bill #</th><th>Shop</th><th>Order Booker</th><th>Collected</th><th>Method</th><th>Collected At</th><th>Actions</th></tr></thead>
+    <tbody>
+      <% collections.forEach(c => { %>
+      <tr>
+        <td><code style="font-size:0.75rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;"><%= c.bill_number %></code></td>
+        <td style="font-weight:600;"><%= c.shop_name %></td>
+        <td><%= c.booker_name %></td>
+        <td style="font-weight:700;color:var(--secondary);">Rs <%= Number(c.amount_collected).toFixed(2) %></td>
+        <td><span class="badge badge-blue"><%= c.payment_method.replace(/_/g,' ') %></span></td>
+        <td style="font-size:0.78rem;"><%= new Date(c.collected_at_device).toLocaleString() %></td>
+        <td>
+          <form method="POST" action="/cash-recovery/verify/<%= c.id %>"
+                onsubmit="return confirm('Verify this collection of Rs <%= Number(c.amount_collected).toFixed(2) %>?')">
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="bi bi-check-lg me-1"></i> Verify
+            </button>
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>

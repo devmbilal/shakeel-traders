@@ -1,0 +1,54 @@
+<div class="page-header">
+  <div><h4>Staff Salary Report</h4></div>
+  <div class="d-flex gap-2">
+    <a href="/reports/staff-salary?staffType=<%= filters.staffType||'' %>&month=<%= filters.month||'' %>&year=<%= filters.year||'' %>&export=excel" class="btn btn-outline-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i> Export</a>
+    <a href="/reports" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Reports</a>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" action="/reports/staff-salary" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Staff Type</label>
+        <select name="staffType" class="form-select">
+          <option value="">All</option>
+          <option value="order_booker" <%= filters.staffType==='order_booker'?'selected':'' %>>Order Booker</option>
+          <option value="salesman" <%= filters.staffType==='salesman'?'selected':'' %>>Salesman</option>
+          <option value="delivery_man" <%= filters.staffType==='delivery_man'?'selected':'' %>>Delivery Man</option>
+        </select>
+      </div>
+      <div class="col-md-2"><label class="form-label fw-semibold">Month</label><input type="number" name="month" class="form-control" min="1" max="12" value="<%= filters.month||'' %>" placeholder="1-12"></div>
+      <div class="col-md-2"><label class="form-label fw-semibold">Year</label><input type="number" name="year" class="form-control" value="<%= filters.year||new Date().getFullYear() %>"></div>
+      <div class="col-md-3"><button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i> Filter</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card table-card">
+  <% if (!data.length) { %>
+    <div class="text-center py-5 text-muted">No salary records found.</div>
+  <% } else { %>
+  <table class="table">
+    <thead><tr><th>Staff</th><th>Type</th><th>Month/Year</th><th class="text-end">Basic Salary</th><th class="text-end">Advances</th><th class="text-end">Balance</th><th>Cleared</th></tr></thead>
+    <tbody>
+      <% data.forEach(r => { %>
+      <tr>
+        <td class="fw-semibold"><%= r.staff_name || '—' %></td>
+        <td><span class="badge bg-secondary-subtle text-secondary small"><%= r.staff_type %></span></td>
+        <td class="small"><%= r.month %>/<%= r.year %></td>
+        <td class="text-end">Rs <%= Number(r.basic_salary||0).toLocaleString() %></td>
+        <td class="text-end text-danger">Rs <%= Number(r.total_advances_paid||0).toLocaleString() %></td>
+        <td class="text-end fw-bold <%= parseFloat(r.running_balance||0)>0?'text-success':'text-danger' %>">Rs <%= Number(r.running_balance||0).toLocaleString() %></td>
+        <td class="small"><%= r.clearance_date ? new Date(r.clearance_date).toLocaleDateString('en-PK') : '—' %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<% 
+const queryString = new URLSearchParams({ staffType: filters.staffType||'', month: filters.month||'', year: filters.year||'' }).toString();
+%>
+<%- include('../layout/pagination', { pagination, queryString }) %>

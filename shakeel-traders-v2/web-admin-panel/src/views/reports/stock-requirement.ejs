@@ -1,0 +1,34 @@
+<div class="page-header">
+  <div><h4>Stock Requirement Report</h4></div>
+  <div class="d-flex gap-2">
+    <% if (bookerId) { %><a href="/reports/stock-requirement?bookerId=<%= bookerId %>&export=excel" class="btn btn-outline-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i> Export</a><% } %>
+    <a href="/reports" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Reports</a>
+  </div>
+</div>
+
+<div class="card table-card">
+  <% if (!data.length) { %>
+    <div class="text-center py-5 text-muted">No pending orders found.</div>
+  <% } else { %>
+  <table class="table">
+    <thead><tr><th>SKU</th><th>Product</th><th>UPC</th><th>Required Cartons</th><th>Required Loose</th><th>Current Stock</th></tr></thead>
+    <tbody>
+      <% data.forEach(r => { %>
+      <tr>
+        <td><code class="small"><%= r.sku_code %></code></td>
+        <td class="fw-semibold"><%= r.product_name %></td>
+        <td><%= r.units_per_carton %></td>
+        <td class="fw-bold text-primary"><%= r.total_cartons %></td>
+        <td><%= r.total_loose %></td>
+        <td class="<%= r.current_stock_cartons < r.total_cartons ? 'text-danger fw-semibold' : 'text-success' %>"><%= r.current_stock_cartons %>C + <%= r.current_stock_loose %>L</td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<% 
+const queryString = new URLSearchParams({ bookerId: bookerId||'' }).toString();
+%>
+<%- include('../layout/pagination', { pagination, queryString }) %>

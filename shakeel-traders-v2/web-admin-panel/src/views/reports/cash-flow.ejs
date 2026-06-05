@@ -1,0 +1,54 @@
+<div class="page-header">
+  <div><h4>Cash Flow Report</h4></div>
+  <div class="d-flex gap-2">
+    <a href="/reports/cash-flow?startDate=<%= filters.startDate||'' %>&endDate=<%= filters.endDate||'' %>&view=<%= filters.view||'daily' %>&export=excel" class="btn btn-outline-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i> Export</a>
+    <a href="/reports" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Reports</a>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" action="/reports/cash-flow" class="row g-3 align-items-end">
+      <div class="col-md-3"><label class="form-label fw-semibold">From</label><input type="date" name="startDate" class="form-control" value="<%= filters.startDate||'' %>"></div>
+      <div class="col-md-3"><label class="form-label fw-semibold">To</label><input type="date" name="endDate" class="form-control" value="<%= filters.endDate||'' %>"></div>
+      <div class="col-md-2">
+        <label class="form-label fw-semibold">View</label>
+        <select name="view" class="form-select">
+          <option value="daily" <%= (filters.view||'daily')==='daily'?'selected':'' %>>Daily</option>
+          <option value="monthly" <%= filters.view==='monthly'?'selected':'' %>>Monthly</option>
+        </select>
+      </div>
+      <div class="col-md-3"><button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i> Filter</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card table-card">
+  <% if (!data.length) { %>
+    <div class="text-center py-5 text-muted">No cash flow data found.</div>
+  <% } else { %>
+  <table class="table">
+    <thead>
+      <tr>
+        <% if (filters.view==='monthly') { %><th>Year</th><th>Month</th><% } else { %><th>Date</th><% } %>
+        <th>Entry Type</th><th class="text-end">Total Amount</th><th class="text-end">Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% data.forEach(r => { %>
+      <tr>
+        <% if (filters.view==='monthly') { %><td><%= r.year %></td><td><%= r.month %></td><% } else { %><td class="small"><%= r.cash_date ? new Date(r.cash_date).toLocaleDateString('en-PK') : '' %></td><% } %>
+        <td><span class="badge bg-primary-subtle text-primary small"><%= r.entry_type %></span></td>
+        <td class="text-end fw-semibold text-success">Rs <%= Number(r.total_amount||0).toLocaleString() %></td>
+        <td class="text-end"><%= r.entry_count %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<% 
+const queryString = new URLSearchParams({ startDate: filters.startDate||'', endDate: filters.endDate||'', view: filters.view||'daily' }).toString();
+%>
+<%- include('../layout/pagination', { pagination, queryString }) %>

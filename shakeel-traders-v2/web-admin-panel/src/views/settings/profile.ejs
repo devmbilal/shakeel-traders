@@ -1,0 +1,127 @@
+<div class="page-header">
+  <div>
+    <h4>Admin Profile Settings</h4>
+    <p class="page-sub">Update your account credentials and personal information</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <!-- Change Password Card -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="bi bi-shield-lock me-2"></i>Change Password
+      </div>
+      <div class="card-body">
+        <form method="POST" action="/settings/change-password">
+          <div class="mb-3">
+            <label for="currentPassword" class="form-label">Current Password</label>
+            <input type="password" class="form-control" id="currentPassword" name="currentPassword" required />
+          </div>
+          <div class="mb-3">
+            <label for="newPassword" class="form-label">New Password</label>
+            <input type="password" class="form-control" id="newPassword" name="newPassword" required minlength="6" />
+            <div class="form-text">Password must be at least 6 characters long</div>
+          </div>
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required />
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle me-2"></i>Update Password
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Change Username Card -->
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-person-badge me-2"></i>Change Username
+      </div>
+      <div class="card-body">
+        <form method="POST" action="/settings/change-username">
+          <div class="mb-3">
+            <label for="currentUsername" class="form-label">Current Username</label>
+            <input type="text" class="form-control" id="currentUsername" value="<%= user.username %>" disabled />
+          </div>
+          <div class="mb-3">
+            <label for="newUsername" class="form-label">New Username</label>
+            <input type="text" class="form-control" id="newUsername" name="newUsername" required minlength="3" />
+            <div class="form-text">Username must be at least 3 characters long</div>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="password" name="password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle me-2"></i>Update Username
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <!-- Profile Info Card -->
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-person-circle me-2"></i>Profile Information
+      </div>
+      <div class="card-body">
+        <div class="text-center mb-3">
+          <div class="avatar avatar-lg mx-auto mb-3">
+            <%= user.full_name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) %>
+          </div>
+          <h5 class="mb-1"><%= user.full_name %></h5>
+          <p class="text-muted small mb-0">@<%= user.username %></p>
+          <span class="badge badge-active mt-2">Administrator</span>
+        </div>
+        <div class="divider"></div>
+        <div class="small">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Role:</span>
+            <span class="fw-semibold"><%= user.role %></span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">User ID:</span>
+            <span class="fw-semibold">#<%= user.id %></span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Status:</span>
+            <span class="badge badge-active">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Tips -->
+    <div class="card mt-3">
+      <div class="card-header">
+        <i class="bi bi-shield-check me-2"></i>Security Tips
+      </div>
+      <div class="card-body">
+        <ul class="small mb-0" style="padding-left: 20px;">
+          <li class="mb-2">Use a strong password with letters, numbers, and symbols</li>
+          <li class="mb-2">Change your password regularly</li>
+          <li class="mb-2">Never share your credentials</li>
+          <li>Log out when using shared computers</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Password confirmation validation
+  document.querySelector('form[action="/settings/change-password"]').addEventListener('submit', function(e) {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (newPassword !== confirmPassword) {
+      e.preventDefault();
+      alert('New password and confirmation do not match!');
+      return false;
+    }
+  });
+</script>

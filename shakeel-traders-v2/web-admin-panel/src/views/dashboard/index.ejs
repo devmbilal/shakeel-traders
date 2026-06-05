@@ -1,0 +1,735 @@
+<style>
+/* ── Dashboard Styles ──────────────────────────────────────────────────────── */
+.db-kpi {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.18s;
+}
+.db-kpi:hover { box-shadow: var(--shadow-md); }
+.db-kpi-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.db-kpi-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.db-kpi-value {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.55rem;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+.db-kpi-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* Hero card */
+.db-hero {
+  background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+  border-radius: var(--radius);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(15,23,42,0.22);
+}
+.db-hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.db-hero-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 6px;
+}
+.db-hero-value {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 2.6rem;
+  color: #fff;
+  line-height: 1;
+}
+.db-hero-divider {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 18px 0;
+}
+.db-hero-stat-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 3px;
+}
+.db-hero-stat-value {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #fff;
+}
+.db-hero-stat-sub {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  margin-top: 1px;
+}
+
+/* Alert items */
+.db-alert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #F8FAFC;
+  border: 1px solid var(--border);
+}
+.db-alert-row + .db-alert-row { margin-top: 8px; }
+.db-alert-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Cash card */
+.db-cash {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 6px 24px rgba(5,150,105,0.22);
+}
+.db-cash-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.12);
+}
+.db-cash-row + .db-cash-row { margin-top: 8px; }
+
+/* Orders card */
+.db-orders {
+  background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 6px 24px rgba(29,78,216,0.22);
+}
+.db-orders-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.12);
+}
+.db-orders-row + .db-orders-row { margin-top: 8px; }
+
+/* Section card */
+.db-section {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.db-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.db-section-title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+}
+.db-section-body { padding: 16px 20px; }
+
+/* Bar chart */
+.db-bar-row { margin-bottom: 14px; }
+.db-bar-row:last-child { margin-bottom: 0; }
+.db-bar-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.db-bar-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+.db-bar-val  { font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); }
+.db-bar-track {
+  height: 7px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.db-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(.4,0,.2,1);
+}
+
+/* Booker table */
+.db-booker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.db-booker-row:last-child { border-bottom: none; }
+.db-rank {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.db-rank-1 { background: #FEF9C3; color: #854D0E; }
+.db-rank-2 { background: #F1F5F9; color: #475569; }
+.db-rank-3 { background: #FEF3C7; color: #92400E; }
+
+/* Period toggle */
+.db-period-btn {
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.db-period-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.db-period-btn:hover:not(.active) { background: var(--bg); }
+
+/* Quick stats strip */
+.db-stat-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #F8FAFC;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.db-stat-strip-val {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+.db-stat-strip-lbl {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Pulse dot */
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  animation: pulse-dot 2s infinite;
+  display: inline-block;
+}
+</style>
+
+<!-- ── Dashboard Header ──────────────────────────────────────────────────── -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <span class="live-dot"></span>
+      <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);">Live</span>
+    </div>
+    <h4 style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.25rem;margin:0;">Executive Dashboard</h4>
+    <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;" id="dashSubtitle">Real-time overview — Today</div>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <div class="d-flex gap-1">
+      <button class="db-period-btn active" id="btnDaily"   onclick="window.switchView('daily')">Today</button>
+      <button class="db-period-btn"        id="btnMonthly" onclick="window.switchView('monthly')">Month</button>
+      <button class="db-period-btn"        id="btnYearly"  onclick="window.switchView('yearly')">Year</button>
+    </div>
+    <button class="db-period-btn" onclick="window.refreshDashboard()" title="Refresh">
+      <i class="bi bi-arrow-clockwise"></i>
+    </button>
+  </div>
+</div>
+
+<!-- ── Error State ───────────────────────────────────────────────────────── -->
+<div id="errorState" class="alert alert-danger d-none">
+  <i class="bi bi-exclamation-triangle me-2"></i><span id="errorMessage">Failed to load dashboard data.</span>
+</div>
+
+<!-- ── Dashboard Content ─────────────────────────────────────────────────── -->
+<div id="dashboardContent">
+
+  <!-- ROW 1: Quick Stats Strip -->
+  <div class="row g-3 mb-3" id="statsStrip">
+    <div class="col-6 col-md-3">
+      <div class="db-stat-strip">
+        <i class="bi bi-shop" style="font-size:1.1rem;color:var(--secondary);"></i>
+        <div>
+          <div class="db-stat-strip-val" id="qs-shops">—</div>
+          <div class="db-stat-strip-lbl">Shops</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="db-stat-strip">
+        <i class="bi bi-box-seam" style="font-size:1.1rem;color:#8B5CF6;"></i>
+        <div>
+          <div class="db-stat-strip-val" id="qs-products">—</div>
+          <div class="db-stat-strip-lbl">Products</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="db-stat-strip">
+        <i class="bi bi-person-badge" style="font-size:1.1rem;color:#F59E0B;"></i>
+        <div>
+          <div class="db-stat-strip-val" id="qs-bookers">—</div>
+          <div class="db-stat-strip-lbl">Bookers</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="db-stat-strip">
+        <i class="bi bi-signpost-2" style="font-size:1.1rem;color:#EF4444;"></i>
+        <div>
+          <div class="db-stat-strip-val" id="qs-routes">—</div>
+          <div class="db-stat-strip-lbl">Routes</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /#statsStrip -->
+
+  <!-- ROW 2: Hero Financial + Alerts -->
+  <div class="row g-3 mb-3">
+
+    <!-- Financial Hero -->
+    <div class="col-lg-5">
+      <div class="db-hero h-100">
+        <div class="db-hero-label">Total Outstanding</div>
+        <div class="db-hero-value" id="totalOutstanding">Rs —</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:4px;" id="outstandingBillCount">— bills</div>
+        <div class="db-hero-divider"></div>
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="db-hero-stat-label">Supplier Advance</div>
+            <div class="db-hero-stat-value" id="supplierAdvance">Rs —</div>
+            <div class="db-hero-stat-sub" id="supplierCount">— suppliers</div>
+          </div>
+          <div class="col-6">
+            <div class="db-hero-stat-label">Stock Value</div>
+            <div class="db-hero-stat-value" id="stockValue">Rs —</div>
+            <div class="db-hero-stat-sub" id="stockUnits">— ctn</div>
+          </div>
+        </div>
+
+        <!-- Mobile App Connection Info -->
+        <div class="db-hero-divider"></div>
+        <div style="max-width:55%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 14px;">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-phone" style="color:rgba(255,255,255,0.5);font-size:0.85rem;"></i>
+            <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);">Mobile App Connection</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span style="font-size:0.68rem;color:rgba(255,255,255,0.4);width:32px;">IP</span>
+            <code id="serverIP" style="font-size:0.82rem;font-weight:700;color:#60A5FA;background:rgba(96,165,250,0.1);padding:2px 8px;border-radius:5px;letter-spacing:0.03em;">—</code>
+            <button onclick="copyToClipboard('serverIP')" title="Copy IP" style="background:none;border:none;padding:0;cursor:pointer;color:rgba(255,255,255,0.3);">
+              <i class="bi bi-copy" style="font-size:0.75rem;"></i>
+            </button>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span style="font-size:0.68rem;color:rgba(255,255,255,0.4);width:32px;">Port</span>
+            <code id="serverPort" style="font-size:0.82rem;font-weight:700;color:#34D399;background:rgba(52,211,153,0.1);padding:2px 8px;border-radius:5px;letter-spacing:0.03em;">—</code>
+            <button onclick="copyToClipboard('serverPort')" title="Copy Port" style="background:none;border:none;padding:0;cursor:pointer;color:rgba(255,255,255,0.3);">
+              <i class="bi bi-copy" style="font-size:0.75rem;"></i>
+            </button>
+          </div>
+        </div>
+        <!-- subtle logo watermark -->
+        <% if (typeof logoPath !== 'undefined' && logoPath) { %>
+        <img id="heroDashLogo" src="<%= logoPath %>?v=<%= Date.now() %>" alt="" aria-hidden="true"
+          style="position:absolute;bottom:-16px;right:10px;height:150px;width:auto;opacity:1;pointer-events:none;" />
+        <% } %>
+      </div>
+    </div>
+
+    <!-- KPI Column: Cash + Orders -->
+    <div class="col-lg-4 d-flex flex-column gap-3">
+
+      <!-- Cash Collected -->
+      <div class="db-cash flex-fill">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Cash Collected</div>
+          <i class="bi bi-cash-coin" style="color:rgba(255,255,255,0.25);font-size:1.1rem;"></i>
+        </div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:2rem;color:#fff;line-height:1;margin-bottom:14px;" id="cashCollectedTotal">Rs —</div>
+        <div class="db-cash-row">
+          <span style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.85);">Salesman Sale</span>
+          <span style="font-size:0.78rem;font-weight:700;color:#fff;" id="cashSalesmanSale">Rs 0</span>
+        </div>
+        <div class="db-cash-row">
+          <span style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.85);">Recovery</span>
+          <span style="font-size:0.78rem;font-weight:700;color:#fff;" id="cashRecovery">Rs 0</span>
+        </div>
+        <div class="db-cash-row">
+          <span style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.85);">Delivery Collection</span>
+          <span style="font-size:0.78rem;font-weight:700;color:#fff;" id="cashDeliveryMan">Rs 0</span>
+        </div>
+      </div>
+
+      <!-- Orders Booked -->
+      <div class="db-orders flex-fill">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Orders Booked</div>
+          <i class="bi bi-clipboard-check" style="color:rgba(255,255,255,0.25);font-size:1.1rem;"></i>
+        </div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:2rem;color:#fff;line-height:1;margin-bottom:14px;" id="totalOrdersBooked">—</div>
+        <div id="topBookersList">
+          <div class="db-orders-row"><span style="font-size:0.75rem;color:rgba(255,255,255,0.5);">Loading…</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Alerts Panel -->
+    <div class="col-lg-3">
+      <div class="db-section h-100">
+        <div class="db-section-header">
+          <span class="db-section-title">Alerts</span>
+          <span class="badge bg-danger" id="totalAlertsCount" style="font-size:0.7rem;">0</span>
+        </div>
+        <div class="db-section-body">
+          <div class="db-alert-row">
+            <div class="d-flex align-items-center gap-2">
+              <div class="db-alert-dot" style="background:#EF4444;"></div>
+              <span style="font-size:0.8rem;font-weight:600;">Low Stock</span>
+            </div>
+            <span class="badge" style="background:#FEE2E2;color:#991B1B;font-size:0.7rem;" id="lowStockCount">0</span>
+          </div>
+          <div class="db-alert-row">
+            <div class="d-flex align-items-center gap-2">
+              <div class="db-alert-dot" style="background:#F59E0B;"></div>
+              <span style="font-size:0.8rem;font-weight:600;">Pending Orders</span>
+            </div>
+            <span class="badge" style="background:#FEF9C3;color:#854D0E;font-size:0.7rem;" id="pendingOrdersCount">0</span>
+          </div>
+          <div class="db-alert-row">
+            <div class="d-flex align-items-center gap-2">
+              <div class="db-alert-dot" style="background:#8B5CF6;"></div>
+              <span style="font-size:0.8rem;font-weight:600;">Pending Issuances</span>
+            </div>
+            <span class="badge" style="background:#EDE9FE;color:#5B21B6;font-size:0.7rem;" id="pendingIssuancesCount">0</span>
+          </div>
+          <div class="db-alert-row">
+            <div class="d-flex align-items-center gap-2">
+              <div class="db-alert-dot" style="background:#3B82F6;"></div>
+              <span style="font-size:0.8rem;font-weight:600;">Pending Returns</span>
+            </div>
+            <span class="badge" style="background:#DBEAFE;color:#1E40AF;font-size:0.7rem;" id="pendingReturnsCount">0</span>
+          </div>
+          <div class="db-alert-row">
+            <div class="d-flex align-items-center gap-2">
+              <div class="db-alert-dot" style="background:#64748B;"></div>
+              <span style="font-size:0.8rem;font-weight:600;">Unsynced Bookers</span>
+            </div>
+            <span class="badge" style="background:#F1F5F9;color:#475569;font-size:0.7rem;" id="unsyncedCount">0</span>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <a href="/stock"         class="btn btn-sm btn-dark-primary flex-fill" style="font-size:0.7rem;">Stock</a>
+            <a href="/orders"        class="btn btn-sm btn-dark-primary flex-fill" style="font-size:0.7rem;">Orders</a>
+            <a href="/cash-recovery" class="btn btn-sm btn-dark-primary flex-fill" style="font-size:0.7rem;">Recovery</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 3: Sales by Channel KPIs -->
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <div class="db-kpi">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="db-kpi-label">Order Booker Sales</div>
+          <div class="db-kpi-icon" style="background:#EFF6FF;">
+            <i class="bi bi-person-badge" style="color:#3B82F6;"></i>
+          </div>
+        </div>
+        <div class="db-kpi-value" id="salesOrderBooker">Rs —</div>
+        <div class="db-kpi-sub" id="salesOrderBookerCount">— bills</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="db-kpi">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="db-kpi-label">Salesman Sales</div>
+          <div class="db-kpi-icon" style="background:#F0FDF4;">
+            <i class="bi bi-truck" style="color:#10B981;"></i>
+          </div>
+        </div>
+        <div class="db-kpi-value" id="salesSalesman">Rs —</div>
+        <div class="db-kpi-sub" id="salesSalesmanCount">— bills</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="db-kpi">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="db-kpi-label">Direct Shop Sales</div>
+          <div class="db-kpi-icon" style="background:#FFF7ED;">
+            <i class="bi bi-shop" style="color:#F59E0B;"></i>
+          </div>
+        </div>
+        <div class="db-kpi-value" id="salesDirectShop">Rs —</div>
+        <div class="db-kpi-sub" id="salesDirectShopCount">— bills</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Salesman Graph + Route Breakdown -->
+  <div class="row g-3">
+
+    <!-- Salesman Sales Bar Chart -->
+    <div class="col-lg-6">
+      <div class="db-section">
+        <div class="db-section-header">
+          <span class="db-section-title">Salesman Sales Breakdown</span>
+          <a href="/direct-sales" style="font-size:0.72rem;font-weight:700;color:var(--secondary);text-decoration:none;"></a>
+        </div>
+        <div class="db-section-body" id="salesmanSalesGraph">
+          <div style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:24px 0;">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Route Breakdown -->
+    <div class="col-lg-6">
+      <div class="db-section">
+        <div class="db-section-header">
+          <span class="db-section-title">Top Routes by Sales</span>
+          <a href="/routes" style="font-size:0.72rem;font-weight:700;color:var(--secondary);text-decoration:none;"></a>
+        </div>
+        <div class="db-section-body" id="routeBreakdownGraph">
+          <div style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:24px 0;">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /#dashboardContent -->
+
+<script>
+(function () {
+  'use strict';
+
+  var currentView = 'daily';
+
+  /* ── Helpers ── */
+  function fmt(amount) {
+    var n = parseFloat(amount || 0);
+    if (n >= 10000000) return 'Rs ' + (n / 10000000).toFixed(1) + 'Cr';
+    if (n >= 100000)   return 'Rs ' + (n / 100000).toFixed(1) + 'L';
+    if (n >= 1000)     return 'Rs ' + (n / 1000).toFixed(0) + 'K';
+    return 'Rs ' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+
+  function set(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  /* ── Render ── */
+  function render(data) {
+    /* Quick stats */
+    var s = data.stats || {};
+    set('qs-shops',    s.total_shops    || 0);
+    set('qs-products', s.total_products || 0);
+    set('qs-bookers',  s.active_bookers || 0);
+    set('qs-routes',   s.total_routes   || 0);
+
+    /* Server connection info */
+    var srv = data.server || {};
+    set('serverIP',   srv.ip   || '—');
+    set('serverPort', String(srv.port || '—'));
+
+    /* Subtitle */
+    set('dashSubtitle', 'Real-time overview — ' + (data.dateLabel || 'Today'));
+
+    /* Financial hero */
+    var f = data.financials || {};
+    set('totalOutstanding',    fmt(f.totalOutstanding));
+    set('outstandingBillCount', (f.outstandingBillCount || 0) + ' open bills');
+    set('supplierAdvance',     fmt(f.supplierAdvance));
+    set('supplierCount',       (f.supplierCount || 0) + ' suppliers');
+    set('stockValue',          fmt(f.stockValue));
+    set('stockUnits',          (f.totalCartons || 0).toLocaleString() + ' ctn + ' + (f.totalLoose || 0).toLocaleString() + ' loose');
+
+    /* Cash */
+    var c = data.cash || {};
+    set('cashCollectedTotal', fmt(c.total));
+    set('cashSalesmanSale',   fmt(c.salesman_sale));
+    set('cashRecovery',       fmt(c.recovery));
+    set('cashDeliveryMan',    fmt(c.delivery_man_collection));
+
+    /* Orders */
+    var bp = data.bookerPerformance || [];
+    var totalOrders = bp.reduce(function (sum, b) { return sum + parseInt(b.orders_booked || 0); }, 0);
+    set('totalOrdersBooked', totalOrders);
+    renderTopBookers(bp);
+
+    /* Alerts */
+    var al = data.alerts || {};
+    var totalAlerts = (al.lowStockCount || 0) + (al.pendingOrders || 0) + (al.pendingIssuances || 0) + (al.pendingReturns || 0) + (al.unsyncedBookers || []).length;
+    set('totalAlertsCount',      totalAlerts);
+    set('lowStockCount',         al.lowStockCount || 0);
+    set('pendingOrdersCount',    al.pendingOrders || 0);
+    set('pendingIssuancesCount', al.pendingIssuances || 0);
+    set('pendingReturnsCount',   al.pendingReturns || 0);
+    set('unsyncedCount',         (al.unsyncedBookers || []).length);
+
+    /* Sales by channel */
+    var sl = data.sales || {};
+    set('salesOrderBooker',      fmt((sl.order_booker || {}).sales));
+    set('salesOrderBookerCount', ((sl.order_booker || {}).count || 0) + ' bills');
+    set('salesSalesman',         fmt((sl.salesman || {}).sales));
+    set('salesSalesmanCount',    'Stock-based sales');
+    set('salesDirectShop',       fmt((sl.direct_shop || {}).sales));
+    set('salesDirectShopCount',  ((sl.direct_shop || {}).count || 0) + ' bills');
+
+    /* Charts */
+    renderBarChart('salesmanSalesGraph',  data.salesmanBreakdown || [], 'salesman_name', 'total_sales',  '#10B981', '/direct-sales');
+    renderBarChart('routeBreakdownGraph', data.routeBreakdown    || [], 'route_name',    'total_sales',  '#3B82F6', '/routes');
+  }
+
+  function renderTopBookers(data) {
+    var el = document.getElementById('topBookersList');
+    if (!el) return;
+    if (!data || !data.length) {
+      el.innerHTML = '<div class="db-orders-row"><span style="font-size:0.75rem;color:rgba(255,255,255,0.45);">No data</span></div>';
+      return;
+    }
+    el.innerHTML = data.slice(0, 3).map(function (b, i) {
+      return '<div class="db-orders-row">' +
+        '<div class="d-flex align-items-center gap-2">' +
+        '<div style="width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:#fff;">' + (i + 1) + '</div>' +
+        '<span style="font-size:0.78rem;font-weight:600;color:#fff;">' + b.full_name + '</span>' +
+        '</div>' +
+        '<span style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.85);">' + b.orders_booked + ' orders</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderBarChart(containerId, data, nameKey, valueKey, color, link) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    if (!data || !data.length) {
+      el.innerHTML = '<div style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:24px 0;">No data for this period</div>';
+      return;
+    }
+    var max = Math.max.apply(Math, data.map(function (r) { return parseFloat(r[valueKey] || 0); }));
+    el.innerHTML = data.slice(0, 6).map(function (r) {
+      var val = parseFloat(r[valueKey] || 0);
+      var pct = max > 0 ? Math.round(val / max * 100) : 0;
+      // For salesman breakdown show cartons+loose instead of bill count
+      var sub = '';
+      if (r.total_sold_cartons !== undefined) {
+        sub = '<span style="font-size:0.68rem;color:var(--text-muted);">' +
+              (r.total_sold_cartons || 0) + ' ctn + ' + (r.total_sold_loose || 0) + ' loose sold</span>';
+      }
+      return '<div class="db-bar-row">' +
+        '<div class="db-bar-meta">' +
+        '<div><span class="db-bar-name">' + (r[nameKey] || '—') + '</span>' +
+        (sub ? '<br>' + sub : '') + '</div>' +
+        '<span class="db-bar-val">' + fmt(val) + '</span>' +
+        '</div>' +
+        '<div class="db-bar-track">' +
+        '<div class="db-bar-fill" style="width:' + pct + '%;background:' + color + ';"></div>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  /* ── Fetch ── */
+  function load() {
+    document.getElementById('errorState').classList.add('d-none');
+    fetch('/dashboard/data?view=' + currentView)
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) { render(data); })
+      .catch(function (err) {
+        document.getElementById('errorState').classList.remove('d-none');
+        set('errorMessage', err.message);
+      });
+  }
+
+  /* ── Copy to clipboard ── */
+  window.copyToClipboard = function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    navigator.clipboard.writeText(el.textContent.trim()).then(function () {
+      var orig = el.style.background;
+      el.style.background = 'rgba(52,211,153,0.25)';
+      setTimeout(function () { el.style.background = orig; }, 800);
+    });
+  };
+
+  window.switchView = function (v) {
+    currentView = v;
+    ['daily','monthly','yearly'].forEach(function (x) {
+      var btn = document.getElementById('btn' + x.charAt(0).toUpperCase() + x.slice(1));
+      if (btn) btn.className = 'db-period-btn' + (x === v ? ' active' : '');
+    });
+    load();
+  };
+
+  window.refreshDashboard = load;
+
+  /* ── Init ── */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', load);
+  } else {
+    load();
+  }
+  setInterval(load, 60000);
+
+})();
+</script>

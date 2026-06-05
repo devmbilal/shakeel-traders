@@ -1,0 +1,52 @@
+<div class="page-header">
+  <div><h4>Return Detail — <%= ret.salesman_name %></h4><div class="page-sub">Return Date: <%= ret.return_date %></div></div>
+  <a href="/stock/pending-returns" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+<div class="card mb-3">
+  <div class="card-header">Product Breakdown</div>
+  <div class="card-body p-0">
+    <table class="table mb-0">
+      <thead><tr><th>SKU</th><th>Product</th><th>Issued</th><th>Returned</th><th>Sold</th><th>Sale Value</th></tr></thead>
+      <tbody>
+        <% (ret.items || []).forEach(item => { %>
+        <tr>
+          <td><code style="font-size:0.75rem;"><%= item.sku_code %></code></td>
+          <td><%= item.product_name %></td>
+          <td><%= item.issued_cartons %>C + <%= item.issued_loose %>L</td>
+          <td><%= item.returned_cartons %>C + <%= item.returned_loose %>L</td>
+          <td style="font-weight:600;color:var(--secondary);"><%= item.sold_cartons %>C + <%= item.sold_loose %>L</td>
+          <td style="font-weight:700;">Rs <%= Number(item.line_sale_value).toFixed(2) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body">
+    <div class="row g-3 mb-3">
+      <div class="col-md-4">
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:3px;">System Sale Value</div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.2rem;">Rs <%= Number(ret.system_sale_value||0).toFixed(2) %></div>
+      </div>
+      <div class="col-md-4">
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:3px;">Cash Collected by Salesman</div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.2rem;color:#10B981;">Rs <%= Number(ret.cash_collected||0).toFixed(2) %></div>
+      </div>
+    </div>
+    <form method="POST" action="/stock/returns/<%= ret.id %>/approve">
+      <div class="d-flex align-items-center gap-3">
+        <div>
+          <label class="form-label">Override Sale Value (Rs)</label>
+          <input type="number" name="final_sale_value" class="form-control" style="width:180px;" step="0.01" min="0" placeholder="<%= Number(ret.system_sale_value||0).toFixed(2) %>">
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">Leave blank to use system value</div>
+        </div>
+        <div style="margin-top:20px;">
+          <button type="submit" class="btn btn-primary" onclick="return confirm('Approve this return?')">
+            <i class="bi bi-check-lg me-1"></i> Approve Return
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

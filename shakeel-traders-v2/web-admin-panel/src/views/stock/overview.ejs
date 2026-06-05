@@ -1,0 +1,86 @@
+<div class="page-header">
+  <div><h4>Stock Management</h4><div class="page-sub">Warehouse stock overview and movement management</div></div>
+  <div class="d-flex gap-2">
+    <a href="/stock/manual-add" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus-lg me-1"></i> Manual Add</a>
+    <a href="/stock/add-from-supplier" class="btn btn-primary btn-sm"><i class="bi bi-truck me-1"></i> Add from Supplier</a>
+  </div>
+</div>
+
+<!-- Quick nav tabs -->
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  <a href="/stock" class="btn btn-dark-primary btn-sm">Stock Overview</a>
+  <a href="/stock/pending-issuances" class="btn btn-outline-secondary btn-sm">Pending Issuances</a>
+  <a href="/stock/pending-returns" class="btn btn-outline-secondary btn-sm">Pending Returns</a>
+  <a href="/stock/requirement-report" class="btn btn-outline-secondary btn-sm">Requirement Report</a>
+</div>
+
+<!-- Search Bar -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <div class="d-flex gap-2 align-items-center">
+      <i class="bi bi-search" style="color:var(--text-secondary);"></i>
+      <input type="text" id="stockSearch" class="form-control form-control-sm border-0" placeholder="Search by SKU, product name, or brand..." style="box-shadow:none;">
+    </div>
+  </div>
+</div>
+
+<div class="card table-card">
+  <% if (products.length === 0) { %>
+    <div style="text-align:center;padding:48px;color:var(--text-muted);">No active products found.</div>
+  <% } else { %>
+  <table class="table" id="stockTable">
+    <thead>
+      <tr>
+        <th>SKU</th><th>Product</th><th>Brand</th>
+        <th>Cartons</th><th>Loose Units</th><th>Total Units</th>
+        <th>Retail Price</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% products.forEach(p => { %>
+      <% const totalUnits = p.current_stock_cartons * p.units_per_carton + p.current_stock_loose; %>
+      <% const isLow = p.low_stock_threshold && totalUnits <= p.low_stock_threshold; %>
+      <tr>
+        <td><code style="font-size:0.75rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;"><%= p.sku_code %></code></td>
+        <td><span style="font-weight:600;"><%= p.name %></span></td>
+        <td style="color:var(--text-secondary);"><%= p.brand || '—' %></td>
+        <td style="font-weight:600;color:<%= isLow ? '#EF4444' : 'var(--text-primary)' %>;"><%= p.current_stock_cartons %></td>
+        <td style="font-weight:600;color:<%= isLow ? '#EF4444' : 'var(--text-primary)' %>;"><%= p.current_stock_loose %></td>
+        <td>
+          <span style="font-weight:700;color:<%= isLow ? '#EF4444' : '#10B981' %>;">
+            <%= totalUnits %>
+            <% if (isLow) { %><i class="bi bi-exclamation-triangle-fill ms-1" title="Low stock"></i><% } %>
+          </span>
+        </td>
+        <td>Rs <%= Number(p.retail_price).toFixed(2) %></td>
+        <td>
+          <a href="/stock/<%= p.id %>/movements" class="btn btn-icon btn-outline-secondary" title="Movement History">
+            <i class="bi bi-clock-history"></i>
+          </a>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<script>
+// Stock search functionality
+document.getElementById('stockSearch').addEventListener('input', function(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  const rows = document.querySelectorAll('#stockTable tbody tr');
+  
+  rows.forEach(row => {
+    const sku = row.cells[0].textContent.toLowerCase();
+    const product = row.cells[1].textContent.toLowerCase();
+    const brand = row.cells[2].textContent.toLowerCase();
+    
+    if (sku.includes(searchTerm) || product.includes(searchTerm) || brand.includes(searchTerm)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+});
+</script>

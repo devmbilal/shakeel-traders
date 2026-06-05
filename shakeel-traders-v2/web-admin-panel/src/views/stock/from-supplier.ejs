@@ -1,0 +1,95 @@
+<div class="page-header">
+  <div><h4>Add Stock from Supplier</h4><div class="page-sub">Record a stock receipt. Value will be deducted from supplier advance balance.</div></div>
+  <a href="/stock" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+
+<div class="card">
+  <div class="card-header"><i class="bi bi-truck me-2" style="color:var(--secondary);"></i>Stock Receipt</div>
+  <div class="card-body">
+    <form method="POST" action="/stock/add-from-supplier" id="supplierForm">
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="form-label">Supplier <span style="color:#EF4444;">*</span></label>
+          <select name="company_id" class="form-select" data-searchable required>
+            <option value="">— Select supplier —</option>
+            <% suppliers.forEach(s => { %>
+              <option value="<%= s.id %>"><%= s.name %> (Balance: Rs <%= Number(s.current_advance_balance).toFixed(2) %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Receipt Date <span style="color:#EF4444;">*</span></label>
+          <input type="date" name="receipt_date" class="form-control" value="<%= new Date().toISOString().slice(0,10) %>" required>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label">Note (optional)</label>
+          <input type="text" name="note" class="form-control" placeholder="e.g. Invoice #1234">
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <h6 style="font-family:'Manrope',sans-serif;font-weight:700;margin:0;">Products Received</h6>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addRow()">
+          <i class="bi bi-plus-lg me-1"></i> Add Product
+        </button>
+      </div>
+
+      <div id="itemsContainer">
+        <div class="item-row row g-2 mb-2 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Product</label>
+            <select name="product_id" class="form-select" data-searchable required>
+              <option value="">— Select —</option>
+              <% products.forEach(p => { %>
+                <option value="<%= p.id %>" data-upc="<%= p.units_per_carton %>"><%= p.sku_code %> — <%= p.name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Cartons</label>
+            <input type="number" name="cartons" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Loose Units</label>
+            <input type="number" name="loose_units" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Unit Price (Rs)</label>
+            <input type="number" name="unit_price" class="form-control" step="0.01" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-delete btn-sm w-100" onclick="removeRow(this)">
+              <i class="bi bi-trash"></i> Remove
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Submit Receipt</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const productOptions = `<% products.forEach(p => { %><option value="<%= p.id %>"><%= p.sku_code %> — <%= p.name %></option><% }) %>`;
+
+function addRow() {
+  const container = document.getElementById('itemsContainer');
+  const row = document.createElement('div');
+  row.className = 'item-row row g-2 mb-2 align-items-end';
+  row.innerHTML = `
+    <div class="col-md-4"><select name="product_id" class="form-select" required><option value="">— Select —</option>${productOptions}</select></div>
+    <div class="col-md-2"><input type="number" name="cartons" class="form-control" min="0" value="0"></div>
+    <div class="col-md-2"><input type="number" name="loose_units" class="form-control" min="0" value="0"></div>
+    <div class="col-md-2"><input type="number" name="unit_price" class="form-control" step="0.01" min="0" value="0"></div>
+    <div class="col-md-2"><button type="button" class="btn btn-delete btn-sm w-100" onclick="removeRow(this)"><i class="bi bi-trash"></i> Remove</button></div>
+  `;
+  container.appendChild(row);
+}
+function removeRow(btn) {
+  const rows = document.querySelectorAll('.item-row');
+  if (rows.length > 1) btn.closest('.item-row').remove();
+}
+</script>
