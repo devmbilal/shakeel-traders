@@ -1,0 +1,78 @@
+<div class="page-header">
+  <div>
+    <h4><%= isEdit ? 'Edit' : 'Add' %> Delivery Man</h4>
+    <div class="page-sub"><%= isEdit ? 'Update' : 'Create' %> delivery man record</div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header"><span style="font-weight:700;">Delivery Man Details</span></div>
+      <div class="card-body">
+        <form method="POST" action="<%= isEdit ? `/users/delivery-men/${deliveryMan.id}` : '/users/delivery-men' %>">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Full Name <span style="color:#EF4444;">*</span></label>
+              <input type="text" name="full_name" class="form-control" 
+                     value="<%= isEdit ? deliveryMan.full_name : '' %>" required>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label">Contact Number</label>
+              <input type="text" name="contact" class="form-control" 
+                     value="<%= isEdit && deliveryMan.contact ? deliveryMan.contact : '' %>" 
+                     placeholder="03XX-XXXXXXX">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Monthly Base Salary</label>
+              <div class="input-group">
+                <span class="input-group-text">Rs</span>
+                <input type="number" name="base_salary" class="form-control" 
+                       step="0.01" min="0" 
+                       value="<%= isEdit && deliveryMan.base_salary ? deliveryMan.base_salary : '' %>" 
+                       placeholder="30000.00">
+              </div>
+              <small class="text-muted">Used for payroll calculation. Leave empty if not applicable.</small>
+            </div>
+
+            <div class="col-12">
+              <div class="form-check">
+                <input type="checkbox" name="enable_payroll" value="1" id="enable_payroll" class="form-check-input"
+                       <%= isEdit && deliveryMan.enable_payroll ? 'checked' : (!isEdit ? 'checked' : '') %>>
+                <label class="form-check-label" for="enable_payroll">
+                  <strong>Include in Payroll & Attendance</strong>
+                </label>
+                <div class="form-text">Check this to include delivery man in attendance marking and payroll generation. Uncheck for software-only or contract-based delivery men.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save me-1"></i> <%= isEdit ? 'Update' : 'Create' %> Delivery Man
+            </button>
+            <a href="/users?tab=delivery_men" class="btn btn-outline-secondary">
+              <i class="bi bi-x-lg me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card border-info">
+      <div class="card-body">
+        <h6 class="card-title"><i class="bi bi-info-circle me-2"></i>Information</h6>
+        <ul class="mb-0 small">
+          <li>Delivery men don't have system login credentials</li>
+          <li>Set base salary to include them in payroll</li>
+          <li>Leave base salary empty if they're paid differently</li>
+          <li>Delivery men will appear in attendance if base salary is set</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

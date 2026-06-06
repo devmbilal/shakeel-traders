@@ -1,0 +1,211 @@
+<div class="page-header">
+  <div>
+    <h4>Mark Attendance</h4>
+    <div class="page-sub">Mark daily attendance for all staff members</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/attendance/report" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-file-earmark-text me-1"></i> View Report
+    </a>
+  </div>
+</div>
+
+<!-- Date Selector -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="GET" action="/attendance" class="row g-2 align-items-center">
+      <div class="col-auto">
+        <label class="form-label mb-0 fw-semibold">Select Date:</label>
+      </div>
+      <div class="col-auto">
+        <input type="date" name="date" class="form-control form-control-sm" value="<%= selectedDate %>" onchange="this.form.submit()">
+      </div>
+      <div class="col-auto">
+        <% if (isFriday) { %>
+          <span class="badge bg-primary"><i class="bi bi-calendar-x me-1"></i> Friday (Auto Weekly Off)</span>
+        <% } %>
+        <% if (isHoliday) { %>
+          <span class="badge bg-danger"><i class="bi bi-calendar-event me-1"></i> Public Holiday</span>
+        <% } %>
+      </div>
+      <div class="col">
+        <small class="text-muted">
+          <i class="bi bi-info-circle me-1"></i>
+          <strong>Simplified:</strong> Only mark Absent & Holiday. Everyone else is auto-present. Fridays are auto-off.
+        </small>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Attendance Form -->
+<form method="POST" action="/attendance/mark" id="attendanceForm">
+  <input type="hidden" name="attendance_date" value="<%= selectedDate %>">
+  
+  <div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span style="font-weight:700;"><%= staff.length %> Staff Members</span>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="markAll('')">
+          <i class="bi bi-arrow-clockwise me-1"></i> Clear All
+        </button>
+        <% if (isHoliday) { %>
+          <button type="button" class="btn btn-sm btn-warning" onclick="markAll('holiday')">
+            <i class="bi bi-calendar-event me-1"></i> Mark All Holiday
+          </button>
+        <% } %>
+      </div>
+    </div>
+    
+    <div class="card-body p-0">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th style="padding-left:20px;">Staff Name</th>
+            <th>Type</th>
+            <th>Base Salary</th>
+            <th style="width:400px;">Attendance Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (staff.length === 0) { %>
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">
+                No active staff members found
+              </td>
+            </tr>
+          <% } else { %>
+            <% staff.forEach(s => { 
+              const key = `${s.staff_type}_${s.id}`;
+              const currentStatus = s.attendance_status || (isFriday ? 'off' : (isHoliday ? 'holiday' : ''));
+            %>
+            <tr>
+              <td style="padding-left:20px;">
+                <div style="font-weight:600;"><%= s.full_name %></div>
+                <% if (s.contact) { %><div style="font-size:0.75rem;color:var(--text-muted);"><%= s.contact %></div><% } %>
+              </td>
+              <td>
+                <span class="badge badge-blue" style="text-transform:capitalize;"><%= s.staff_type.replace(/_/g, ' ') %></span>
+              </td>
+              <td>
+                <% if (s.base_salary) { %>
+                  <span style="font-weight:600;">Rs <%= parseFloat(s.base_salary).toLocaleString() %></span>
+                <% } else { %>
+                  <span class="text-muted">—</span>
+                <% } %>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm" role="group">
+                  <input type="radio" class="btn-check" name="attendance[<%= key %>]" id="none_<%= key %>" value="" <%= currentStatus === '' || !currentStatus ? 'checked' : '' %>>
+                  <label class="btn btn-outline-secondary" for="none_<%= key %>">
+                    <i class="bi bi-dash-circle me-1"></i> Auto (Present)
+                  </label>
+
+                  <input type="radio" class="btn-check" name="attendance[<%= key %>]" id="absent_<%= key %>" value="absent" <%= currentStatus === 'absent' ? 'checked' : '' %>>
+                  <label class="btn btn-outline-danger" for="absent_<%= key %>">
+                    <i class="bi bi-x-circle me-1"></i> Absent
+                  </label>
+
+                  <input type="radio" class="btn-check" name="attendance[<%= key %>]" id="holiday_<%= key %>" value="holiday" <%= currentStatus === 'holiday' ? 'checked' : '' %>>
+                  <label class="btn btn-outline-warning" for="holiday_<%= key %>">
+                    <i class="bi bi-calendar-event me-1"></i> Holiday
+                  </label>
+                </div>
+              </td>
+            </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    
+    <% if (staff.length > 0) { %>
+    <div class="card-footer text-end">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save me-1"></i> Save Attendance
+      </button>
+    </div>
+    <% } %>
+  </div>
+</form>
+
+<!-- Summary Cards -->
+<div class="row">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <i class="bi bi-dash-circle text-secondary" style="font-size:2rem;"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <div class="text-muted small">Auto (Present)</div>
+            <div class="h5 mb-0" id="autoCount">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <i class="bi bi-x-circle text-danger" style="font-size:2rem;"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <div class="text-muted small">Absent</div>
+            <div class="h5 mb-0" id="absentCount">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <i class="bi bi-calendar-event text-warning" style="font-size:2rem;"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <div class="text-muted small">Holiday</div>
+            <div class="h5 mb-0" id="holidayCount">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Mark all with specific status
+function markAll(status) {
+  const radios = document.querySelectorAll('input[type="radio"][value="' + status + '"]');
+  radios.forEach(radio => radio.checked = true);
+  updateCounts();
+}
+
+// Update summary counts
+function updateCounts() {
+  let auto = 0, absent = 0, holiday = 0;
+  
+  document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+    if (radio.value === '' || !radio.value) auto++;
+    else if (radio.value === 'absent') absent++;
+    else if (radio.value === 'holiday') holiday++;
+  });
+  
+  document.getElementById('autoCount').textContent = auto;
+  document.getElementById('absentCount').textContent = absent;
+  document.getElementById('holidayCount').textContent = holiday;
+}
+
+// Update counts on radio change
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', updateCounts);
+  });
+  updateCounts(); // Initial count
+});
+</script>

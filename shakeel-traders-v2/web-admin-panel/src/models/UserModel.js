@@ -30,7 +30,7 @@ const UserModel = {
 
   async findById(id) {
     const rows = await query(
-      'SELECT id, full_name, username, contact, role, is_active FROM users WHERE id = ? LIMIT 1',
+      'SELECT id, full_name, username, contact, role, base_salary, enable_payroll, is_active FROM users WHERE id = ? LIMIT 1',
       [id]
     );
     return rows[0] || null;
@@ -39,15 +39,15 @@ const UserModel = {
   async create(data) {
     const hash = await bcrypt.hash(data.password, 10);
     const result = await query(
-      'INSERT INTO users (full_name, username, password_hash, role, contact) VALUES (?, ?, ?, ?, ?)',
-      [data.full_name, data.username, hash, data.role, data.contact || null]
+      'INSERT INTO users (full_name, username, password_hash, role, contact, base_salary, enable_payroll) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [data.full_name, data.username, hash, data.role, data.contact || null, data.base_salary || null, data.enable_payroll !== undefined ? data.enable_payroll : 1]
     );
     return result.insertId;
   },
 
   async update(id, data) {
-    const fields = ['full_name = ?', 'username = ?', 'contact = ?'];
-    const params = [data.full_name, data.username, data.contact || null];
+    const fields = ['full_name = ?', 'username = ?', 'contact = ?', 'base_salary = ?', 'enable_payroll = ?'];
+    const params = [data.full_name, data.username, data.contact || null, data.base_salary || null, data.enable_payroll !== undefined ? data.enable_payroll : 1];
 
     if (data.password && data.password.trim() !== '') {
       fields.push('password_hash = ?');

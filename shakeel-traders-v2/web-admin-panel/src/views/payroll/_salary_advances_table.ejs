@@ -1,0 +1,56 @@
+<% if (!staff || staff.length === 0) { %>
+  <div style="text-align:center;padding:40px;color:var(--text-muted);">
+    <i class="bi bi-people" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+    No <%= staffType.replace('_',' ') %>s with payroll enabled found.
+  </div>
+<% } else { %>
+<table class="table mb-0">
+  <thead><tr>
+    <th style="padding-left:20px;">Name</th>
+    <th>Base Salary</th>
+    <th>Advances (Current Month)</th>
+    <th>Actions</th>
+  </tr></thead>
+  <tbody>
+    <% staff.forEach((s, i) => { const colors = ['avatar-blue','avatar-green','avatar-orange','avatar-purple','avatar-teal']; %>
+    <tr>
+      <td style="padding-left:20px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="avatar avatar-sm <%= colors[i % colors.length] %>"><%= (s.full_name||'').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) %></div>
+          <div>
+            <div style="font-weight:600;font-size:0.82rem;"><%= s.full_name %></div>
+            <% if (s.contact) { %><div style="font-size:0.7rem;color:var(--text-muted);"><%= s.contact %></div><% } %>
+          </div>
+        </div>
+      </td>
+      <td>
+        <% if (s.base_salary) { %>
+          <span style="font-weight:600;">Rs <%= Number(s.base_salary).toLocaleString() %></span>
+        <% } else { %>
+          <span style="color:var(--text-muted);">Not set</span>
+        <% } %>
+      </td>
+      <td>
+        <% if (s.total_advances_paid > 0) { %>
+          <span style="color:#EF4444;font-weight:600;">Rs <%= Number(s.total_advances_paid).toLocaleString() %></span>
+        <% } else { %>
+          <span style="color:var(--text-muted);">Rs 0</span>
+        <% } %>
+      </td>
+      <td>
+        <div class="d-flex gap-1">
+          <a href="/payroll/ledger/<%= staffType %>/<%= s.id %>" class="btn btn-sm btn-info" title="View Ledger & History">
+            <i class="bi bi-journal-text me-1"></i> Ledger
+          </a>
+          <button class="btn btn-sm btn-success" title="Record Advance"
+                  data-bs-toggle="modal" data-bs-target="#advanceModal"
+                  data-staff-id="<%= s.id %>" data-staff-type="<%= staffType %>">
+            <i class="bi bi-plus-circle me-1"></i> Advance
+          </button>
+        </div>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

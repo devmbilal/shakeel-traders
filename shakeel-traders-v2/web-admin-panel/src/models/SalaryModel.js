@@ -8,21 +8,23 @@ const SalaryModel = {
     if (staffType === 'delivery_man') {
       return query(
         `SELECT dm.id, dm.full_name, dm.contact, dm.is_active, 'delivery_man' AS staff_type,
-                sr.id AS record_id, sr.month, sr.year, sr.basic_salary, sr.total_advances_paid, sr.cleared_at
+                sr.id AS record_id, sr.month, sr.year, sr.basic_salary, sr.total_advances_paid, sr.cleared_at,
+                dm.base_salary
          FROM delivery_men dm
          LEFT JOIN salary_records sr ON sr.staff_id = dm.id AND sr.staff_type = 'delivery_man'
            AND sr.month = MONTH(CURDATE()) AND sr.year = YEAR(CURDATE())
-         WHERE dm.is_active = 1
+         WHERE dm.is_active = 1 AND dm.enable_payroll = 1
          ORDER BY dm.full_name ASC`
       );
     }
     return query(
       `SELECT u.id, u.full_name, u.contact, u.is_active, u.role AS staff_type,
-              sr.id AS record_id, sr.month, sr.year, sr.basic_salary, sr.total_advances_paid, sr.cleared_at
+              sr.id AS record_id, sr.month, sr.year, sr.basic_salary, sr.total_advances_paid, sr.cleared_at,
+              u.base_salary
        FROM users u
        LEFT JOIN salary_records sr ON sr.staff_id = u.id AND sr.staff_type = ?
          AND sr.month = MONTH(CURDATE()) AND sr.year = YEAR(CURDATE())
-       WHERE u.role = ? AND u.is_active = 1
+       WHERE u.role = ? AND u.is_active = 1 AND u.enable_payroll = 1
        ORDER BY u.full_name ASC`,
       [staffType, staffType]
     );

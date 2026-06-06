@@ -42,8 +42,8 @@ const SalaryController = {
       const { staff_id, staff_type, amount, advance_date, note } = req.body;
       await SalaryModel.recordAdvance(staff_id, staff_type, amount, advance_date, note, req.session.user.id);
       req.flash('success', 'Advance recorded.');
-      res.redirect('/salaries?tab=' + (staff_type === 'salesman' ? 'salesmen' : staff_type === 'order_booker' ? 'order_bookers' : 'delivery_men'));
-    } catch (err) { req.flash('error', err.message); res.redirect('/salaries'); }
+      res.redirect('/payroll?tab=advances&staff_tab=' + (staff_type === 'salesman' ? 'salesmen' : staff_type === 'order_booker' ? 'order_bookers' : 'delivery_men'));
+    } catch (err) { req.flash('error', err.message); res.redirect('/payroll?tab=advances'); }
   },
 
   async clearance(req, res) {
@@ -80,7 +80,7 @@ const SalaryController = {
       const validTypes = ['salesman', 'order_booker', 'delivery_man'];
       if (!validTypes.includes(staffType)) {
         req.flash('error', 'Invalid staff type.');
-        return res.redirect('/salaries');
+        return res.redirect('/payroll?tab=advances');
       }
       
       // Fetch staff member name
@@ -93,7 +93,7 @@ const SalaryController = {
       
       if (!staff) {
         req.flash('error', 'Staff member not found.');
-        return res.redirect('/salaries');
+        return res.redirect('/payroll?tab=advances');
       }
       
       // Fetch ledger and net balance
@@ -115,7 +115,7 @@ const SalaryController = {
     } catch (err) {
       console.error('Ledger error:', err);
       req.flash('error', 'Failed to load ledger.');
-      res.redirect('/salaries');
+      res.redirect('/payroll?tab=advances');
     }
   },
 
@@ -127,7 +127,7 @@ const SalaryController = {
       const validTypes = ['salesman', 'order_booker', 'delivery_man'];
       if (!validTypes.includes(staffType)) {
         req.flash('error', 'Invalid staff type.');
-        return res.redirect('/salaries');
+        return res.redirect('/payroll?tab=advances');
       }
       
       // Fetch staff member name
@@ -140,7 +140,7 @@ const SalaryController = {
       
       if (!staff) {
         req.flash('error', 'Staff member not found.');
-        return res.redirect('/salaries');
+        return res.redirect('/payroll?tab=advances');
       }
       
       // Fetch all ledger entries (no pagination)
@@ -204,7 +204,7 @@ const SalaryController = {
     } catch (err) {
       console.error('Export error:', err);
       req.flash('error', 'Failed to export ledger.');
-      res.redirect('/salaries');
+      res.redirect('/payroll?tab=advances');
     }
   },
 };

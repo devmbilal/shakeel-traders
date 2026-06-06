@@ -1,0 +1,337 @@
+<div class="page-header">
+  <div>
+    <h4>HR & Payroll Management</h4>
+    <div class="page-sub">Attendance-based payroll, salary advances, and staff ledger</div>
+  </div>
+</div>
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <a class="nav-link <%= activeTab === 'payroll' ? 'active' : '' %>" href="/payroll?tab=payroll">
+      <i class="bi bi-calculator me-1"></i> Monthly Payroll
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link <%= activeTab === 'advances' ? 'active' : '' %>" href="/payroll?tab=advances">
+      <i class="bi bi-cash-coin me-1"></i> Salary Advances & Ledger
+    </a>
+  </li>
+</ul>
+
+<% if (activeTab === 'payroll') { %>
+<!-- PAYROLL TAB CONTENT -->
+
+<!-- Generate Payroll & Filters -->
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <h6 class="mb-2">Generate Payroll</h6>
+        <form method="POST" action="/payroll/generate" class="row g-2" 
+              onsubmit="return confirm('Generate payroll for all staff? This will calculate attendance deductions.')">
+          <div class="col-auto">
+            <select name="month" class="form-select form-select-sm" required>
+              <% for (let m = 1; m <= 12; m++) { %>
+                <option value="<%= m %>" <%= month == m ? 'selected' : '' %>>
+                  <%= new Date(2000, m-1, 1).toLocaleString('default', { month: 'long' }) %>
+                </option>
+              <% } %>
+            </select>
+          </div>
+          <div class="col-auto">
+            <select name="year" class="form-select form-select-sm" required>
+              <% for (let y = year - 1; y <= year + 1; y++) { %>
+                <option value="<%= y %>" <%= year == y ? 'selected' : '' %>><%= y %></option>
+              <% } %>
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-success btn-sm">
+              <i class="bi bi-calculator me-1"></i> Generate Payroll
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <div class="col-md-6">
+        <h6 class="mb-2">View Payroll</h6>
+        <form method="GET" action="/payroll" class="row g-2">
+          <input type="hidden" name="tab" value="payroll">
+          <div class="col-auto">
+            <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+              <% for (let m = 1; m <= 12; m++) { %>
+                <option value="<%= m %>" <%= month == m ? 'selected' : '' %>>
+                  <%= new Date(2000, m-1, 1).toLocaleString('default', { month: 'long' }) %>
+                </option>
+              <% } %>
+            </select>
+          </div>
+          <div class="col-auto">
+            <select name="year" class="form-select form-select-sm" onchange="this.form.submit()">
+              <% for (let y = year - 1; y <= year + 1; y++) { %>
+                <option value="<%= y %>" <%= year == y ? 'selected' : '' %>><%= y %></option>
+              <% } %>
+            </select>
+          </div>
+          <div class="col-auto">
+            <select name="payment_status" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">All Status</option>
+              <option value="pending" <%= paymentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+              <option value="paid" <%= paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+            </select>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-3">
+  <div class="col-md-4">
+    <div class="card border-primary">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <i class="bi bi-cash-stack text-primary" style="font-size:2.5rem;"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <div class="text-muted small">Total Payable</div>
+            <div class="h4 mb-0">Rs <%= parseFloat(summary.totalPayable).toLocaleString() %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-success">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <i class="bi bi-check-circle text-success" style="font-size:2.5rem;"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <div class="text-muted small">Total Paid</div>
+            <div class="h4 mb-0 text-success">Rs <%= parseFloat(summary.totalPaid).toLocaleString() %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-danger">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <i class="bi bi-clock text-danger" style="font-size:2.5rem;"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <div class="text-muted small">Total Pending</div>
+            <div class="h4 mb-0 text-danger">Rs <%= parseFloat(summary.totalPending).toLocaleString() %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payroll Table -->
+<div class="card">
+  <div class="card-header">
+    <span style="font-weight:700;">
+      <%= new Date(2000, month-1, 1).toLocaleString('default', { month: 'long' }) %> <%= year %> Payroll - 
+      <%= payrolls.length %> Staff Members
+    </span>
+  </div>
+  
+  <div class="card-body p-0">
+    <% if (payrolls.length === 0) { %>
+      <div style="text-align:center;padding:48px;color:var(--text-muted);">
+        <i class="bi bi-cash-stack" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+        No payroll records found. Click "Generate Payroll" to create records for this month.
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th style="padding-left:20px;">Staff Name</th>
+              <th>Type</th>
+              <th class="text-end">Base Salary</th>
+              <th class="text-center">Working Days</th>
+              <th class="text-center">Present</th>
+              <th class="text-center">Absent</th>
+              <th class="text-end">Deduction</th>
+              <th class="text-end">Net Salary</th>
+              <th class="text-end">Advances</th>
+              <th class="text-end">Final Payable</th>
+              <th class="text-center">Status</th>
+              <th style="width:150px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payrolls.forEach(p => { %>
+            <tr>
+              <td style="padding-left:20px;">
+                <div style="font-weight:600;"><%= p.staff_name %></div>
+              </td>
+              <td>
+                <span class="badge badge-blue" style="text-transform:capitalize;">
+                  <%= p.staff_type.replace(/_/g, ' ') %>
+                </span>
+              </td>
+              <td class="text-end">
+                <strong>Rs <%= parseFloat(p.base_salary).toLocaleString() %></strong>
+              </td>
+              <td class="text-center"><%= p.working_days %></td>
+              <td class="text-center">
+                <span class="badge bg-success"><%= p.present_days %></span>
+              </td>
+              <td class="text-center">
+                <% if (p.absent_days > 0) { %>
+                  <span class="badge bg-danger"><%= p.absent_days %></span>
+                <% } else { %>
+                  <span class="text-muted">0</span>
+                <% } %>
+              </td>
+              <td class="text-end">
+                <% if (p.absence_deduction > 0) { %>
+                  <span class="text-danger">- Rs <%= parseFloat(p.absence_deduction).toLocaleString() %></span>
+                <% } else { %>
+                  <span class="text-muted">Rs 0</span>
+                <% } %>
+              </td>
+              <td class="text-end">
+                <strong>Rs <%= parseFloat(p.net_salary).toLocaleString() %></strong>
+              </td>
+              <td class="text-end">
+                <% if (p.advances_paid > 0) { %>
+                  <span class="text-warning">Rs <%= parseFloat(p.advances_paid).toLocaleString() %></span>
+                <% } else { %>
+                  <span class="text-muted">Rs 0</span>
+                <% } %>
+              </td>
+              <td class="text-end">
+                <strong style="font-size:1.05rem;color:var(--primary);">
+                  Rs <%= parseFloat(p.final_payable).toLocaleString() %>
+                </strong>
+              </td>
+              <td class="text-center">
+                <% if (p.payment_status === 'paid') { %>
+                  <span class="badge bg-success">Paid</span>
+                <% } else { %>
+                  <span class="badge bg-warning">Pending</span>
+                <% } %>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="/payroll/<%= p.id %>" class="btn btn-sm btn-outline-primary" title="View Details">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <% if (p.payment_status === 'pending') { %>
+                    <a href="/payroll/<%= p.id %>" class="btn btn-sm btn-success" title="Mark Paid">
+                      <i class="bi bi-check-circle"></i>
+                    </a>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Info Card -->
+<div class="card mt-3 border-info">
+  <div class="card-body">
+    <h6 class="card-title"><i class="bi bi-info-circle me-2"></i>How Payroll Works</h6>
+    <ul class="mb-0 small">
+      <li><strong>Base Salary:</strong> Monthly salary set for each staff member</li>
+      <li><strong>Working Days:</strong> Total days in month - Fridays - Holidays</li>
+      <li><strong>Per Day Salary:</strong> Base Salary ÷ Working Days</li>
+      <li><strong>Absence Deduction:</strong> Absent Days × Per Day Salary (Fridays excluded)</li>
+      <li><strong>Net Salary:</strong> Base Salary - Absence Deduction</li>
+      <li><strong>Final Payable:</strong> Net Salary - Advances Paid (during the month)</li>
+      <li><strong>Auto-Present:</strong> Days not marked by admin are automatically counted as present</li>
+    </ul>
+  </div>
+</div>
+
+<% } else if (activeTab === 'advances') { %>
+<!-- ADVANCES TAB CONTENT -->
+
+<div class="card">
+  <div class="card-body p-0">
+    <ul class="nav nav-tabs px-4 pt-3" id="staffTabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link <%= !locals.staff_tab || locals.staff_tab === 'salesmen' ? 'active' : '' %>" href="/payroll?tab=advances&staff_tab=salesmen">
+          <i class="bi bi-truck me-1"></i> Salesmen
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link <%= locals.staff_tab === 'order_bookers' ? 'active' : '' %>" href="/payroll?tab=advances&staff_tab=order_bookers">
+          <i class="bi bi-person-walking me-1"></i> Order Bookers
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link <%= locals.staff_tab === 'delivery_men' ? 'active' : '' %>" href="/payroll?tab=advances&staff_tab=delivery_men">
+          <i class="bi bi-bicycle me-1"></i> Delivery Men
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content p-4">
+      <% 
+      const currentStaffTab = locals.staff_tab || 'salesmen';
+      const staffData = {
+        salesmen: { data: salesmen, type: 'salesman' },
+        order_bookers: { data: orderBookers, type: 'order_booker' },
+        delivery_men: { data: deliveryMen, type: 'delivery_man' }
+      };
+      const current = staffData[currentStaffTab];
+      %>
+      
+      <%- include('_salary_advances_table', { staff: current.data, staffType: current.type }) %>
+    </div>
+  </div>
+</div>
+
+<% } %>
+
+<!-- Record Advance Modal -->
+<div class="modal fade" id="advanceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h6 class="modal-title">Record Advance</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/payroll/advance">
+        <input type="hidden" name="staff_id" id="advStaffId">
+        <input type="hidden" name="staff_type" id="advStaffType">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Amount (Rs)</label><div class="input-group"><span class="input-group-text">Rs</span><input type="number" name="amount" class="form-control" step="0.01" min="0.01" required></div></div>
+            <div class="col-md-6"><label class="form-label">Date</label><input type="date" name="advance_date" class="form-control" value="<%= now ? now.toISOString().slice(0,10) : new Date().toISOString().slice(0,10) %>" required></div>
+            <div class="col-12"><label class="form-label">Note</label><input type="text" name="note" class="form-control" placeholder="Optional"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Record Advance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+if (document.getElementById('advanceModal')) {
+  document.getElementById('advanceModal').addEventListener('show.bs.modal', function(e) {
+    const btn = e.relatedTarget;
+    document.getElementById('advStaffId').value = btn.dataset.staffId;
+    document.getElementById('advStaffType').value = btn.dataset.staffType;
+  });
+}
+</script>

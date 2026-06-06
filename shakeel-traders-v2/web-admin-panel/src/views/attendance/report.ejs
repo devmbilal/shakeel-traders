@@ -1,0 +1,198 @@
+<div class="page-header">
+  <div>
+    <h4>Attendance Report</h4>
+    <div class="page-sub">View monthly attendance summary for all staff</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/attendance" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-calendar-check me-1"></i> Mark Attendance
+    </a>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="GET" action="/attendance/report" class="row g-2 align-items-end">
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Month</label>
+        <select name="month" class="form-select form-select-sm">
+          <% for (let m = 1; m <= 12; m++) { %>
+            <option value="<%= m %>" <%= month == m ? 'selected' : '' %>>
+              <%= new Date(2000, m-1, 1).toLocaleString('default', { month: 'long' }) %>
+            </option>
+          <% } %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Year</label>
+        <select name="year" class="form-select form-select-sm">
+          <% for (let y = year - 2; y <= year + 1; y++) { %>
+            <option value="<%= y %>" <%= year == y ? 'selected' : '' %>><%= y %></option>
+          <% } %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Staff Type</label>
+        <select name="staff_type" class="form-select form-select-sm">
+          <option value="">All Types</option>
+          <option value="admin" <%= staffTypeFilter === 'admin' ? 'selected' : '' %>>Admin</option>
+          <option value="order_booker" <%= staffTypeFilter === 'order_booker' ? 'selected' : '' %>>Order Booker</option>
+          <option value="salesman" <%= staffTypeFilter === 'salesman' ? 'selected' : '' %>>Salesman</option>
+          <option value="delivery_man" <%= staffTypeFilter === 'delivery_man' ? 'selected' : '' %>>Delivery Man</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small mb-1">Staff Member</label>
+        <select name="staff_id" class="form-select form-select-sm" data-searchable>
+          <option value="">All Staff</option>
+          <% allStaff.forEach(s => { %>
+            <option value="<%= s.id %>" <%= staffFilter == s.id ? 'selected' : '' %>>
+              <%= s.full_name %> (<%= s.staff_type.replace(/_/g, ' ') %>)
+            </option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="bi bi-search me-1"></i> Filter
+        </button>
+        <a href="/attendance/report" class="btn btn-outline-secondary btn-sm">Clear</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Report Table -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span style="font-weight:700;">
+      <%= new Date(2000, month-1, 1).toLocaleString('default', { month: 'long' }) %> <%= year %> - 
+      <%= reportData.length %> Staff Members
+    </span>
+  </div>
+  
+  <div class="card-body p-0">
+    <% if (reportData.length === 0) { %>
+      <div style="text-align:center;padding:48px;color:var(--text-muted);">
+        <i class="bi bi-calendar-x" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+        No attendance records found for this period.
+      </div>
+    <% } else { %>
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th style="padding-left:20px;">Staff Name</th>
+            <th>Type</th>
+            <th class="text-center">Total Days</th>
+            <th class="text-center">Working Days</th>
+            <th class="text-center">Present</th>
+            <th class="text-center">Absent</th>
+            <th class="text-center">Off Days</th>
+            <th class="text-center">Holidays</th>
+            <th class="text-center">Attendance %</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% reportData.forEach(r => { 
+            const attendanceGood = parseFloat(r.attendance_percentage) >= 95;
+            const attendanceWarning = parseFloat(r.attendance_percentage) >= 80 && parseFloat(r.attendance_percentage) < 95;
+            const attendancePoor = parseFloat(r.attendance_percentage) < 80;
+          %>
+          <tr>
+            <td style="padding-left:20px;">
+              <div style="font-weight:600;"><%= r.staff_name %></div>
+            </td>
+            <td>
+              <span class="badge badge-blue" style="text-transform:capitalize;">
+                <%= r.staff_type.replace(/_/g, ' ') %>
+              </span>
+            </td>
+            <td class="text-center"><strong><%= r.total_days %></strong></td>
+            <td class="text-center"><strong><%= r.working_days %></strong></td>
+            <td class="text-center">
+              <span class="badge bg-success"><%= r.present_days %></span>
+            </td>
+            <td class="text-center">
+              <% if (r.absent_days > 0) { %>
+                <span class="badge bg-danger"><%= r.absent_days %></span>
+              <% } else { %>
+                <span class="text-muted">0</span>
+              <% } %>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-primary"><%= r.off_days %></span>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-warning"><%= r.holiday_days %></span>
+            </td>
+            <td class="text-center">
+              <% if (attendanceGood) { %>
+                <span class="badge bg-success" style="font-size:0.9rem;padding:6px 12px;">
+                  <%= r.attendance_percentage %>%
+                </span>
+              <% } else if (attendanceWarning) { %>
+                <span class="badge bg-warning" style="font-size:0.9rem;padding:6px 12px;">
+                  <%= r.attendance_percentage %>%
+                </span>
+              <% } else if (attendancePoor) { %>
+                <span class="badge bg-danger" style="font-size:0.9rem;padding:6px 12px;">
+                  <%= r.attendance_percentage %>%
+                </span>
+              <% } else { %>
+                <span class="badge bg-secondary" style="font-size:0.9rem;padding:6px 12px;">
+                  <%= r.attendance_percentage %>%
+                </span>
+              <% } %>
+            </td>
+            <td>
+              <a href="/attendance/staff/<%= r.staff_id %>/<%= r.staff_type %>?month=<%= month %>&year=<%= year %>" 
+                 class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-eye me-1"></i> View Details
+              </a>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<!-- Summary Cards -->
+<% if (reportData.length > 0) { %>
+<div class="row mt-3">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="mb-3">Summary Statistics</h6>
+        <div class="row">
+          <div class="col-md-3">
+            <div class="text-muted small">Total Staff</div>
+            <div class="h4 mb-0"><%= reportData.length %></div>
+          </div>
+          <div class="col-md-3">
+            <div class="text-muted small">Average Attendance</div>
+            <div class="h4 mb-0">
+              <%= (reportData.reduce((sum, r) => sum + parseFloat(r.attendance_percentage), 0) / reportData.length).toFixed(1) %>%
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="text-muted small">Total Absences</div>
+            <div class="h4 mb-0 text-danger">
+              <%= reportData.reduce((sum, r) => sum + r.absent_days, 0) %>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="text-muted small">Perfect Attendance</div>
+            <div class="h4 mb-0 text-success">
+              <%= reportData.filter(r => r.absent_days === 0).length %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>

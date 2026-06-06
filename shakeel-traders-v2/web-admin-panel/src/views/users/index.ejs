@@ -1,7 +1,7 @@
 <div class="page-header">
   <div>
     <h4>User Management</h4>
-    <div class="page-sub">Manage order bookers and salesmen</div>
+    <div class="page-sub">Manage staff members (order bookers, salesmen, delivery men)</div>
   </div>
   <div class="d-flex gap-2">
     <a href="/users/new?role=order_booker" class="btn btn-primary btn-sm">
@@ -9,6 +9,9 @@
     </a>
     <a href="/users/new?role=salesman" class="btn btn-outline-primary btn-sm">
       <i class="bi bi-person-plus me-1"></i> Add Salesman
+    </a>
+    <a href="/users/delivery-men/new" class="btn btn-outline-success btn-sm">
+      <i class="bi bi-person-plus me-1"></i> Add Delivery Man
     </a>
   </div>
 </div>
@@ -26,6 +29,12 @@
         <button class="nav-link <%= activeTab === 'salesmen' ? 'active' : '' %>" id="sm-tab" data-bs-toggle="tab" data-bs-target="#sm-pane" type="button" role="tab">
           <i class="bi bi-truck me-1"></i> Salesmen
           <span class="badge badge-blue ms-1"><%= salesmen.length %></span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link <%= activeTab === 'delivery_men' ? 'active' : '' %>" id="dm-tab" data-bs-toggle="tab" data-bs-target="#dm-pane" type="button" role="tab">
+          <i class="bi bi-bicycle me-1"></i> Delivery Men
+          <span class="badge badge-blue ms-1"><%= deliveryMen.length %></span>
         </button>
       </li>
     </ul>
@@ -128,8 +137,63 @@
           </table>
         <% } %>
       </div>
+
+      <!-- Delivery Men -->
+      <div class="tab-pane fade <%= activeTab === 'delivery_men' ? 'show active' : '' %>" id="dm-pane" role="tabpanel">
+        <% if (deliveryMen.length === 0) { %>
+          <div style="text-align:center;padding:40px;color:var(--text-muted);">
+            <i class="bi bi-bicycle" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+            No delivery men yet. <a href="/users/delivery-men/new" style="color:var(--secondary);">Add one</a>.
+          </div>
+        <% } else { %>
+          <table class="table mb-0">
+            <thead><tr>
+              <th style="padding-left:20px;">Name</th>
+              <th>Contact</th>
+              <th>Base Salary</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <% deliveryMen.forEach((dm, i) => { const colors = ['avatar-orange','avatar-blue','avatar-green','avatar-purple','avatar-teal']; %>
+              <tr>
+                <td style="padding-left:20px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="avatar avatar-sm <%= colors[i % colors.length] %>"><%= dm.full_name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) %></div>
+                    <span style="font-weight:600;font-size:0.82rem;"><%= dm.full_name %></span>
+                  </div>
+                </td>
+                <td style="color:var(--text-secondary);"><%= dm.contact || '—' %></td>
+                <td>
+                  <% if (dm.base_salary) { %>
+                    <span style="font-weight:600;">Rs <%= Number(dm.base_salary).toLocaleString() %></span>
+                  <% } else { %>
+                    <span style="color:var(--text-muted);">Not set</span>
+                  <% } %>
+                </td>
+                <td><span class="badge <%= dm.is_active ? 'badge-active' : 'badge-inactive' %>"><%= dm.is_active ? 'Active' : 'Inactive' %></span></td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="/users/delivery-men/<%= dm.id %>/edit" class="btn btn-sm btn-edit btn-icon" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <% if (dm.is_active) { %>
+                    <form method="POST" action="/users/delivery-men/<%= dm.id %>/deactivate" class="d-inline" onsubmit="return confirm('Deactivate <%= dm.full_name %>?')">
+                      <button type="submit" class="btn btn-sm btn-delete btn-icon" title="Deactivate"><i class="bi bi-person-x"></i></button>
+                    </form>
+                    <% } else { %>
+                    <form method="POST" action="/users/delivery-men/<%= dm.id %>/activate" class="d-inline">
+                      <button type="submit" class="btn btn-sm btn-assign btn-icon" title="Reactivate"><i class="bi bi-check-circle"></i></button>
+                    </form>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
     </div>
   </div>
 </div>
 
-<%- include('../layout/pagination', {pagination: activeTab === 'order_bookers' ? obPagination : smPagination, queryString}) %>
+<%- include('../layout/pagination', {pagination: activeTab === 'delivery_men' ? dmPagination : (activeTab === 'order_bookers' ? obPagination : smPagination), queryString}) %>
