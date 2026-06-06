@@ -100,6 +100,7 @@ app.use('/reports',           require('./routes/web/reports'));
 app.use('/backup',            require('./routes/web/backup'));
 app.use('/audit-log',         require('./routes/web/auditLog'));
 app.use('/settings',          require('./routes/web/settings'));
+app.use('/help',              require('./routes/web/help'));
 
 
 

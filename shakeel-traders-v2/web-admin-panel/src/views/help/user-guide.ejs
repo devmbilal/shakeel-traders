@@ -1,0 +1,1082 @@
+<style>
+/* ── User Guide Styles ────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+* {
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+.guide-hero {
+  background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+  color: #fff;
+  padding: 40px;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.guide-hero::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.guide-hero h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  margin: 0 0 8px 0;
+}
+.guide-hero p {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+.guide-search {
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.guide-search input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 40px 10px 16px;
+  font-size: 0.88rem;
+  width: 100%;
+  transition: all 0.2s;
+}
+.guide-search input:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.guide-search-icon {
+  position: relative;
+}
+.guide-search-icon i {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.guide-content {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+.guide-sidebar {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.guide-sidebar h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin: 0 0 16px 0;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.guide-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.guide-nav li {
+  margin-bottom: 4px;
+}
+.guide-nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.84rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+.guide-nav a:hover {
+  background: var(--bg);
+  color: var(--secondary);
+}
+.guide-nav a.active {
+  background: rgba(59,130,246,0.1);
+  color: var(--secondary);
+  font-weight: 600;
+}
+.guide-main {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.guide-section {
+  margin-bottom: 40px;
+  scroll-margin-top: 80px;
+}
+.guide-section:last-child {
+  margin-bottom: 0;
+}
+.guide-section h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+}
+.guide-section h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin: 24px 0 12px 0;
+}
+.guide-section p {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.guide-section ul, .guide-section ol {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  padding-left: 24px;
+}
+.guide-section li {
+  margin-bottom: 8px;
+}
+.guide-card {
+  background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+.guide-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border-color: rgba(59,130,246,0.2);
+}
+.guide-card h4 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.guide-card h4 i {
+  color: var(--secondary);
+}
+.guide-card p {
+  font-size: 0.88rem;
+  margin: 0;
+  color: var(--text-secondary);
+}
+.guide-workflow {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 2px solid rgba(59,130,246,0.2);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 24px 0;
+}
+.guide-workflow h4 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1E40AF;
+  margin: 0 0 16px 0;
+}
+.guide-workflow-steps {
+  display: grid;
+  gap: 12px;
+}
+.guide-workflow-step {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: var(--radius-sm);
+}
+.guide-workflow-step-num {
+  width: 28px;
+  height: 28px;
+  background: var(--secondary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.guide-workflow-step-text {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.88rem;
+}
+.guide-table th {
+  background: var(--bg);
+  padding: 12px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.guide-table td {
+  padding: 12px;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.guide-table tr:hover {
+  background: var(--bg);
+}
+.guide-tip {
+  background: linear-gradient(135deg, #FEF9C3 0%, #FEF3C7 100%);
+  border-left: 4px solid #F59E0B;
+  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  margin: 16px 0;
+}
+.guide-tip strong {
+  color: #92400E;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+}
+.guide-tip p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #854D0E;
+}
+@media (max-width: 992px) {
+  .guide-content {
+    grid-template-columns: 1fr;
+  }
+  .guide-sidebar {
+    position: static;
+  }
+}
+.lang-switch {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: block !important;
+}
+.lang-switch a {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none !important;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.4);
+  transition: all 0.3s;
+  display: inline-block;
+  font-size: 0.95rem;
+  border: none;
+}
+.lang-switch a:hover {
+  background: #2563EB !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59,130,246,0.5);
+}
+</style>
+
+<!-- ── User Guide Hero ──────────────────────────────────────────────────────── -->
+<div class="guide-hero">
+  <h1><i class="bi bi-book me-2"></i>System User Guide</h1>
+  <p>Complete guide to using Shakeel Traders Distribution System — Learn how to manage orders, stock, cash, and daily operations in simple steps</p>
+</div>
+
+<!-- ── Search Box ───────────────────────────────────────────────────────────── -->
+<div class="guide-search">
+  <div class="guide-search-icon">
+    <input type="text" id="guideSearch" placeholder="Search for topics, features, or pages..." autocomplete="off">
+    <i class="bi bi-search"></i>
+  </div>
+</div>
+
+<!-- ── Guide Content ────────────────────────────────────────────────────────── -->
+<div class="guide-content">
+  
+  <!-- Sidebar Navigation -->
+  <aside class="guide-sidebar">
+    <h3>Quick Navigation</h3>
+    <ul class="guide-nav">
+      <li><a href="#overview"><i class="bi bi-info-circle"></i> System Overview</a></li>
+      <li><a href="#daily-workflow"><i class="bi bi-calendar-check"></i> Daily Workflow</a></li>
+      <li><a href="#dashboard"><i class="bi bi-grid-1x2"></i> Dashboard</a></li>
+      <li><a href="#operations"><i class="bi bi-clipboard-check"></i> Operations</a></li>
+      <li><a href="#inventory"><i class="bi bi-box-seam"></i> Inventory</a></li>
+      <li><a href="#distribution"><i class="bi bi-signpost-2"></i> Distribution</a></li>
+      <li><a href="#finance"><i class="bi bi-currency-dollar"></i> Finance</a></li>
+      <li><a href="#hr"><i class="bi bi-people"></i> Human Resources</a></li>
+      <li><a href="#system"><i class="bi bi-gear"></i> System</a></li>
+      <li><a href="#mobile-app"><i class="bi bi-phone"></i> Mobile App</a></li>
+      <li><a href="#faq"><i class="bi bi-question-circle"></i> Common Questions</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="guide-main">
+
+    <!-- SECTION 1: System Overview -->
+    <section id="overview" class="guide-section">
+      <h2>System Overview</h2>
+      <p>This system helps you manage your distribution business across three sales channels:</p>
+      
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="guide-card">
+            <h4><i class="bi bi-person-badge"></i> Order Booker Sales</h4>
+            <p>Field staff visits shops, books orders on mobile app. You convert orders to bills in office.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="guide-card">
+            <h4><i class="bi bi-truck"></i> Salesman Sales</h4>
+            <p>Salesman takes stock in morning, sells during day, returns unsold stock in evening.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="guide-card">
+            <h4><i class="bi bi-shop"></i> Direct Shop Sales</h4>
+            <p>Create instant bills for walk-in customers or direct phone orders from shops.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>How It Works</h3>
+      <p><strong>Two Parts of the System:</strong></p>
+      <ul>
+        <li><strong>Web Admin Panel</strong> — You use this on your office computer (in the browser)</li>
+        <li><strong>Mobile App</strong> — Your order bookers and salesmen use this on Android phones</li>
+      </ul>
+      
+      <div class="guide-tip">
+        <strong>First Time Login</strong>
+        <p>Open browser → Go to http://localhost:3000 → Username: admin, Password: admin123 → Change password immediately after first login!</p>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Daily Workflow -->
+    <section id="daily-workflow" class="guide-section">
+      <h2>Daily Workflow</h2>
+      <p>Follow this routine every day for smooth business operations:</p>
+      
+      <div class="guide-workflow">
+        <h4>Morning Routine (Before Field Staff Leave)</h4>
+        <div class="guide-workflow-steps">
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">1</div>
+            <div class="guide-workflow-step-text">Go to <strong>Route Assignments</strong> → Assign routes to order bookers for today</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">2</div>
+            <div class="guide-workflow-step-text">Go to <strong>Cash Recovery</strong> → Assign outstanding bills to order bookers for collection</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">3</div>
+            <div class="guide-workflow-step-text">Go to <strong>Stock → Pending Issuances</strong> → Approve salesman stock requests</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-workflow">
+        <h4>Evening Routine (After Field Staff Return)</h4>
+        <div class="guide-workflow-steps">
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">1</div>
+            <div class="guide-workflow-step-text">Go to <strong>Orders → Pending Orders</strong> → Convert orders to bills (stock is deducted)</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">2</div>
+            <div class="guide-workflow-step-text">Go to <strong>Cash Recovery → Pending Verifications</strong> → Verify cash collections</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">3</div>
+            <div class="guide-workflow-step-text">Go to <strong>Stock → Pending Returns</strong> → Approve salesman returns (stock is added back)</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">4</div>
+            <div class="guide-workflow-step-text">Go to <strong>Cash Recovery → Bill Settlement</strong> → Record delivery man cash collections</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">5</div>
+            <div class="guide-workflow-step-text">Review <strong>Dashboard</strong> for alerts and daily summary</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Dashboard -->
+    <section id="dashboard" class="guide-section">
+      <h2>Dashboard</h2>
+      <p>Your dashboard shows a live snapshot of your business. It updates automatically when you perform operations.</p>
+      
+      <h3>What You See on Dashboard</h3>
+      <table class="guide-table">
+        <thead>
+          <tr>
+            <th>Card</th>
+            <th>What It Shows</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Total Outstanding</strong></td>
+            <td>Total unpaid amount across all open bills from all channels</td>
+          </tr>
+          <tr>
+            <td><strong>Supplier Advance</strong></td>
+            <td>Money you have paid to suppliers in advance (not yet cleared by goods received)</td>
+          </tr>
+          <tr>
+            <td><strong>Stock Value</strong></td>
+            <td>Current warehouse stock value with cartons and loose units</td>
+          </tr>
+          <tr>
+            <td><strong>Cash Collected</strong></td>
+            <td>Today's total cash broken into: Salesman Sale, Recovery, Delivery Collection</td>
+          </tr>
+          <tr>
+            <td><strong>Orders Booked</strong></td>
+            <td>Today's order count with top 3 order bookers</td>
+          </tr>
+          <tr>
+            <td><strong>Alerts</strong></td>
+            <td>Low stock items, pending orders, pending issuances, pending returns, unsynced bookers</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Period Toggle</h3>
+      <p>Click the buttons at top right to switch between <strong>Today</strong>, <strong>Month</strong>, or <strong>Year</strong> view. The dashboard data updates automatically.</p>
+      
+      <div class="guide-tip">
+        <strong>Quick Tip</strong>
+        <p>Click the refresh button (🔄) at top right to update dashboard data without reloading the page. Mobile App Connection info (IP and Port) is shown in the top navigation bar.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Operations -->
+    <section id="operations" class="guide-section">
+      <h2>Operations</h2>
+      <p>Daily business operations for managing orders, sales, and cash recovery.</p>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-clipboard-check-fill"></i> Order Management</h4>
+        <p><strong>Purpose:</strong> Convert orders booked by order bookers into bills</p>
+        <p><strong>How to use:</strong></p>
+        <ul>
+          <li>Go to <strong>Orders → Pending Orders</strong></li>
+          <li>You will see all orders synced from mobile app</li>
+          <li>Click <strong>Convert to Bill</strong> on any order (stock will be deducted from warehouse)</li>
+          <li>Or select multiple orders and use <strong>Bulk Convert</strong></li>
+          <li>Converted bills appear in <strong>Orders → Converted Bills</strong></li>
+          <li>Use <strong>Consolidated View</strong> to see total stock needed for all pending orders</li>
+        </ul>
+        <p><strong>Bill Status:</strong> Open (unpaid) → Partially Paid (some collected) → Cleared (fully paid)</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-cart-fill"></i> Direct Shop Sales</h4>
+        <p><strong>Purpose:</strong> Create instant bills for walk-in customers or direct phone orders</p>
+        <p><strong>How to use:</strong></p>
+        <ul>
+          <li>Go to <strong>Direct Shop Sales → New Bill</strong></li>
+          <li>Select the shop from dropdown</li>
+          <li>Search products by SKU code or name</li>
+          <li>Enter cartons and loose units</li>
+          <li>Prices fill automatically (you can edit if allowed for that shop)</li>
+          <li>Click <strong>Create Bill</strong> — stock is deducted immediately</li>
+        </ul>
+        <div class="guide-tip">
+          <strong>Note</strong>
+          <p>Bill starts as "open" status. Cash must be collected separately via Bill Settlement.</p>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-printer"></i> Print Bills</h4>
+        <p><strong>Purpose:</strong> Print multiple outstanding bills for delivery or collection</p>
+        <p><strong>How to use:</strong></p>
+        <ul>
+          <li>Go to <strong>Print Bills</strong> (in sidebar after Direct Shop Sales)</li>
+          <li>Filter by type: All / Order Booker / Direct Shop</li>
+          <li>Select bills using checkboxes (or click Select All)</li>
+          <li>Click <strong>Print Selected</strong></li>
+          <li>Each bill prints in CBL Salesflo format</li>
+          <li>Last page shows <strong>Stock Requirement Summary</strong> (total cartons and loose needed)</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-cash-coin"></i> Cash Recovery</h4>
+        <p><strong>Purpose:</strong> Manage bill collections and payments</p>
+        <p><strong>Tabs:</strong></p>
+        <ul>
+          <li><strong>Outstanding Bills</strong> — All bills with remaining balance. Assign bills to order bookers for field collection.</li>
+          <li><strong>Bill Settlement</strong> — Record cash brought by delivery men. Select bill, delivery man, amount → Click Record Payment.</li>
+          <li><strong>Pending Verifications</strong> — Verify cash collections synced by order bookers. Review amount and payment method → Click Verify.</li>
+          <li><strong>Recovery History</strong> — Full history of all assignments and collections.</li>
+        </ul>
+        <div class="guide-tip">
+          <strong>Important</strong>
+          <p>Cash only appears in Centralized Cash Screen AFTER verification/settlement. Unverified collections do NOT count.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Inventory -->
+    <section id="inventory" class="guide-section">
+      <h2>Inventory</h2>
+      <p>Manage products, stock levels, and supplier relationships.</p>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-box-seam-fill"></i> Products</h4>
+        <p><strong>Purpose:</strong> Manage your product catalog</p>
+        <p><strong>How to use:</strong></p>
+        <ul>
+          <li><strong>Add Product</strong> — Click "Add Product" button → Fill SKU code, name, brand, units per carton, retail price, wholesale price</li>
+          <li><strong>Import CSV</strong> — Click "Import CSV" to bulk upload products. CSV format:<br>
+          <code>sku_code,name,brand,units_per_carton,retail_price,wholesale_price,low_stock_threshold</code></li>
+          <li><strong>Edit Product</strong> — Click pencil icon on any product</li>
+          <li><strong>View Stock History</strong> — Click clock icon to see all stock movements</li>
+        </ul>
+        <div class="guide-tip">
+          <strong>CSV Import Rule</strong>
+          <p>If SKU already exists, product is updated. Stock levels are NEVER changed by CSV import (use Stock screen for stock changes).</p>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-archive-fill"></i> Stock</h4>
+        <p><strong>Purpose:</strong> Manage warehouse stock levels and movements</p>
+        <p><strong>Tabs:</strong></p>
+        <ul>
+          <li><strong>Stock Overview</strong> — See all products with current cartons and loose units. Status: Green (sufficient) / Orange (low) / Red (out of stock)</li>
+          <li><strong>Manual Add Stock</strong> — Add stock received without a supplier receipt. Select product, enter cartons and loose → Save</li>
+          <li><strong>Add from Supplier</strong> — Record stock received from supplier. This deducts from supplier advance balance automatically.</li>
+          <li><strong>Pending Issuances</strong> — Approve salesman morning stock requests. Review quantities → Click Approve (stock is deducted)</li>
+          <li><strong>Pending Returns</strong> — Approve salesman evening returns. Review returned and sold quantities → Click Approve (returned stock is added back)</li>
+          <li><strong>Stock Requirement</strong> — See consolidated stock needed for all pending orders</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-truck"></i> Suppliers</h4>
+        <p><strong>Purpose:</strong> Manage supplier relationships and advance payments</p>
+        <p><strong>How to use:</strong></p>
+        <ul>
+          <li><strong>Add Supplier</strong> — Click "Add Supplier" → Enter name, contact person, phone</li>
+          <li><strong>Record Advance</strong> — In supplier details → Record Advance → Enter amount, date, payment method (advance balance increases)</li>
+          <li><strong>Add Stock Receipt</strong> — In supplier details → Add Stock Receipt → Select products and quantities (advance balance decreases automatically)</li>
+          <li><strong>Record Claim</strong> — Record complaints or returns. Claimed products are NOT added to warehouse stock. When claim is cleared, advance balance increases.</li>
+        </ul>
+        <div class="guide-tip">
+          <strong>Understanding Advance Balance</strong>
+          <p>Advance Balance = Money Paid − Goods Received − Claims Cleared. When you receive goods, advance balance goes down.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: Distribution -->
+    <section id="distribution" class="guide-section">
+      <h2>Distribution</h2>
+      <p>Manage routes, route assignments, and shop relationships.</p>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-signpost-2-fill"></i> Routes</h4>
+        <p><strong>Purpose:</strong> Define geographical routes for your order bookers</p>
+        <p><strong>How to use:</strong></p>
+        <ul>
+          <li><strong>Add Route</strong> — Click "Add Route" → Enter route name (e.g., "Main Bazaar Area", "GT Road Zone")</li>
+          <li><strong>View Route Details</strong> — Click eye icon to see all shops in the route</li>
+          <li><strong>Deactivate Route</strong> — Click red slash button (route data is preserved, just inactive)</li>
+        </ul>
+        <p><strong>Note:</strong> Route ID is needed for CSV shop import.</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-calendar-check-fill"></i> Route Assignments</h4>
+        <p><strong>Purpose:</strong> Assign routes to order bookers for daily work</p>
+        <p><strong>How to use:</strong></p>
+        <ul>
+          <li>Go to <strong>Route Assignments → Assign Today</strong></li>
+          <li>Select Order Booker from dropdown</li>
+          <li>Select Date (defaults to today)</li>
+          <li>Select one or more Routes</li>
+          <li>Click <strong>Assign</strong></li>
+        </ul>
+        <p><strong>Rule:</strong> Each route can only be assigned to ONE booker per day. If route is already assigned, you will see an error.</p>
+        <div class="guide-tip">
+          <strong>Do This Every Morning</strong>
+          <p>Always assign routes before order bookers do their morning sync, otherwise they won't see their shops on mobile app.</p>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-shop-window"></i> Shops</h4>
+        <p><strong>Purpose:</strong> Manage customer shops database</p>
+        <p><strong>How to use:</strong></p>
+        <ul>
+          <li><strong>Add Shop</strong> — Click "Add Shop" → Fill name, owner, phone, address, route, type (retail/wholesale), price edit permission</li>
+          <li><strong>Import CSV</strong> — Click "Import CSV" for bulk upload. You will see preview screen where you can edit/delete rows before confirming import.</li>
+          <li><strong>View Shop Ledger</strong> — Click ledger icon to see full financial history (all bills, payments, outstanding balance)</li>
+          <li><strong>Add Opening Balance</strong> — In shop ledger → Click "Add Opening Balance" to record pre-system outstanding bills</li>
+        </ul>
+        <p><strong>CSV Format:</strong><br>
+        <code>name,owner_name,phone,address,route_id,shop_type,price_edit_allowed</code></p>
+      </div>
+    </section>
+
+    <!-- SECTION 7: Finance -->
+    <section id="finance" class="guide-section">
+      <h2>Finance</h2>
+      <p>Track all cash, expenses, and generate financial reports.</p>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-safe-fill"></i> Centralized Cash</h4>
+        <p><strong>Purpose:</strong> See all cash received across all three sales channels</p>
+        <p><strong>Views:</strong></p>
+        <ul>
+          <li><strong>Daily View</strong> — Today's total cash broken into:
+            <ul>
+              <li>Salesman Sale (from approved salesman returns)</li>
+              <li>Recovery (from verified order booker collections)</li>
+              <li>Delivery Man Collection (from bill settlements)</li>
+            </ul>
+          </li>
+          <li><strong>Monthly View</strong> — Day-by-day breakdown for selected date range</li>
+        </ul>
+        <div class="guide-tip">
+          <strong>When Cash Appears</strong>
+          <p>Cash ONLY shows here after: Salesman return approved / Recovery verified / Delivery settlement recorded. Unverified data does NOT appear.</p>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-receipt"></i> Expenses</h4>
+        <p><strong>Purpose:</strong> Record business expenses</p>
+        <p><strong>Expense Types:</strong></p>
+        <ul>
+          <li>Fuel</li>
+          <li>Daily Allowance</li>
+          <li>Vehicle Maintenance</li>
+          <li>Office Expenses</li>
+          <li>Other</li>
+        </ul>
+        <p><strong>How to use:</strong> Click "Add Expense" → Select type, amount, date, description → Save. Filter expenses by type, date range, or staff member.</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-bar-chart-fill"></i> Reports</h4>
+        <p><strong>Purpose:</strong> Generate detailed business reports (all exportable to Excel)</p>
+        <p><strong>Available Reports:</strong></p>
+        <table class="guide-table">
+          <thead>
+            <tr>
+              <th>Report</th>
+              <th>What It Shows</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Daily Sales</td><td>Sales by all 3 channels for specific date</td></tr>
+            <tr><td>Monthly Sales</td><td>Sales by all 3 channels for a month</td></tr>
+            <tr><td>Order Booker Performance</td><td>Orders booked, bills converted, recoveries per booker</td></tr>
+            <tr><td>Salesman Performance</td><td>Issued, returned, sold quantities and sale value per salesman</td></tr>
+            <tr><td>Stock Movement</td><td>All warehouse stock changes with type and balance</td></tr>
+            <tr><td>Stock Requirement</td><td>Consolidated stock needed for pending orders per booker</td></tr>
+            <tr><td>Shop Ledger</td><td>Full financial history for specific shop</td></tr>
+            <tr><td>Cash Recovery</td><td>Assigned bills vs collected amounts per booker</td></tr>
+            <tr><td>Supplier Advance</td><td>Advances, receipts, claims per supplier</td></tr>
+            <tr><td>Staff Salary</td><td>Monthly salary, advances, running balance per staff</td></tr>
+            <tr><td>Claims</td><td>All claims per supplier with status</td></tr>
+            <tr><td>Cash Flow</td><td>Daily and monthly cash across all channels</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Export:</strong> Every report has an "Export" button to download Excel file.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 8: Human Resources -->
+    <section id="hr" class="guide-section">
+      <h2>Human Resources</h2>
+      <p>Manage staff, attendance, and payroll.</p>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-people-fill"></i> User Management</h4>
+        <p><strong>Purpose:</strong> Add and manage system users</p>
+        <p><strong>User Roles:</strong></p>
+        <ul>
+          <li><strong>Admin</strong> — Full access to web panel</li>
+          <li><strong>Order Booker</strong> — Access to mobile app for booking orders and recovery</li>
+          <li><strong>Salesman</strong> — Access to mobile app for stock issuance and returns</li>
+          <li><strong>Delivery Man</strong> — For bill settlement tracking</li>
+        </ul>
+        <p><strong>How to use:</strong> Click "Add User" → Fill name, username, password, role, phone → Save</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-calendar-check"></i> Attendance</h4>
+        <p><strong>Purpose:</strong> Track staff attendance (present/absent/leave)</p>
+        <p><strong>Features:</strong></p>
+        <ul>
+          <li>Auto Present — Staff marked present by default each day (configurable in Holidays)</li>
+          <li>Edit attendance manually if needed</li>
+          <li>View by day or month</li>
+          <li>Filter by staff role</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-wallet2"></i> Payroll</h4>
+        <p><strong>Purpose:</strong> Manage staff salaries and advances</p>
+        <p><strong>Operations:</strong></p>
+        <ul>
+          <li><strong>Record Monthly Salary</strong> — Set basic salary for the month</li>
+          <li><strong>Record Salary Advance</strong> — Track advances given during the month</li>
+          <li><strong>Running Balance</strong> — Basic Salary − Total Advances = Balance Due</li>
+          <li><strong>Month-End Clearance</strong> — Mark salary as settled at month end</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SECTION 9: System -->
+    <section id="system" class="guide-section">
+      <h2>System</h2>
+      <p>Configure system settings, company profile, and backups.</p>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-building"></i> Company Profile</h4>
+        <p><strong>Purpose:</strong> Set business information that appears on bills and dashboard</p>
+        <p><strong>Information you can set:</strong></p>
+        <ul>
+          <li>Company Name</li>
+          <li>Owner Name</li>
+          <li>Address</li>
+          <li>Phone Numbers (Primary, Secondary, WhatsApp)</li>
+          <li>Email</li>
+          <li>GST/NTN Number</li>
+          <li>Sales Tax Number</li>
+          <li>CNIC</li>
+          <li>Company Logo (upload PNG/JPG — appears on dashboard and bills)</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-gear-fill"></i> Settings</h4>
+        <p><strong>Purpose:</strong> Change admin credentials</p>
+        <p><strong>Options:</strong></p>
+        <ul>
+          <li>Change admin username</li>
+          <li>Change admin password (minimum 6 characters)</li>
+        </ul>
+        <div class="guide-tip">
+          <strong>Security</strong>
+          <p>Always use a strong password. Do NOT share admin credentials with field staff.</p>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-cloud-arrow-up-fill"></i> Backup</h4>
+        <p><strong>Purpose:</strong> Protect your business data</p>
+        <p><strong>Features:</strong></p>
+        <ul>
+          <li><strong>Manual Backup</strong> — Click "Run Backup Now" to create immediate backup (.sql file in backups folder)</li>
+          <li><strong>Automatic Backup</strong> — Runs every night at midnight (00:00 Pakistan time) automatically</li>
+          <li><strong>Google Drive Sync</strong> — If configured, backups also upload to Google Drive automatically</li>
+          <li><strong>Restore from Backup</strong> — Select backup file → Click Restore → Confirm (replaces ALL current data)</li>
+        </ul>
+        <div class="guide-tip">
+          <strong>Warning</strong>
+          <p>Restore only if something went seriously wrong. All data since the backup date will be lost!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 10: Mobile App -->
+    <section id="mobile-app" class="guide-section">
+      <h2>Mobile App</h2>
+      <p>Guide for order bookers and salesmen using the Android mobile app.</p>
+      
+      <h3>First-Time Setup</h3>
+      <div class="guide-workflow-steps">
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">1</div>
+          <div class="guide-workflow-step-text">Install APK on Android phone</div>
+        </div>
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">2</div>
+          <div class="guide-workflow-step-text">Open app → Connection Screen → Enter Server IP (shown in top navbar on web panel)</div>
+        </div>
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">3</div>
+          <div class="guide-workflow-step-text">Enter Port: <code>3000</code> → Tap "Test Connection"</div>
+        </div>
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">4</div>
+          <div class="guide-workflow-step-text">If connected successfully → Tap "Continue to Login"</div>
+        </div>
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">5</div>
+          <div class="guide-workflow-step-text">Enter username and password</div>
+        </div>
+      </div>
+
+      <h3>For Order Bookers</h3>
+      <div class="guide-card">
+        <h4>Morning Routine</h4>
+        <ul>
+          <li>Connect to office Wi-Fi</li>
+          <li>Open app → Tap <strong>Sync</strong> (morning sync)</li>
+          <li>App downloads: your assigned routes, shops, products, prices, recovery assignments</li>
+          <li>Go to field — app works fully offline</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4>Booking Orders</h4>
+        <ul>
+          <li>Tap <strong>Routes</strong> → Select your assigned route</li>
+          <li>Tap a shop to open order booking screen</li>
+          <li>Search products by SKU or name</li>
+          <li>Enter cartons and loose units</li>
+          <li>Tap <strong>Save Order</strong> (saved locally until evening sync)</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4>Cash Recovery</h4>
+        <ul>
+          <li>Tap <strong>Recovery</strong> tab</li>
+          <li>See all bills assigned to you for today</li>
+          <li>Tap a bill → Enter amount collected → Select payment method (Cash/Bank Transfer)</li>
+          <li>Tap <strong>Save</strong> (saved locally until evening sync)</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4>Evening Routine</h4>
+        <ul>
+          <li>Return to office Wi-Fi range</li>
+          <li>Open app → Tap <strong>Sync</strong> (evening sync)</li>
+          <li>App uploads all orders and recovery collections</li>
+          <li>Check for any stock adjustment notifications</li>
+        </ul>
+      </div>
+
+      <h3>For Salesmen</h3>
+      <div class="guide-card">
+        <h4>Morning Routine</h4>
+        <ul>
+          <li>Open app → Tap <strong>Request Issuance</strong></li>
+          <li>Enter products and quantities you need</li>
+          <li>Tap <strong>Submit</strong></li>
+          <li>Wait for Admin to approve (status changes to "Approved")</li>
+          <li>Collect stock from warehouse</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4>Evening Routine</h4>
+        <ul>
+          <li>Open app → Tap <strong>Submit Return</strong></li>
+          <li>Screen shows all products from your approved issuance</li>
+          <li>Enter quantities you are returning (unsold stock)</li>
+          <li>System automatically calculates sold quantities</li>
+          <li>Tap <strong>Submit Return</strong></li>
+          <li>Wait for Admin to approve</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SECTION 11: FAQ -->
+    <section id="faq" class="guide-section">
+      <h2>Common Questions</h2>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> Order booker synced but orders not showing?</h4>
+        <p>Go to Orders → Pending Orders. Check the date filter — clear it to see all dates. Orders might be from previous days.</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> "Stock went negative" error when converting order?</h4>
+        <p>Check current stock in Stock → Stock Overview. You need to add stock first before converting the order. Either Manual Add or Add from Supplier.</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> Bill shows as open but cash was collected?</h4>
+        <p>Cash must be recorded properly:</p>
+        <ul>
+          <li>For delivery man collections: Go to Cash Recovery → Bill Settlement → Record Payment</li>
+          <li>For order booker collections: Go to Cash Recovery → Pending Verifications → Verify the collection</li>
+        </ul>
+        <p>Cash does NOT automatically update just because it was collected physically. You must record it in the system.</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> Salesman sale not showing on cash screen?</h4>
+        <p>The salesman return must be approved first. Go to Stock → Pending Returns and approve it. After approval, the sale value posts to Centralized Cash Screen automatically.</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> Mobile app can't connect?</h4>
+        <p>Check these things:</p>
+        <ul>
+          <li>Both phone and PC must be on same Wi-Fi network</li>
+          <li>Verify IP and Port are correct (shown in top navbar of web panel)</li>
+          <li>PC web server must be running (check if you can open http://localhost:3000 in PC browser)</li>
+          <li>Windows Firewall might be blocking — allow port 3000</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> How to add a new shop to a route?</h4>
+        <p>Two ways:</p>
+        <ul>
+          <li>Go to Routes → Click the route → Add Shop</li>
+          <li>Or go to Shops → Add Shop → Select the route from dropdown</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> How to see a shop's full payment history?</h4>
+        <p>Go to Shops → Click the shop row → View Ledger. You will see all bills, payments, and running outstanding balance.</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> Can I edit a bill after it's created?</h4>
+        <p>No, bills cannot be edited after creation (to maintain audit trail). If there's an error, create a new corrected bill or adjust stock manually.</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> What is the difference between retail and wholesale shop?</h4>
+        <p>This affects which price is shown by default:</p>
+        <ul>
+          <li><strong>Retail Shop</strong> — Uses retail_price from product</li>
+          <li><strong>Wholesale Shop</strong> — Uses wholesale_price from product</li>
+        </ul>
+        <p>You can still manually edit prices during bill creation if price_edit_allowed is enabled for that shop.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Language Switch Button -->
+<div class="lang-switch">
+  <a href="/help/user-guide-urdu"><i class="bi bi-globe me-2"></i>اردو ورژن</a>
+</div>
+
+<!-- JavaScript for Search and Navigation -->
+<script>
+(function() {
+  'use strict';
+
+  // Search functionality
+  const searchInput = document.getElementById('guideSearch');
+  const sections = document.querySelectorAll('.guide-section');
+  
+  searchInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase().trim();
+    
+    if (searchTerm === '') {
+      // Show all sections if search is empty
+      sections.forEach(section => {
+        section.style.display = 'block';
+      });
+      return;
+    }
+    
+    // Search through all sections
+    sections.forEach(section => {
+      const sectionText = section.textContent.toLowerCase();
+      if (sectionText.includes(searchTerm)) {
+        section.style.display = 'block';
+        
+        // Highlight matching text
+        highlightText(section, searchTerm);
+      } else {
+        section.style.display = 'none';
+      }
+    });
+  });
+  
+  function highlightText(element, searchTerm) {
+    // Simple highlight - you can enhance this
+    // This is a basic implementation
+  }
+  
+  // Smooth scroll for navigation links
+  const navLinks = document.querySelectorAll('.guide-nav a');
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href');
+      const targetSection = document.querySelector(targetId);
+      
+      if (targetSection) {
+        // Remove active class from all links
+        navLinks.forEach(l => l.classList.remove('active'));
+        // Add active class to clicked link
+        this.classList.add('active');
+        
+        // Smooth scroll to target
+        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+  
+  // Update active nav link on scroll
+  window.addEventListener('scroll', function() {
+    let current = '';
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      if (pageYOffset >= sectionTop - 100) {
+        current = section.getAttribute('id');
+      }
+    });
+    
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  });
+})();
+</script>

@@ -1,0 +1,766 @@
+<style>
+/* ── User Guide Styles (Urdu) ────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap');
+
+body {
+  direction: rtl;
+  text-align: right;
+}
+* {
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif !important;
+}
+.guide-hero {
+  background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+  color: #fff;
+  padding: 40px;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.guide-hero::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.guide-hero h1 {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  font-weight: 700;
+  font-size: 2.5rem;
+  margin: 0 0 8px 0;
+}
+.guide-hero p {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.8);
+  margin: 0;
+  font-family: 'Noto Nastaliq Urdu', serif;
+  line-height: 2.2;
+}
+.guide-search {
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.guide-search input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px 10px 40px;
+  font-size: 1rem;
+  width: 100%;
+  transition: all 0.2s;
+  font-family: 'Noto Nastaliq Urdu', serif;
+}
+.guide-search input:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.guide-search-icon {
+  position: relative;
+}
+.guide-search-icon i {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.guide-content {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+}
+.guide-sidebar {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.guide-sidebar h3 {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 16px 0;
+  color: var(--text-primary);
+}
+.guide-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.guide-nav li {
+  margin-bottom: 4px;
+}
+.guide-nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  font-family: 'Noto Nastaliq Urdu', serif;
+}
+.guide-nav a:hover {
+  background: var(--bg);
+  color: var(--secondary);
+}
+.guide-nav a.active {
+  background: rgba(59,130,246,0.1);
+  color: var(--secondary);
+  font-weight: 600;
+}
+.guide-main {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.guide-section {
+  margin-bottom: 40px;
+  scroll-margin-top: 80px;
+}
+.guide-section:last-child {
+  margin-bottom: 0;
+}
+.guide-section h2 {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+}
+.guide-section h3 {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  margin: 24px 0 12px 0;
+}
+.guide-section p {
+  font-size: 1.05rem;
+  line-height: 2;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  font-family: 'Noto Nastaliq Urdu', serif;
+}
+.guide-section ul, .guide-section ol {
+  font-size: 1.05rem;
+  line-height: 2;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  padding-right: 24px;
+  font-family: 'Noto Nastaliq Urdu', serif;
+}
+.guide-section li {
+  margin-bottom: 8px;
+}
+.guide-card {
+  background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+.guide-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border-color: rgba(59,130,246,0.2);
+}
+.guide-card h4 {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.guide-card h4 i {
+  color: var(--secondary);
+}
+.guide-card p {
+  font-size: 1rem;
+  margin: 0;
+  color: var(--text-secondary);
+}
+.guide-workflow {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 2px solid rgba(59,130,246,0.2);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 24px 0;
+}
+.guide-workflow h4 {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #1E40AF;
+  margin: 0 0 16px 0;
+}
+.guide-workflow-steps {
+  display: grid;
+  gap: 12px;
+}
+.guide-workflow-step {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: var(--radius-sm);
+}
+.guide-workflow-step-num {
+  width: 28px;
+  height: 28px;
+  background: var(--secondary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.guide-workflow-step-text {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-family: 'Noto Nastaliq Urdu', serif;
+}
+.guide-tip {
+  background: linear-gradient(135deg, #FEF9C3 0%, #FEF3C7 100%);
+  border-right: 4px solid #F59E0B;
+  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  margin: 16px 0;
+}
+.guide-tip strong {
+  color: #92400E;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+  font-family: 'Noto Nastaliq Urdu', serif;
+}
+.guide-tip p {
+  margin: 0;
+  font-size: 1rem;
+  color: #854D0E;
+  font-family: 'Noto Nastaliq Urdu', serif;
+}
+.lang-switch {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 9999;
+  display: block !important;
+}
+.lang-switch a {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none !important;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.4);
+  transition: all 0.3s;
+  display: inline-block;
+  font-size: 0.95rem;
+  border: none;
+}
+.lang-switch a:hover {
+  background: #2563EB !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59,130,246,0.5);
+}
+@media (max-width: 992px) {
+  .guide-content {
+    grid-template-columns: 1fr;
+  }
+  .guide-sidebar {
+    position: static;
+  }
+}
+</style>
+
+<!-- ── User Guide Hero ──────────────────────────────────────────────────────── -->
+<div class="guide-hero">
+  <h1><i class="bi bi-book me-2"></i>صارف گائیڈ</h1>
+  <p>شکیل ٹریڈرز ڈسٹری بیوشن سسٹم استعمال کرنے کی مکمل گائیڈ — آسان لفظوں میں آرڈرز، سٹاک، کیش اور روزانہ کاموں کا طریقہ سیکھیں</p>
+</div>
+
+<!-- ── Search Box ───────────────────────────────────────────────────────────── -->
+<div class="guide-search">
+  <div class="guide-search-icon">
+    <input type="text" id="guideSearch" placeholder="موضوعات، خصوصیات، یا صفحات تلاش کریں..." autocomplete="off">
+    <i class="bi bi-search"></i>
+  </div>
+</div>
+
+<!-- ── Guide Content ────────────────────────────────────────────────────────── -->
+<div class="guide-content">
+  
+  <!-- Main Content -->
+  <main class="guide-main">
+
+    <!-- SECTION 1: System Overview -->
+    <section id="overview" class="guide-section">
+      <h2>System Overview - سسٹم کا جائزہ</h2>
+      <p>یہ سسٹم آپ کو تین فروخت کے ذرائع سے اپنا ڈسٹری بیوشن کا کاروبار چلانے میں مدد کرتا ہے:</p>
+      
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="guide-card">
+            <h4><i class="bi bi-person-badge"></i> آرڈر بُکر سیلز</h4>
+            <p>فیلڈ سٹاف دکانوں پر جا کر موبائل ایپ پر آرڈر بُک کرتا ہے۔ آپ دفتر میں آرڈر کو بل میں تبدیل کرتے ہیں۔</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="guide-card">
+            <h4><i class="bi bi-truck"></i> سیلزمین سیلز</h4>
+            <p>سیلزمین صبح سٹاک لیتا ہے، دن میں فروخت کرتا ہے، شام کو باقی سٹاک واپس کرتا ہے۔</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="guide-card">
+            <h4><i class="bi bi-shop"></i> ڈائریکٹ شاپ سیلز</h4>
+            <p>واک اِن گاہکوں یا فون آرڈرز کے لیے فوری بل بنائیں۔</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>How It Works - یہ کیسے کام کرتا ہے</h3>
+      <p><strong>سسٹم کے دو حصے:</strong></p>
+      <ul>
+        <li><strong>ویب ایڈمن پینل</strong> — آپ دفتر کے کمپیوٹر پر براؤزر میں استعمال کرتے ہیں</li>
+        <li><strong>موبائل ایپ</strong> — آپ کے آرڈر بُکرز اور سیلزمین اینڈرائیڈ فونز پر استعمال کرتے ہیں</li>
+      </ul>
+      
+      <div class="guide-tip">
+        <strong>پہلی بار لاگ اِن</strong>
+        <p>براؤزر کھولیں → http://localhost:3000 پر جائیں → یوزر نیم: admin، پاس ورڈ: admin123 → پہلے لاگ اِن کے بعد فوری طور پر پاس ورڈ تبدیل کریں!</p>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Daily Workflow -->
+    <section id="daily-workflow" class="guide-section">
+      <h2>Daily Workflow - روزانہ کا معمول</h2>
+      <p>کاروبار کے ہموار آپریشن کے لیے ہر روز اس طریقے پر عمل کریں:</p>
+      
+      <div class="guide-workflow">
+        <h4>Morning Routine - صبح کا معمول (فیلڈ سٹاف جانے سے پہلے)</h4>
+        <div class="guide-workflow-steps">
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">1</div>
+            <div class="guide-workflow-step-text"><strong>Route Assignments</strong> → آج کے لیے آرڈر بُکرز کو روٹس تفویض کریں</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">2</div>
+            <div class="guide-workflow-step-text"><strong>Cash Recovery</strong> → وصولی کے لیے آرڈر بُکرز کو بقایا بل تفویض کریں</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">3</div>
+            <div class="guide-workflow-step-text"><strong>Stock → Pending Issuances</strong> → سیلزمین کی سٹاک ریکویسٹس منظور کریں</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-workflow">
+        <h4>Evening Routine - شام کا معمول (فیلڈ سٹاف واپس آنے کے بعد)</h4>
+        <div class="guide-workflow-steps">
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">1</div>
+            <div class="guide-workflow-step-text"><strong>Orders → Pending Orders</strong> → آرڈرز کو بل میں تبدیل کریں (سٹاک کٹ جائے گا)</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">2</div>
+            <div class="guide-workflow-step-text"><strong>Cash Recovery → Pending Verifications</strong> → کیش وصولیوں کی تصدیق کریں</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">3</div>
+            <div class="guide-workflow-step-text"><strong>Stock → Pending Returns</strong> → سیلزمین کی واپسیاں منظور کریں (سٹاک واپس شامل ہو گا)</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">4</div>
+            <div class="guide-workflow-step-text"><strong>Cash Recovery → Bill Settlement</strong> → ڈیلیوری مین کی کیش وصولیاں ریکارڈ کریں</div>
+          </div>
+          <div class="guide-workflow-step">
+            <div class="guide-workflow-step-num">5</div>
+            <div class="guide-workflow-step-text"><strong>Dashboard</strong> → الرٹس اور روزانہ کی رپورٹ دیکھیں</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Dashboard -->
+    <section id="dashboard" class="guide-section">
+      <h2>Dashboard - ڈیش بورڈ</h2>
+      <p>آپ کا ڈیش بورڈ آپ کے کاروبار کی لائیو تصویر دکھاتا ہے۔ جب آپ آپریشن کرتے ہیں تو یہ خودکار طور پر اپ ڈیٹ ہوتا ہے۔</p>
+      
+      <h3>Dashboard Overview - ڈیش بورڈ پر کیا دیکھیں گے</h3>
+      <ul>
+        <li><strong>Total Outstanding</strong> — تمام کھلے بلوں کی کُل غیر ادا شدہ رقم</li>
+        <li><strong>Supplier Advance</strong> — سپلائرز کو پیشگی دی گئی رقم (ابھی مال نہیں ملا)</li>
+        <li><strong>Stock Value</strong> — موجودہ گودام کے سٹاک کی مالیت کارٹن اور لوز یونٹس کے ساتھ</li>
+        <li><strong>Cash Collected</strong> — آج کا کُل کیش تین حصوں میں: سیلزمین سیل، ریکوری، ڈیلیوری کلیکشن</li>
+        <li><strong>Orders Booked</strong> — آج کے آرڈرز کی تعداد ٹاپ 3 آرڈر بُکرز کے ساتھ</li>
+        <li><strong>Alerts</strong> — کم سٹاک، زیر التواء آرڈرز، زیر التواء جاریات، زیر التواء واپسیاں، غیر سنکرونائز بُکرز</li>
+      </ul>
+
+      <h3>Period Toggle - دورانیہ ٹوگل</h3>
+      <p>اوپر دائیں جانب بٹن پر کلک کر کے <strong>آج</strong>، <strong>مہینہ</strong>، یا <strong>سال</strong> کا ڈیٹا دیکھیں۔ ڈیش بورڈ خودکار اپ ڈیٹ ہو جائے گا۔</p>
+      
+      <div class="guide-tip">
+        <strong>فوری ٹِپ</strong>
+        <p>اوپر دائیں جانب ریفریش بٹن (🔄) پر کلک کریں تاکہ صفحہ دوبارہ لوڈ کیے بغیر ڈیٹا اپ ڈیٹ ہو جائے۔ موبائل ایپ کنکشن کی معلومات (IP اور Port) اوپر نیویگیشن بار میں دکھائی جاتی ہے۔</p>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Operations -->
+    <section id="operations" class="guide-section">
+      <h2>Operations - آپریشنز</h2>
+      <p>آرڈرز، سیلز، اور کیش ریکوری کو منظم کرنے کے لیے روزانہ کے کاروباری آپریشنز۔</p>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-clipboard-check-fill"></i> آرڈر مینجمنٹ</h4>
+        <p><strong>مقصد:</strong> آرڈر بُکرز کے بُک کیے گئے آرڈرز کو بل میں تبدیل کرنا</p>
+        <p><strong>استعمال کا طریقہ:</strong></p>
+        <ul>
+          <li><strong>Orders → Pending Orders</strong> پر جائیں</li>
+          <li>موبائل ایپ سے سنک ہونے والے تمام آرڈرز دیکھیں گے</li>
+          <li>کسی بھی آرڈر پر <strong>Convert to Bill</strong> کلک کریں (گودام سے سٹاک کٹ جائے گا)</li>
+          <li>یا کئی آرڈرز منتخب کریں اور <strong>Bulk Convert</strong> استعمال کریں</li>
+          <li>تبدیل شدہ بل <strong>Orders → Converted Bills</strong> میں نظر آئیں گے</li>
+        </ul>
+        <p><strong>بل کی حالت:</strong> Open (غیر ادا شدہ) → Partially Paid (کچھ وصول) → Cleared (مکمل ادا شدہ)</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-cart-fill"></i> ڈائریکٹ شاپ سیلز</h4>
+        <p><strong>مقصد:</strong> واک اِن گاہکوں یا فون آرڈرز کے لیے فوری بل بنانا</p>
+        <p><strong>استعمال کا طریقہ:</strong></p>
+        <ul>
+          <li><strong>Direct Shop Sales → New Bill</strong> پر جائیں</li>
+          <li>ڈراپ ڈاؤن سے دکان منتخب کریں</li>
+          <li>SKU کوڈ یا نام سے پروڈکٹس تلاش کریں</li>
+          <li>کارٹن اور لوز یونٹس داخل کریں</li>
+          <li>قیمتیں خودکار بھر جائیں گی (اگر اجازت ہو تو تبدیل کر سکتے ہیں)</li>
+          <li><strong>Create Bill</strong> کلک کریں — سٹاک فوری کٹ جائے گا</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-cash-coin"></i> کیش ریکوری</h4>
+        <p><strong>مقصد:</strong> بل کی وصولیوں اور ادائیگیوں کو منظم کرنا</p>
+        <p><strong>ٹیبز:</strong></p>
+        <ul>
+          <li><strong>Outstanding Bills</strong> — بقایا رقم والے تمام بل۔ فیلڈ وصولی کے لیے آرڈر بُکرز کو بل تفویض کریں۔</li>
+          <li><strong>Bill Settlement</strong> — ڈیلیوری مین کی لائی ہوئی کیش ریکارڈ کریں۔ بل، ڈیلیوری مین، رقم منتخب کریں → Record Payment کلک کریں۔</li>
+          <li><strong>Pending Verifications</strong> — آرڈر بُکرز کی سنک کردہ کیش وصولیوں کی تصدیق کریں۔ رقم اور ادائیگی کا طریقہ چیک کریں → Verify کلک کریں۔</li>
+          <li><strong>Recovery History</strong> — تمام تفویضات اور وصولیوں کی مکمل تاریخ۔</li>
+        </ul>
+        <div class="guide-tip">
+          <strong>اہم</strong>
+          <p>کیش صرف تصدیق/سیٹلمنٹ کے بعد Centralized Cash Screen میں نظر آئے گی۔ غیر تصدیق شدہ وصولیاں شمار نہیں ہوتیں۔</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Inventory -->
+    <section id="inventory" class="guide-section">
+      <h2>Inventory - انوینٹری</h2>
+      <p>پروڈکٹس، سٹاک لیولز، اور سپلائر تعلقات کو منظم کریں۔</p>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-box-seam-fill"></i> پروڈکٹس</h4>
+        <p><strong>مقصد:</strong> اپنے پروڈکٹ کیٹلاگ کو منظم کرنا</p>
+        <p><strong>استعمال کا طریقہ:</strong></p>
+        <ul>
+          <li><strong>Add Product</strong> — "Add Product" بٹن کلک کریں → SKU کوڈ، نام، برانڈ، یونٹس فی کارٹن، ریٹیل قیمت، ہول سیل قیمت بھریں</li>
+          <li><strong>Import CSV</strong> — بلک اپ لوڈ کے لیے "Import CSV" کلک کریں</li>
+          <li><strong>Edit Product</strong> — کسی پروڈکٹ پر پینسل آئیکن کلک کریں</li>
+          <li><strong>View Stock History</strong> — تمام سٹاک کی نقل و حرکت دیکھنے کے لیے گھڑی آئیکن کلک کریں</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-archive-fill"></i> سٹاک</h4>
+        <p><strong>مقصد:</strong> گودام کے سٹاک لیولز اور نقل و حرکت کو منظم کرنا</p>
+        <p><strong>ٹیبز:</strong></p>
+        <ul>
+          <li><strong>Stock Overview</strong> — موجودہ کارٹن اور لوز یونٹس کے ساتھ تمام پروڈکٹس۔ حالت: سبز (کافی) / نارنجی (کم) / سرخ (ختم)</li>
+          <li><strong>Manual Add Stock</strong> — سپلائر رسید کے بغیر موصولہ سٹاک شامل کریں</li>
+          <li><strong>Add from Supplier</strong> — سپلائر سے موصولہ سٹاک ریکارڈ کریں۔ یہ خودکار طور پر سپلائر ایڈوانس بیلنس کم کر دیتا ہے۔</li>
+          <li><strong>Pending Issuances</strong> — سیلزمین کی صبح کی سٹاک ریکویسٹس منظور کریں (سٹاک کٹ جائے گا)</li>
+          <li><strong>Pending Returns</strong> — سیلزمین کی شام کی واپسیاں منظور کریں (واپس سٹاک شامل ہو گا)</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-truck"></i> سپلائرز</h4>
+        <p><strong>مقصد:</strong> سپلائر تعلقات اور پیشگی ادائیگیوں کو منظم کرنا</p>
+        <p><strong>استعمال کا طریقہ:</strong></p>
+        <ul>
+          <li><strong>Add Supplier</strong> — "Add Supplier" کلک کریں → نام، رابطہ شخص، فون داخل کریں</li>
+          <li><strong>Record Advance</strong> — سپلائر کی تفصیلات میں → Record Advance → رقم، تاریخ، ادائیگی کا طریقہ داخل کریں (ایڈوانس بیلنس بڑھ جائے گا)</li>
+          <li><strong>Add Stock Receipt</strong> — سپلائر کی تفصیلات میں → Add Stock Receipt → پروڈکٹس اور مقدار منتخب کریں (ایڈوانس بیلنس خودکار کم ہو جائے گا)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SECTION 6: Mobile App -->
+    <section id="mobile-app" class="guide-section">
+      <h2>Mobile App - موبائل ایپ</h2>
+      <p>اینڈرائیڈ موبائل ایپ استعمال کرنے والے آرڈر بُکرز اور سیلزمین کے لیے گائیڈ۔</p>
+      
+      <h3>First-Time Setup - پہلی بار سیٹ اپ</h3>
+      <div class="guide-workflow-steps">
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">1</div>
+          <div class="guide-workflow-step-text">اینڈرائیڈ فون پر APK انسٹال کریں</div>
+        </div>
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">2</div>
+          <div class="guide-workflow-step-text">ایپ کھولیں → Connection Screen → Server IP داخل کریں (ویب پینل کے اوپر نیویگیشن بار میں دکھایا گیا)</div>
+        </div>
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">3</div>
+          <div class="guide-workflow-step-text">Port داخل کریں: <code>3000</code> → "Test Connection" ٹیپ کریں</div>
+        </div>
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">4</div>
+          <div class="guide-workflow-step-text">اگر کامیابی سے کنیکٹ ہو گیا → "Continue to Login" ٹیپ کریں</div>
+        </div>
+        <div class="guide-workflow-step">
+          <div class="guide-workflow-step-num">5</div>
+          <div class="guide-workflow-step-text">یوزر نیم اور پاس ورڈ داخل کریں</div>
+        </div>
+      </div>
+
+      <h3>For Order Bookers - آرڈر بُکرز کے لیے</h3>
+      <div class="guide-card">
+        <h4>صبح کا معمول</h4>
+        <ul>
+          <li>دفتر کے وائی فائی سے کنیکٹ ہوں</li>
+          <li>ایپ کھولیں → <strong>Sync</strong> ٹیپ کریں (صبح کی سنکرونائزیشن)</li>
+          <li>ایپ ڈاؤن لوڈ کرتی ہے: آپ کی تفویض شدہ روٹس، دکانیں، پروڈکٹس، قیمتیں، ریکوری تفویضات</li>
+          <li>فیلڈ میں جائیں — ایپ مکمل طور پر آف لائن کام کرتی ہے</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4>آرڈرز بُک کرنا</h4>
+        <ul>
+          <li><strong>Routes</strong> ٹیپ کریں → اپنی تفویض شدہ روٹ منتخب کریں</li>
+          <li>آرڈر بُکنگ سکرین کھولنے کے لیے دکان ٹیپ کریں</li>
+          <li>SKU یا نام سے پروڈکٹس تلاش کریں</li>
+          <li>کارٹن اور لوز یونٹس داخل کریں</li>
+          <li><strong>Save Order</strong> ٹیپ کریں (شام کی سنک تک مقامی طور پر محفوظ)</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4>کیش ریکوری</h4>
+        <ul>
+          <li><strong>Recovery</strong> ٹیب ٹیپ کریں</li>
+          <li>آج کے لیے آپ کو تفویض کیے گئے تمام بل دیکھیں</li>
+          <li>بل ٹیپ کریں → وصول کی گئی رقم داخل کریں → ادائیگی کا طریقہ منتخب کریں (Cash/Bank Transfer)</li>
+          <li><strong>Save</strong> ٹیپ کریں (شام کی سنک تک مقامی طور پر محفوظ)</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4>شام کا معمول</h4>
+        <ul>
+          <li>دفتر کے وائی فائی رینج میں واپس آئیں</li>
+          <li>ایپ کھولیں → <strong>Sync</strong> ٹیپ کریں (شام کی سنکرونائزیشن)</li>
+          <li>ایپ تمام آرڈرز اور ریکوری کلیکشنز اپ لوڈ کرتی ہے</li>
+        </ul>
+      </div>
+
+      <h3>For Salesmen - سیلزمین کے لیے</h3>
+      <div class="guide-card">
+        <h4>صبح کا معمول</h4>
+        <ul>
+          <li>ایپ کھولیں → <strong>Request Issuance</strong> ٹیپ کریں</li>
+          <li>پروڈکٹس اور مقدار داخل کریں جو آپ کو چاہیے</li>
+          <li><strong>Submit</strong> ٹیپ کریں</li>
+          <li>ایڈمن کی منظوری کا انتظار کریں (حالت "Approved" میں بدل جائے گی)</li>
+          <li>گودام سے سٹاک جمع کریں</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4>شام کا معمول</h4>
+        <ul>
+          <li>ایپ کھولیں → <strong>Submit Return</strong> ٹیپ کریں</li>
+          <li>سکرین آپ کی منظور شدہ جاری سے تمام پروڈکٹس دکھاتی ہے</li>
+          <li>مقدار داخل کریں جو آپ واپس کر رہے ہیں (غیر فروخت شدہ سٹاک)</li>
+          <li>سسٹم خودکار فروخت شدہ مقدار کیلکولیٹ کرتا ہے</li>
+          <li><strong>Submit Return</strong> ٹیپ کریں</li>
+          <li>ایڈمن کی منظوری کا انتظار کریں</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SECTION 7: Common Questions -->
+    <section id="faq" class="guide-section">
+      <h2>FAQ - عام سوالات</h2>
+      
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> آرڈر بُکر نے سنک کیا لیکن آرڈر نظر نہیں آ رہے؟</h4>
+        <p>Orders → Pending Orders پر جائیں۔ تاریخ کا فلٹر چیک کریں — تمام تاریخیں دیکھنے کے لیے اسے صاف کریں۔ آرڈر پچھلے دنوں کے ہو سکتے ہیں۔</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> آرڈر تبدیل کرتے وقت "سٹاک منفی ہو گیا" کی خرابی؟</h4>
+        <p>Stock → Stock Overview میں موجودہ سٹاک چیک کریں۔ آرڈر تبدیل کرنے سے پہلے آپ کو سٹاک شامل کرنا ہو گا۔ Manual Add یا Add from Supplier استعمال کریں۔</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> بل "کھلا" دکھا رہا ہے لیکن کیش وصول ہو چکی ہے؟</h4>
+        <p>کیش کو صحیح طریقے سے ریکارڈ کرنا ضروری ہے:</p>
+        <ul>
+          <li>ڈیلیوری مین کی وصولیوں کے لیے: Cash Recovery → Bill Settlement → Record Payment</li>
+          <li>آرڈر بُکر کی وصولیوں کے لیے: Cash Recovery → Pending Verifications → وصولی کی تصدیق کریں</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> سیلزمین کی فروخت کیش سکرین پر نظر نہیں آ رہی؟</h4>
+        <p>سیلزمین کی واپسی پہلے منظور ہونی چاہیے۔ Stock → Pending Returns پر جائیں اور اسے منظور کریں۔ منظوری کے بعد، فروخت کی قیمت خودکار طور پر Centralized Cash Screen پر پوسٹ ہو جاتی ہے۔</p>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> موبائل ایپ کنیکٹ نہیں ہو رہی؟</h4>
+        <p>یہ چیزیں چیک کریں:</p>
+        <ul>
+          <li>فون اور PC دونوں ایک ہی وائی فائی نیٹ ورک پر ہونے چاہئیں</li>
+          <li>IP اور Port درست ہیں تصدیق کریں (ویب پینل کے اوپر نیویگیشن بار میں دکھایا گیا)</li>
+          <li>PC ویب سرور چل رہا ہونا چاہیے (چیک کریں کہ آپ PC براؤزر میں http://localhost:3000 کھول سکتے ہیں)</li>
+          <li>Windows Firewall بلاک کر رہا ہو سکتا ہے — port 3000 کی اجازت دیں</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> روٹ میں نئی دکان کیسے شامل کریں؟</h4>
+        <p>دو طریقے:</p>
+        <ul>
+          <li>Routes پر جائیں → روٹ کلک کریں → Add Shop</li>
+          <li>یا Shops پر جائیں → Add Shop → ڈراپ ڈاؤن سے روٹ منتخب کریں</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <h4><i class="bi bi-question-circle"></i> دکان کی مکمل ادائیگی کی تاریخ کیسے دیکھیں؟</h4>
+        <p>Shops پر جائیں → دکان کی قطار کلک کریں → View Ledger۔ آپ کو تمام بل، ادائیگیاں، اور چلتا ہوا بقایا بیلنس نظر آئے گا۔</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Sidebar Navigation -->
+  <aside class="guide-sidebar">
+    <h3>Quick Navigation - فوری نیویگیشن</h3>
+    <ul class="guide-nav">
+      <li><a href="#overview"><i class="bi bi-info-circle"></i> سسٹم کا جائزہ</a></li>
+      <li><a href="#daily-workflow"><i class="bi bi-calendar-check"></i> روزانہ کا معمول</a></li>
+      <li><a href="#dashboard"><i class="bi bi-grid-1x2"></i> ڈیش بورڈ</a></li>
+      <li><a href="#operations"><i class="bi bi-clipboard-check"></i> آپریشنز</a></li>
+      <li><a href="#inventory"><i class="bi bi-box-seam"></i> انوینٹری</a></li>
+      <li><a href="#mobile-app"><i class="bi bi-phone"></i> موبائل ایپ</a></li>
+      <li><a href="#faq"><i class="bi bi-question-circle"></i> عام سوالات</a></li>
+    </ul>
+  </aside>
+
+</div>
+
+<!-- Language Switch Button -->
+<div class="lang-switch">
+  <a href="/help/user-guide"><i class="bi bi-globe me-2"></i>English Version</a>
+</div>
+
+<!-- JavaScript for Search and Navigation -->
+<script>
+(function() {
+  'use strict';
+
+  // Search functionality
+  const searchInput = document.getElementById('guideSearch');
+  const sections = document.querySelectorAll('.guide-section');
+  
+  searchInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase().trim();
+    
+    if (searchTerm === '') {
+      sections.forEach(section => {
+        section.style.display = 'block';
+      });
+      return;
+    }
+    
+    sections.forEach(section => {
+      const sectionText = section.textContent.toLowerCase();
+      if (sectionText.includes(searchTerm)) {
+        section.style.display = 'block';
+      } else {
+        section.style.display = 'none';
+      }
+    });
+  });
+  
+  // Smooth scroll for navigation links
+  const navLinks = document.querySelectorAll('.guide-nav a');
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href');
+      const targetSection = document.querySelector(targetId);
+      
+      if (targetSection) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+  
+  // Update active nav link on scroll
+  window.addEventListener('scroll', function() {
+    let current = '';
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      if (pageYOffset >= sectionTop - 100) {
+        current = section.getAttribute('id');
+      }
+    });
+    
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  });
+})();
+</script>
+
