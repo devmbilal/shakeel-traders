@@ -498,12 +498,34 @@
       border: none;
       border-radius: var(--radius-sm);
       font-size: 0.82rem;
-      padding: 10px 14px;
+      padding: 12px 16px;
     }
     .alert-success { background: #DCFCE7; color: #166534; }
     .alert-danger  { background: #FEE2E2; color: #991B1B; }
     .alert-info    { background: #DBEAFE; color: #1E40AF; }
     .alert-warning { background: #FEF9C3; color: #854D0E; }
+    
+    /* Flash message animations */
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    #flashMessages .alert-danger {
+      animation: slideInRight 0.3s ease, shake 0.5s ease 0.3s;
+    }
 
     /* ── Page Header ─────────────────────────────────────────────────────────── */
     .page-header {
@@ -723,23 +745,26 @@
 
     <!-- ── Flash Messages ── -->
     <% if ((success && success.length) || (error && error.length) || (info && info.length)) { %>
-    <div style="padding: 12px 24px 0;">
+    <div id="flashMessages" style="position: fixed; top: 80px; right: 24px; z-index: 9999; max-width: 420px; width: 100%;">
       <% if (success && success.length) { %>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-          <i class="bi bi-check-circle-fill me-2"></i><%= success[0] %>
-          <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+        <div class="alert alert-success alert-dismissible fade show shadow-lg" role="alert" style="animation: slideInRight 0.3s ease; margin-bottom: 8px; border-left: 4px solid #10B981; font-weight: 500;">
+          <i class="bi bi-check-circle-fill me-2" style="font-size: 1.1rem;"></i>
+          <strong>Success:</strong> <%= success[0] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <% } %>
       <% if (error && error.length) { %>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error[0] %>
-          <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+        <div class="alert alert-danger alert-dismissible fade show shadow-lg" role="alert" style="animation: slideInRight 0.3s ease; margin-bottom: 8px; border-left: 4px solid #EF4444; font-weight: 500;">
+          <i class="bi bi-exclamation-triangle-fill me-2" style="font-size: 1.1rem;"></i>
+          <strong>Error:</strong> <%= error[0] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <% } %>
       <% if (info && info.length) { %>
-        <div class="alert alert-info alert-dismissible fade show" role="alert">
-          <i class="bi bi-info-circle-fill me-2"></i><%= info[0] %>
-          <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+        <div class="alert alert-info alert-dismissible fade show shadow-lg" role="alert" style="animation: slideInRight 0.3s ease; margin-bottom: 8px; border-left: 4px solid #3B82F6; font-weight: 500;">
+          <i class="bi bi-info-circle-fill me-2" style="font-size: 1.1rem;"></i>
+          <strong>Info:</strong> <%= info[0] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <% } %>
     </div>
@@ -759,12 +784,21 @@
     document.getElementById('sidebarToggle')?.addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('show');
     });
-    // Auto-dismiss alerts after 5s
+    
+    // Flash message auto-dismiss (longer duration for errors)
     setTimeout(() => {
-      document.querySelectorAll('.alert.fade.show').forEach(el => {
+      document.querySelectorAll('#flashMessages .alert-success, #flashMessages .alert-info').forEach(el => {
         try { bootstrap.Alert.getOrCreateInstance(el).close(); } catch(e) {}
       });
-    }, 5000);
+    }, 8000); // Success and info dismiss after 8 seconds
+    
+    // Error messages stay longer - 15 seconds
+    setTimeout(() => {
+      document.querySelectorAll('#flashMessages .alert-danger').forEach(el => {
+        try { bootstrap.Alert.getOrCreateInstance(el).close(); } catch(e) {}
+      });
+    }, 15000);
+    
     // Tom Select initialization for searchable dropdowns
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('select[data-searchable]').forEach(el => {
