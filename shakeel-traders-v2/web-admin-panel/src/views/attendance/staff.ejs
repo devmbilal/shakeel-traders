@@ -87,10 +87,11 @@
         <div class="text-muted small mb-1">Attendance %</div>
         <div class="h4 mb-0">
           <% 
-            const totalDays = new Date(year, month, 0).getDate();
+            const totalDays = summary.total_days || 0;
             const workingDays = totalDays - (summary.off_days || 0) - (summary.holiday_days || 0);
+            const presentDays = summary.present_days || 0;
             const attendancePercentage = workingDays > 0 
-              ? ((summary.present_days / workingDays) * 100).toFixed(1)
+              ? ((presentDays / workingDays) * 100).toFixed(1)
               : 0;
           %>
           <%= attendancePercentage %>%

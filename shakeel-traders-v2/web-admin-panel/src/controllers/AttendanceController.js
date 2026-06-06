@@ -115,9 +115,26 @@ const AttendanceController = {
         );
         
         const totalDays = new Date(year, month, 0).getDate();
-        const workingDays = totalDays - (summary.off_days || 0) - (summary.holiday_days || 0);
+        
+        // Calculate Fridays in the month (automatic off days)
+        let fridaysCount = 0;
+        for (let day = 1; day <= totalDays; day++) {
+          const date = new Date(year, month - 1, day);
+          if (date.getDay() === 5) { // Friday is day 5
+            fridaysCount++;
+          }
+        }
+        
+        const offDays = fridaysCount; // Fridays are automatic off days
+        const holidayDays = summary.holiday_days || 0;
+        const workingDays = totalDays - offDays - holidayDays;
+        
+        // Auto-present logic: Present = Working Days - Absent
+        // If no attendance is marked, all working days count as present
+        const presentDays = workingDays - (summary.absent_days || 0);
+        
         const attendancePercentage = workingDays > 0 
-          ? ((summary.present_days / workingDays) * 100).toFixed(1)
+          ? ((presentDays / workingDays) * 100).toFixed(1)
           : 0;
         
         reportData.push({
@@ -126,10 +143,10 @@ const AttendanceController = {
           staff_type: staff.staff_type,
           total_days: totalDays,
           working_days: workingDays,
-          present_days: summary.present_days || 0,
+          present_days: presentDays,
           absent_days: summary.absent_days || 0,
-          holiday_days: summary.holiday_days || 0,
-          off_days: summary.off_days || 0,
+          holiday_days: holidayDays,
+          off_days: offDays,
           attendance_percentage: attendancePercentage,
         });
       }
@@ -177,6 +194,32 @@ const AttendanceController = {
         year
       );
 
+      // Calculate total days and Fridays (auto off days)
+      const totalDays = new Date(year, month, 0).getDate();
+      let fridaysCount = 0;
+      for (let day = 1; day <= totalDays; day++) {
+        const date = new Date(year, month - 1, day);
+        if (date.getDay() === 5) { // Friday is day 5
+          fridaysCount++;
+        }
+      }
+
+      // Apply auto-present logic
+      const offDays = fridaysCount;
+      const holidayDays = summary.holiday_days || 0;
+      const absentDays = summary.absent_days || 0;
+      const workingDays = totalDays - offDays - holidayDays;
+      const presentDays = workingDays - absentDays; // Auto-present: present = working - absent
+
+      // Override summary with calculated values
+      const calculatedSummary = {
+        total_days: totalDays,
+        present_days: presentDays,
+        absent_days: absentDays,
+        holiday_days: holidayDays,
+        off_days: offDays,
+      };
+
       // Get staff name
       let staffName = 'Unknown';
       if (staffType === 'delivery_man') {
@@ -197,7 +240,7 @@ const AttendanceController = {
         month,
         year,
         attendance,
-        summary,
+        summary: calculatedSummary,
       });
     } catch (err) {
       console.error(err);
