@@ -17,7 +17,7 @@ const DirectSalesController = {
     try {
       const [shops, products] = await Promise.all([
         ShopModel.listAll({ is_active: '1' }, { limit: 10000, offset: 0 }),
-        ProductModel.listAll('active'),
+        ProductModel.listAll('active', { limit: 999999, offset: 0 }),
       ]);
       renderWithLayout(req, res, 'direct-sales/new', { title: 'New Direct Sale', shops, products });
     } catch (err) {
@@ -107,7 +107,7 @@ const DirectSalesController = {
          ORDER BY b.created_at DESC`,
         params
       );
-      const shops = await ShopModel.listAll({ is_active: '1' });
+      const shops = await ShopModel.listAll({ is_active: '1' }, { limit: 999999, offset: 0 });
       renderWithLayout(req, res, 'direct-sales/index', { title: 'Direct Shop Sales', bills, shops, filters });
     } catch (err) {
       req.flash('error', 'Failed to load bills.'); res.redirect('/dashboard');

@@ -27,7 +27,7 @@ const OrderController = {
       const [orders, bookers, routes] = await Promise.all([
         OrderModel.listPending(filters, { limit: pagination.limit, offset: pagination.offset }),
         UserModel.listByRole('order_booker'),
-        RouteModel.listAll(),
+        RouteModel.listAll({ limit: 999999, offset: 0 }),
       ]);
       
       // Create queryString without page parameter

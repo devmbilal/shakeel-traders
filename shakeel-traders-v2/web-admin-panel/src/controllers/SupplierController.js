@@ -29,7 +29,7 @@ const SupplierController = {
         SupplierModel.findById(req.params.id),
         SupplierModel.getLedger(req.params.id),
         SupplierModel.listClaims(req.params.id),
-        ProductModel.listAll('active'),
+        ProductModel.listAll('active', { limit: 999999, offset: 0 }),
       ]);
       if (!supplier) { req.flash('error', 'Supplier not found.'); return res.redirect('/suppliers'); }
       renderWithLayout(req, res, 'suppliers/detail', { title: supplier.name, supplier, ledger, claims, products });

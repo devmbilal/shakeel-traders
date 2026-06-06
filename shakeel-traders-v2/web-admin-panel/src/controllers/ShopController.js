@@ -51,7 +51,7 @@ const ShopController = {
       const pagination = paginate(total, page);
       const [shops, routes] = await Promise.all([
         ShopModel.listAll(filters, { limit: pagination.limit, offset: pagination.offset }),
-        RouteModel.listAll(),
+        RouteModel.listAll({ limit: 999999, offset: 0 }),
       ]);
       
       // Create queryString without page parameter
@@ -77,7 +77,7 @@ const ShopController = {
   // GET /shops/new
   async newForm(req, res) {
     try {
-      const routes = await RouteModel.listAll();
+      const routes = await RouteModel.listAll({ limit: 999999, offset: 0 });
       renderWithLayout(req, res, 'shops/detail', {
         title: 'Add Shop',
         shop: null,
@@ -158,7 +158,7 @@ const ShopController = {
     try {
       const [shop, routes] = await Promise.all([
         ShopModel.findById(req.params.id),
-        RouteModel.listAll(),
+        RouteModel.listAll({ limit: 999999, offset: 0 }),
       ]);
       if (!shop) {
         req.flash('error', 'Shop not found.');
@@ -255,6 +255,132 @@ const ShopController = {
       console.error(err);
       req.flash('error', 'Failed to record advance: ' + err.message);
       res.redirect('/shops/' + req.params.id + '/ledger');
+    }
+  },
+
+  // GET /shops/:id/add-opening-balance
+  async addOpeningBalanceForm(req, res) {
+    try {
+      const shop = await ShopModel.findById(req.params.id);
+      if (!shop) {
+        req.flash('error', 'Shop not found.');
+        return res.redirect('/shops');
+      }
+      renderWithLayout(req, res, 'shops/add-opening-balance', { 
+        title: `Add Opening Balance — ${shop.name}`, 
+        shop 
+      });
+    } catch (err) {
+      console.error(err);
+      req.flash('error', 'Failed to load form.');
+      res.redirect('/shops');
+    }
+  },
+
+  // POST /shops/:id/add-opening-balance
+  async addOpeningBalanceSubmit(req, res) {
+    const { getConnection } = require('../config/db');
+    const AuditModel = require('../models/AuditModel');
+    const conn = await getConnection();
+    try {
+      await conn.beginTransaction();
+      
+      const shop = await ShopModel.findById(req.params.id);
+      if (!shop) {
+        req.flash('error', 'Shop not found.');
+        return res.redirect('/shops');
+      }
+
+      const { 
+        bill_date, 
+        gross_amount, 
+        amount_paid, 
+        note 
+      } = req.body;
+
+      const grossAmt = parseFloat(gross_amount) || 0;
+      const paidAmt = parseFloat(amount_paid) || 0;
+      
+      if (grossAmt <= 0) {
+        req.flash('error', 'Gross amount must be greater than 0.');
+        return res.redirect(`/shops/${req.params.id}/add-opening-balance`);
+      }
+
+      if (paidAmt < 0 || paidAmt > grossAmt) {
+        req.flash('error', 'Amount paid must be between 0 and gross amount.');
+        return res.redirect(`/shops/${req.params.id}/add-opening-balance`);
+      }
+
+      const outstandingAmt = grossAmt - paidAmt;
+      
+      // Determine bill status
+      let status = 'open';
+      if (paidAmt >= grossAmt) {
+        status = 'cleared';
+      } else if (paidAmt > 0) {
+        status = 'partially_paid';
+      }
+
+      // Generate bill number for opening balance
+      const billNumber = `OPENING-${shop.id}-${Date.now()}`;
+
+      // Insert bill
+      const [billResult] = await conn.query(
+        `INSERT INTO bills 
+          (shop_id, bill_type, bill_date, bill_number, gross_amount, advance_deducted, 
+           net_amount, amount_paid, outstanding_amount, status, created_by)
+         VALUES (?, 'direct_shop', ?, ?, ?, 0, ?, ?, ?, ?)`,
+        [shop.id, bill_date, billNumber, grossAmt, grossAmt, paidAmt, outstandingAmt, status, req.session.user.id]
+      );
+
+      const billId = billResult.insertId;
+
+      // Get current shop balance
+      const [[currentBalance]] = await conn.query(
+        `SELECT balance_after FROM shop_ledger_entries 
+         WHERE shop_id = ? ORDER BY id DESC LIMIT 1`,
+        [shop.id]
+      );
+      const prevBalance = currentBalance ? parseFloat(currentBalance.balance_after) : 0;
+
+      // Add ledger entry for the bill (debit)
+      const balanceAfterBill = prevBalance + grossAmt;
+      await conn.query(
+        `INSERT INTO shop_ledger_entries 
+          (shop_id, entry_type, reference_id, reference_type, debit, credit, balance_after, note, entry_date)
+         VALUES (?, 'bill', ?, 'bills', ?, 0, ?, ?, ?)`,
+        [shop.id, billId, grossAmt, balanceAfterBill, note || 'Opening balance bill', bill_date]
+      );
+
+      // If amount was paid, add recovery entry (credit)
+      if (paidAmt > 0) {
+        const balanceAfterPayment = balanceAfterBill - paidAmt;
+        await conn.query(
+          `INSERT INTO shop_ledger_entries 
+            (shop_id, entry_type, reference_id, reference_type, debit, credit, balance_after, note, entry_date)
+           VALUES (?, 'recovery', ?, 'bills', 0, ?, ?, ?, ?)`,
+          [shop.id, billId, paidAmt, balanceAfterPayment, 'Opening balance payment', bill_date]
+        );
+      }
+
+      // Insert audit log
+      await AuditModel.insertLog({
+        userId: req.session.user.id,
+        action: 'ADD_OPENING_BALANCE',
+        entityType: 'bills',
+        entityId: billId
+      }, conn);
+
+      await conn.commit();
+      req.flash('success', `Opening balance added: Rs ${grossAmt.toFixed(2)}, Outstanding: Rs ${outstandingAmt.toFixed(2)}`);
+      res.redirect(`/shops/${shop.id}/ledger`);
+    } catch (err) {
+      await conn.rollback();
+      console.error(err);
+      req.flash('error', 'Failed to add opening balance: ' + err.message);
+      res.redirect(`/shops/${req.params.id}/add-opening-balance`);
+    } finally {
+      conn.release();
     }
   },
 

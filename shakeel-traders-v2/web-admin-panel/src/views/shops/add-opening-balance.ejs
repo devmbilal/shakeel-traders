@@ -1,0 +1,115 @@
+<div class="page-header">
+  <div>
+    <h4>Add Opening Balance</h4>
+    <div class="page-sub">Add pre-deployment outstanding bill for <%= shop.name %></div>
+  </div>
+  <a href="/shops/<%= shop.id %>/ledger" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i> Back to Ledger
+  </a>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Opening Balance Details</h5>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info py-2 small mb-4">
+          <i class="bi bi-info-circle me-1"></i>
+          <strong>Note:</strong> Use this form to add bills that existed before system deployment. This will update the shop's ledger and outstanding balance.
+        </div>
+
+        <form method="POST" action="/shops/<%= shop.id %>/add-opening-balance">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Shop Name</label>
+            <input type="text" class="form-control" value="<%= shop.name %>" disabled>
+            <small class="text-muted">Route: <%= shop.route_name %></small>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Bill Date <span class="text-danger">*</span></label>
+              <input type="date" name="bill_date" class="form-control" required>
+              <small class="text-muted">The original date of the bill</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Gross Amount (Rs) <span class="text-danger">*</span></label>
+              <input type="number" name="gross_amount" class="form-control" step="0.01" min="0.01" placeholder="0.00" required>
+              <small class="text-muted">Total bill amount</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Amount Already Paid (Rs)</label>
+            <input type="number" name="amount_paid" class="form-control" step="0.01" min="0" value="0" placeholder="0.00">
+            <small class="text-muted">Enter 0 if nothing was paid yet. Outstanding will be calculated automatically.</small>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Note (Optional)</label>
+            <textarea name="note" class="form-control" rows="3" placeholder="E.g., Opening balance from previous system, Pre-deployment outstanding..."></textarea>
+          </div>
+
+          <div class="alert alert-warning py-2 small mb-3">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            <strong>Important:</strong> This will create a bill and update the shop's ledger. Make sure the amounts are correct before submitting.
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i> Add Opening Balance
+            </button>
+            <a href="/shops/<%= shop.id %>/ledger" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">Instructions</h6>
+      </div>
+      <div class="card-body">
+        <h6 class="fw-semibold">How to use:</h6>
+        <ol class="small mb-3">
+          <li>Enter the original bill date (before deployment)</li>
+          <li>Enter the total bill amount</li>
+          <li>If the shop already paid some amount, enter it</li>
+          <li>Add a note for reference</li>
+          <li>Click "Add Opening Balance"</li>
+        </ol>
+
+        <h6 class="fw-semibold mt-3">What happens:</h6>
+        <ul class="small mb-0">
+          <li>A bill will be created in the system</li>
+          <li>Shop ledger will be updated</li>
+          <li>Outstanding balance will be calculated</li>
+          <li>Future payments can be recorded normally</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-calculate outstanding when amounts change
+const grossInput = document.querySelector('input[name="gross_amount"]');
+const paidInput = document.querySelector('input[name="amount_paid"]');
+
+function validateAmounts() {
+  const gross = parseFloat(grossInput.value) || 0;
+  const paid = parseFloat(paidInput.value) || 0;
+  
+  if (paid > gross) {
+    paidInput.setCustomValidity('Amount paid cannot exceed gross amount');
+  } else {
+    paidInput.setCustomValidity('');
+  }
+}
+
+grossInput?.addEventListener('input', validateAmounts);
+paidInput?.addEventListener('input', validateAmounts);
+</script>

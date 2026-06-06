@@ -12,7 +12,7 @@ const RouteAssignmentController = {
       const selectedDate = req.query.date || today;
       const [orderBookers, routes, todayAssignments, selectedDateAssignments] = await Promise.all([
         UserModel.listByRole('order_booker'),
-        RouteModel.listAll(),
+        RouteModel.listAll({ limit: 999999, offset: 0 }),
         RouteModel.getAssignmentsByDate(today),
         selectedDate !== today ? RouteModel.getAssignmentsByDate(selectedDate) : Promise.resolve(null),
       ]);
@@ -70,7 +70,7 @@ const RouteAssignmentController = {
       const date = req.query.date || today;
       const [orderBookers, routes, byDateAssignments, todayAssignments] = await Promise.all([
         UserModel.listByRole('order_booker'),
-        RouteModel.listAll(),
+        RouteModel.listAll({ limit: 999999, offset: 0 }),
         RouteModel.getAssignmentsByDate(date),
         RouteModel.getAssignmentsByDate(today),
       ]);
@@ -99,7 +99,7 @@ const RouteAssignmentController = {
       const userId = req.query.userId || null;
       const [orderBookers, routes, todayAssignments] = await Promise.all([
         UserModel.listByRole('order_booker'),
-        RouteModel.listAll(),
+        RouteModel.listAll({ limit: 999999, offset: 0 }),
         RouteModel.getAssignmentsByDate(today),
       ]);
       let byBookerAssignments = [];
@@ -147,7 +147,7 @@ const RouteAssignmentController = {
       const [assignment, orderBookers, routes] = await Promise.all([
         RouteModel.findAssignmentById(req.params.id),
         UserModel.listByRole('order_booker'),
-        RouteModel.listAll(),
+        RouteModel.listAll({ limit: 999999, offset: 0 }),
       ]);
       if (!assignment) { req.flash('error', 'Assignment not found.'); return res.redirect('/route-assignments'); }
       renderWithLayout(req, res, 'route-assignments/edit', {

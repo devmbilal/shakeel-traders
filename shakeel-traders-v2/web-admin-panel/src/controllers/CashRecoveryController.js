@@ -18,8 +18,8 @@ const CashRecoveryController = {
         RecoveryModel.listOutstandingBills(filters),
         RecoveryModel.listAssignedBills(assignedFilters),
         UserModel.listByRole('order_booker'),
-        RouteModel.listAll(),
-        ShopModel.listAll({ is_active: '1' }),
+        RouteModel.listAll({ limit: 999999, offset: 0 }),
+        ShopModel.listAll({ is_active: '1' }, { limit: 999999, offset: 0 }),
       ]);
       renderWithLayout(req, res, 'cash-recovery/outstanding', {
         title: 'Cash Recovery — Outstanding Bills',
