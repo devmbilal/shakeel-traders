@@ -1,16 +1,10 @@
 <nav id="sidebar">
   <div class="sidebar-brand">
     <p class="brand-name">Shakeel Traders</p>
-    <span class="brand-sub">Admin Terminal</span>
+    <span class="brand-sub">Distribution Order System</span>
   </div>
 
-  <div class="sidebar-dispatch">
-    <a href="/orders" class="btn-dispatch">
-      <i class="bi bi-plus-lg"></i> New Dispatch
-    </a>
-  </div>
-
-  <ul class="sidebar-nav">
+  <ul class="sidebar-nav" style="margin-top: 8px;">
     <!-- Dashboard -->
     <li>
       <a href="/dashboard" class="nav-link <% if(currentPath==='/dashboard'){%>active<%}%>">
@@ -104,7 +98,7 @@
     <!-- Finance Section -->
     <li class="nav-section">
       <button class="nav-section-toggle" onclick="toggleSection(this)">
-        <i class="bi bi-currency-dollar nav-icon"></i>
+        <i class="bi bi-wallet2 nav-icon"></i>
         <span class="nav-label">Finance</span>
         <i class="bi bi-chevron-down toggle-icon"></i>
       </button>

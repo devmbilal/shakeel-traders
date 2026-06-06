@@ -56,6 +56,18 @@ function reschedule(timeStr) {
     const rows = await query('SELECT backup_time FROM company_profile WHERE id = 1');
     const savedTime = rows[0]?.backup_time || '23:00';
     reschedule(savedTime);
+    
+    // Check if we missed the scheduled backup (e.g., computer was off)
+    const BackupService = require('../services/BackupService');
+    const missedBackup = await BackupService.shouldRunMissedBackup(savedTime);
+    
+    if (missedBackup) {
+      console.log('[CRON] Detected missed backup — running now...');
+      setTimeout(async () => {
+        await _runBackup();
+      }, 5000); // Wait 5 seconds after startup before running missed backup
+    }
+    
   } catch (err) {
     // DB might not be ready yet on first run — fall back to default
     console.warn('[CRON] Could not load backup time from DB, using default 23:00:', err.message);

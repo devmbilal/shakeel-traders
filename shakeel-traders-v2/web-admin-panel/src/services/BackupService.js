@@ -20,10 +20,88 @@ class BackupService {
     return backupDir;
   }
 
+  /**
+   * Update last backup timestamp in database
+   */
+  static async updateLastBackupTime() {
+    try {
+      const { query } = require('../config/db');
+      const now = new Date();
+      await query(
+        'UPDATE company_profile SET last_backup_time = ? WHERE id = 1',
+        [now]
+      );
+    } catch (error) {
+      console.warn('[Backup] Failed to update last backup time:', error.message);
+    }
+  }
+
+  /**
+   * Get last backup time from database
+   */
+  static async getLastBackupTime() {
+    try {
+      const { query } = require('../config/db');
+      const rows = await query('SELECT last_backup_time FROM company_profile WHERE id = 1');
+      return rows[0]?.last_backup_time || null;
+    } catch (error) {
+      console.warn('[Backup] Failed to get last backup time:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Check if backup was missed and should run now
+   * Returns true if last backup is older than scheduled time yesterday
+   */
+  static async shouldRunMissedBackup(scheduledTime) {
+    try {
+      const lastBackupTime = await this.getLastBackupTime();
+      
+      if (!lastBackupTime) {
+        // No previous backup recorded, don't auto-run
+        return false;
+      }
+
+      // Parse scheduled time (HH:MM)
+      const [hours, minutes] = scheduledTime.split(':').map(Number);
+      
+      // Get current Pakistan time
+      const now = new Date();
+      const pktNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Karachi' }));
+      
+      // Calculate yesterday's scheduled backup time
+      const yesterdayScheduled = new Date(pktNow);
+      yesterdayScheduled.setDate(yesterdayScheduled.getDate() - 1);
+      yesterdayScheduled.setHours(hours, minutes, 0, 0);
+      
+      // Convert last backup to PKT for comparison
+      const lastBackupPKT = new Date(lastBackupTime.toLocaleString('en-US', { timeZone: 'Asia/Karachi' }));
+      
+      // If last backup is older than yesterday's scheduled time, we missed it
+      return lastBackupPKT < yesterdayScheduled;
+      
+    } catch (error) {
+      console.warn('[Backup] Error checking missed backup:', error.message);
+      return false;
+    }
+  }
+
   static async runBackup() {
     try {
       const backupDir = await this.ensureBackupDir();
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T').join('_').slice(0, -5);
+      
+      // Format timestamp as: YYYY-MM-DD_HH-MM-SS (Pakistan time)
+      const now = new Date();
+      const pktTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Karachi' }));
+      const year = pktTime.getFullYear();
+      const month = String(pktTime.getMonth() + 1).padStart(2, '0');
+      const day = String(pktTime.getDate()).padStart(2, '0');
+      const hours = String(pktTime.getHours()).padStart(2, '0');
+      const minutes = String(pktTime.getMinutes()).padStart(2, '0');
+      const seconds = String(pktTime.getSeconds()).padStart(2, '0');
+      const timestamp = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+      
       const filename = `shakeel_traders_${timestamp}.sql`;
       const filepath = path.join(backupDir, filename);
 
@@ -40,6 +118,9 @@ class BackupService {
 
       // Verify file was created
       const stats = await fs.stat(filepath);
+
+      // Update last backup time in database
+      await this.updateLastBackupTime();
 
       // Upload to Google Drive (non-blocking — failure doesn't break backup)
       let driveResult = { skipped: true };

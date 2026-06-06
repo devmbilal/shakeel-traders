@@ -67,11 +67,29 @@ const DashboardController = {
         dateLabel = 'This Year';
       }
 
-      // Financial Metrics
-      const [outstandingData] = await query(
-        `SELECT 
-          SUM(outstanding_amount) AS total_outstanding,
-          COUNT(*) AS bill_count
+      // Financial Metrics - Total Outstanding from Shop Ledgers
+      // This includes ALL outstanding amounts (bills + any other shop debts)
+      const outstandingQuery = `
+        SELECT 
+          SUM(latest.balance_after) AS total_outstanding,
+          COUNT(DISTINCT latest.shop_id) AS shop_count
+        FROM (
+          SELECT 
+            sle.shop_id,
+            sle.balance_after,
+            ROW_NUMBER() OVER (PARTITION BY sle.shop_id ORDER BY sle.created_at DESC, sle.id DESC) as rn
+          FROM shop_ledger_entries sle
+          INNER JOIN shops s ON s.id = sle.shop_id
+          WHERE s.is_active = 1
+        ) AS latest
+        WHERE latest.rn = 1 AND latest.balance_after > 0
+      `;
+      
+      const [outstandingData] = await query(outstandingQuery);
+      
+      // Count of bills with outstanding (for reference)
+      const [billData] = await query(
+        `SELECT COUNT(*) AS bill_count
          FROM bills 
          WHERE status IN ('open', 'partially_paid')
            AND bill_type IN ('order_booker', 'direct_shop')`
@@ -330,7 +348,8 @@ const DashboardController = {
         dateLabel,
         financials: {
           totalOutstanding: parseFloat(outstandingData.total_outstanding || 0),
-          outstandingBillCount: parseInt(outstandingData.bill_count || 0),
+          outstandingShopCount: parseInt(outstandingData.shop_count || 0),
+          outstandingBillCount: parseInt(billData.bill_count || 0),
           stockValue: parseFloat(stockValue.stock_value || 0),
           totalCartons: parseInt(stockValue.total_cartons || 0),
           totalLoose: parseInt(stockValue.total_loose || 0),

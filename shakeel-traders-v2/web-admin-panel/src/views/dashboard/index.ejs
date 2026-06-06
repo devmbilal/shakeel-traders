@@ -744,7 +744,7 @@
     /* Financial hero */
     var f = data.financials || {};
     set('totalOutstanding',    fmt(f.totalOutstanding));
-    set('outstandingBillCount', (f.outstandingBillCount || 0) + ' open bills');
+    set('outstandingBillCount', (f.outstandingShopCount || 0) + ' shops with outstanding');
     set('supplierAdvance',     fmt(f.supplierAdvance));
     set('supplierCount',       (f.supplierCount || 0) + ' suppliers');
     set('stockValue',          fmt(f.stockValue));

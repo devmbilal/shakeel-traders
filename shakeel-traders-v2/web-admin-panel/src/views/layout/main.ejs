@@ -89,30 +89,6 @@
       letter-spacing: 0.06em;
     }
 
-    /* New Dispatch button */
-    .sidebar-dispatch {
-      padding: 14px 16px 10px;
-      flex-shrink: 0;
-    }
-    .btn-dispatch {
-      background: var(--secondary);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 0.8rem;
-      padding: 9px 14px;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: background 0.15s;
-      text-decoration: none;
-    }
-    .btn-dispatch:hover { background: var(--secondary-hover); color: #fff; }
-
     /* Nav sections */
     .nav-section-label {
       padding: 14px 20px 4px;
@@ -300,6 +276,91 @@
     .topbar-connection .conn-copy:hover {
       color: var(--secondary);
     }
+    
+    /* Topbar Shortcuts */
+    .topbar-shortcuts {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 0;
+    }
+    .topbar-shortcut {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      position: relative;
+      cursor: pointer;
+    }
+    .topbar-shortcut i {
+      font-size: 1.1rem;
+      z-index: 1;
+    }
+    .topbar-shortcut:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    }
+    .topbar-shortcut:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    
+    /* Primary - Route Assignment (Soft Blue) */
+    .topbar-shortcut-primary {
+      background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+      color: #fff;
+    }
+    .topbar-shortcut-primary:hover {
+      background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+      color: #fff;
+    }
+    
+    /* Success - New Dispatch (Soft Green) */
+    .topbar-shortcut-success {
+      background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+      color: #fff;
+    }
+    .topbar-shortcut-success:hover {
+      background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+      color: #fff;
+    }
+    
+    /* Warning - Pending Issuance (Soft Orange) */
+    .topbar-shortcut-warning {
+      background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+      color: #fff;
+    }
+    .topbar-shortcut-warning:hover {
+      background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+      color: #fff;
+    }
+    
+    /* Danger - Pending Returns (Soft Red) */
+    .topbar-shortcut-danger {
+      background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
+      color: #fff;
+    }
+    .topbar-shortcut-danger:hover {
+      background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+      color: #fff;
+    }
+    
+    /* Info - Cash Recovery (Soft Teal) */
+    .topbar-shortcut-info {
+      background: linear-gradient(135deg, #14B8A6 0%, #2DD4BF 100%);
+      color: #fff;
+    }
+    .topbar-shortcut-info:hover {
+      background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+      color: #fff;
+    }
+    
     .topbar-search {
       flex: 1;
       max-width: 400px;
@@ -840,14 +901,27 @@
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="topbar-actions">
-        <a href="/orders" class="topbar-icon-btn" title="Orders">
-          <i class="bi bi-clipboard-check"></i>
+      <!-- Quick Action Shortcuts -->
+      <div class="topbar-shortcuts d-none d-xl-flex">
+        <a href="/route-assignments" class="topbar-shortcut topbar-shortcut-primary" title="Route Assignment">
+          <i class="bi bi-calendar-check-fill"></i>
         </a>
-        <a href="/cash-recovery" class="topbar-icon-btn" title="Cash Recovery">
+        <a href="/orders" class="topbar-shortcut topbar-shortcut-success" title="New Dispatch">
+          <i class="bi bi-plus-circle-fill"></i>
+        </a>
+        <a href="/stock/pending-issuances" class="topbar-shortcut topbar-shortcut-warning" title="Pending Issuance">
+          <i class="bi bi-hourglass-split"></i>
+        </a>
+        <a href="/stock/pending-returns" class="topbar-shortcut topbar-shortcut-danger" title="Pending Returns">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </a>
+        <a href="/cash-recovery" class="topbar-shortcut topbar-shortcut-info" title="Cash Recovery">
           <i class="bi bi-cash-coin"></i>
         </a>
+      </div>
+
+      <!-- Actions -->
+      <div class="topbar-actions">
 
         <!-- User -->
         <div class="topbar-user" id="userDropdownTrigger">

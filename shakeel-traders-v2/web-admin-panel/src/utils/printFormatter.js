@@ -124,17 +124,24 @@ function formatBillForPrint(bill) {
       position: relative;
     }
     
+    /* Empty space for second half */
+    .bill-empty {
+      height: 48vh;
+      border: 1px dashed #CBD5E1;
+    }
+    
     /* Scissors icon between bills */
-    .bill-half:first-child::after {
-      content: "✂";
+    .bill-half::after {
+      content: "✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -";
       position: absolute;
       bottom: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 16px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 12px;
       color: #94A3B8;
       background: white;
-      padding: 0 8px;
+      letter-spacing: 2px;
     }
     
     .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; border-bottom: 2px solid #1E293B; padding-bottom: 6px; }
@@ -159,7 +166,8 @@ function formatBillForPrint(bill) {
     @media print { 
       body { padding: 0; }
       .bill-half { page-break-inside: avoid; }
-      .bill-half:first-child::after { display: block; }
+      .bill-half::after { display: block; }
+      .bill-empty::after { display: none; }
       .print-actions { display: none !important; }
     }
   </style>
@@ -184,7 +192,7 @@ function formatBillForPrint(bill) {
     </button>
   </div>
   ${billTemplate}
-  ${billTemplate}
+  <div class="bill-empty"></div>
   <script>
     function downloadPDF() {
       window.print();
