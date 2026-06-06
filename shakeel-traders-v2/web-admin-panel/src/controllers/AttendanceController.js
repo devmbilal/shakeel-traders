@@ -3,13 +3,14 @@
 const AttendanceModel = require('../models/AttendanceModel');
 const HolidayModel = require('../models/HolidayModel');
 const { renderWithLayout } = require('../utils/render');
+const { getPakistanDateString } = require('../utils/dateHelpers');
 
 const AttendanceController = {
   
   // GET /attendance - Mark attendance for today or selected date
   async index(req, res) {
     try {
-      const selectedDate = req.query.date || new Date().toISOString().split('T')[0];
+      const selectedDate = req.query.date || getPakistanDateString();
       
       // Check if it's a holiday
       const isHoliday = await HolidayModel.isHoliday(selectedDate);
@@ -94,11 +95,13 @@ const AttendanceController = {
       const staffTypeFilter = req.query.staff_type || '';
 
       // Get all active staff
-      const allStaff = await AttendanceModel.getAllStaffWithAttendance(new Date().toISOString().split('T')[0]);
+      const allStaff = await AttendanceModel.getAllStaffWithAttendance(getPakistanDateString());
       
       // Get attendance for the month
       const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
-      const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+      // Get last day of month (day 0 of next month = last day of current month)
+      const lastDay = new Date(year, month, 0).getDate();
+      const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
       
       let reportData = [];
       
@@ -178,7 +181,9 @@ const AttendanceController = {
       const year = parseInt(req.query.year) || currentDate.getFullYear();
 
       const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
-      const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+      // Get last day of month (day 0 of next month = last day of current month)
+      const lastDay = new Date(year, month, 0).getDate();
+      const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
       const attendance = await AttendanceModel.getByStaffAndRange(
         staffId,

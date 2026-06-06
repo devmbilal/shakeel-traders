@@ -1,19 +1,43 @@
 'use strict';
 const { pool, getConnection } = require('../config/db');
 
+/**
+ * Get today's date in Pakistan timezone (not UTC)
+ * This ensures date calculations work correctly for PKT users
+ */
+function getPakistanToday() {
+  const now = new Date();
+  // Get date components in Pakistan timezone
+  const pktString = now.toLocaleString('en-US', { 
+    timeZone: 'Asia/Karachi',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  // Format: MM/DD/YYYY, convert to YYYY-MM-DD
+  const [month, day, year] = pktString.split('/');
+  return `${year}-${month}-${day}`;
+}
+
 class SyncService {
   // ─── Order Booker: Morning Sync ───────────────────────────────────────────
   static async assembleMorningSyncPayload(bookerId) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getPakistanToday();
 
-    // Routes assigned to this booker today
-    const [routes] = await pool.query(
-      `SELECT r.id, r.name
+    // Route assignments for this booker today (includes assignment IDs)
+    const [routeAssignments] = await pool.query(
+      `SELECT ra.id AS assignment_id, ra.route_id, ra.assignment_date, ra.created_at,
+              r.id, r.name
        FROM route_assignments ra
        JOIN routes r ON r.id = ra.route_id
        WHERE ra.user_id = ? AND ra.assignment_date = ? AND r.is_active = 1`,
       [bookerId, today]
     );
+
+    const routes = routeAssignments.map(ra => ({
+      id: ra.id,
+      name: ra.name
+    }));
 
     const routeIds = routes.map(r => r.id);
 
@@ -79,6 +103,7 @@ class SyncService {
     );
 
     return {
+      routeAssignments,
       routes,
       shops,
       products,
@@ -90,7 +115,7 @@ class SyncService {
 
   // ─── Order Booker: Mid-day Sync ───────────────────────────────────────────
   static async assembleMiddaySyncPayload(bookerId, lastSyncTime) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getPakistanToday();
 
     const [recoveryAssignments] = await pool.query(
       `SELECT bra.id, bra.bill_id, bra.assigned_date, bra.status,
@@ -228,7 +253,7 @@ class SyncService {
 
   // ─── Salesman: Morning Sync ───────────────────────────────────────────────
   static async assembleSalesmanMorningSyncPayload(salesmanId) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getPakistanToday();
 
     const [products] = await pool.query(
       `SELECT id, sku_code, name AS product_name, brand, units_per_carton,
@@ -278,7 +303,7 @@ class SyncService {
 
   // ─── Salesman: Submit Issuance ────────────────────────────────────────────
   static async processSalesmanIssuance(salesmanId, issuanceDate, items) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getPakistanToday();
 
     // Check for duplicate — one issuance per salesman per day (SRS BR)
     const [[existing]] = await pool.query(
@@ -321,7 +346,7 @@ class SyncService {
 
   // ─── Salesman: Check Issuance Status ─────────────────────────────────────
   static async getSalesmanIssuanceStatus(salesmanId) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getPakistanToday();
     const [[issuance]] = await pool.query(
       `SELECT id, status FROM salesman_issuances
        WHERE salesman_id = ? AND issuance_date = ?`,
@@ -340,7 +365,7 @@ class SyncService {
 
   // ─── Salesman: Submit Return ──────────────────────────────────────────────
   static async processSalesmanReturn(salesmanId, returnDate, items, cashCollected) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getPakistanToday();
 
     // Must have an approved issuance today
     const [[issuance]] = await pool.query(

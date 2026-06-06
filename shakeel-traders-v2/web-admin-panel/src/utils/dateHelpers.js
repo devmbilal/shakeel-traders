@@ -7,18 +7,20 @@
 
 /**
  * Get current date in Pakistan timezone in YYYY-MM-DD format
- * Use this for HTML date inputs
- * @returns {string} Date in YYYY-MM-DD format (e.g., "2026-06-02")
+ * Use this for HTML date inputs and database queries
+ * @returns {string} Date in YYYY-MM-DD format (e.g., "2026-06-07")
  */
 function getPakistanDateString() {
   const now = new Date();
-  // Create date in Pakistan timezone
-  const pktDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Karachi' }));
-  
-  const year = pktDate.getFullYear();
-  const month = String(pktDate.getMonth() + 1).padStart(2, '0');
-  const day = String(pktDate.getDate()).padStart(2, '0');
-  
+  // Get date components in Pakistan timezone
+  const pktString = now.toLocaleString('en-US', { 
+    timeZone: 'Asia/Karachi',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  // Format: MM/DD/YYYY, convert to YYYY-MM-DD
+  const [month, day, year] = pktString.split('/');
   return `${year}-${month}-${day}`;
 }
 
@@ -102,62 +104,62 @@ function sqlDateToDisplay(sqlDate) {
 
 /**
  * Format a datetime (timestamp) to Pakistan locale with date and time
+ * MySQL returns DATETIME in UTC notation, JavaScript automatically converts to local (PKT)
  * @param {Date|string} datetime - DateTime to format
  * @param {boolean} includeSeconds - Whether to include seconds (default: false)
- * @returns {string} Formatted datetime string (e.g., "02 Jun 2026, 2:30 PM")
+ * @returns {string} Formatted datetime string (e.g., "07 Jun 2026, 01:14 AM")
  */
 function formatPakistanDateTime(datetime, includeSeconds = false) {
   if (!datetime) return '';
   
   const d = new Date(datetime);
   
-  const dateOptions = {
-    timeZone: 'Asia/Karachi',
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  };
+  // Use getMonth(), getDate(), etc. to get local time components
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = months[d.getMonth()];
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
   
-  const timeOptions = {
-    timeZone: 'Asia/Karachi',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  };
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  const hoursStr = String(hours).padStart(2, '0');
   
+  let timeStr = `${hoursStr}:${minutes} ${ampm}`;
   if (includeSeconds) {
-    timeOptions.second = '2-digit';
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    timeStr = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
   }
   
-  const datePart = d.toLocaleDateString('en-PK', dateOptions);
-  const timePart = d.toLocaleTimeString('en-PK', timeOptions);
-  
-  return `${datePart}, ${timePart}`;
+  return `${month} ${day}, ${year}, ${timeStr}`;
 }
 
 /**
  * Format time only in Pakistan timezone
+ * MySQL returns DATETIME in UTC notation, JavaScript automatically converts to local (PKT)
  * @param {Date|string} datetime - DateTime to format
  * @param {boolean} includeSeconds - Whether to include seconds (default: false)
- * @returns {string} Formatted time string (e.g., "2:30 PM")
+ * @returns {string} Formatted time string (e.g., "01:14 AM")
  */
 function formatPakistanTime(datetime, includeSeconds = false) {
   if (!datetime) return '';
   
   const d = new Date(datetime);
   
-  const options = {
-    timeZone: 'Asia/Karachi',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  };
+  // Use getHours(), getMinutes() to get local time components
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  const hoursStr = String(hours).padStart(2, '0');
   
   if (includeSeconds) {
-    options.second = '2-digit';
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${hoursStr}:${minutes}:${seconds} ${ampm}`;
   }
   
-  return d.toLocaleTimeString('en-PK', options);
+  return `${hoursStr}:${minutes} ${ampm}`;
 }
 
 module.exports = {

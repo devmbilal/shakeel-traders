@@ -3,6 +3,7 @@
 const { query, getConnection } = require('../config/db');
 const StockService = require('../services/StockService');
 const AuditModel = require('./AuditModel');
+const { getPakistanDateString } = require('../utils/dateHelpers');
 
 const SupplierModel = {
   async listAll() {
@@ -66,7 +67,7 @@ const SupplierModel = {
       // Insert stock_receipts header
       const [receiptResult] = await conn.query(
         'INSERT INTO stock_receipts (company_id, receipt_date, total_value, note, recorded_by) VALUES (?, ?, ?, ?, ?)',
-        [companyId, items[0].receipt_date || new Date().toISOString().slice(0,10), totalValue, items[0].note || null, userId]
+        [companyId, items[0].receipt_date || getPakistanDateString(), totalValue, items[0].note || null, userId]
       );
       const receiptId = receiptResult.insertId;
 
