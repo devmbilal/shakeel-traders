@@ -15,8 +15,25 @@ const StockController = {
   // GET /stock — Stock Overview
   async overview(req, res) {
     try {
-      const products = await ProductModel.listAll('active');
-      renderWithLayout(req, res, 'stock/overview', { title: 'Stock Management', products });
+      const page = parseInt(req.query.page) || 1;
+      const limit = 50;
+      const offset = (page - 1) * limit;
+      
+      const [products, totalCount] = await Promise.all([
+        ProductModel.listAll('active', { limit, offset }),
+        ProductModel.countAll('active')
+      ]);
+      
+      const totalPages = Math.ceil(totalCount / limit);
+      
+      renderWithLayout(req, res, 'stock/overview', { 
+        title: 'Stock Management', 
+        products,
+        totalCount,
+        currentPage: page,
+        totalPages,
+        limit
+      });
     } catch (err) {
       console.error('Stock overview error:', err);
       req.flash('error', 'Failed to load stock: ' + err.message);
@@ -41,7 +58,7 @@ const StockController = {
   // GET /stock/manual-add
   async manualAddForm(req, res) {
     try {
-      const products = await ProductModel.listAll('active');
+      const products = await ProductModel.listAll('active', { limit: 999999, offset: 0 });
       renderWithLayout(req, res, 'stock/manual-add', { title: 'Add Stock (Manual)', products });
     } catch (err) {
       req.flash('error', 'Failed to load form.'); res.redirect('/stock');
@@ -143,7 +160,7 @@ const StockController = {
     try {
       const [suppliers, products] = await Promise.all([
         SupplierModel.listAll(),
-        ProductModel.listAll('active'),
+        ProductModel.listAll('active', { limit: 999999, offset: 0 }),
       ]);
       renderWithLayout(req, res, 'stock/from-supplier', { title: 'Add Stock from Supplier', suppliers, products });
     } catch (err) {
