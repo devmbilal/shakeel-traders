@@ -4,81 +4,111 @@
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px 22px;
-  box-shadow: var(--shadow);
-  transition: box-shadow 0.18s;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
-.db-kpi:hover { box-shadow: var(--shadow-md); }
+.db-kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle at top right, rgba(59,130,246,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.db-kpi:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
+  transform: translateY(-2px);
+  border-color: rgba(59,130,246,0.2);
+}
 .db-kpi-icon {
-  width: 44px; height: 44px;
-  border-radius: 10px;
+  width: 48px; height: 48px;
+  border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   flex-shrink: 0;
+  transition: transform 0.3s;
+}
+.db-kpi:hover .db-kpi-icon {
+  transform: scale(1.1) rotate(5deg);
 }
 .db-kpi-label {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .db-kpi-value {
   font-family: 'Manrope', sans-serif;
   font-weight: 800;
-  font-size: 1.55rem;
+  font-size: 1.75rem;
   color: var(--text-primary);
   line-height: 1.1;
 }
 .db-kpi-sub {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--text-muted);
-  margin-top: 3px;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
 /* Hero card */
 .db-hero {
-  background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+  background: linear-gradient(145deg, #1E293B 0%, #0F172A 50%, #1a2332 100%);
   border-radius: var(--radius);
-  padding: 28px;
+  padding: 20px 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(15,23,42,0.22);
+  box-shadow: 0 12px 40px rgba(15,23,42,0.3), 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.db-hero:hover {
+  box-shadow: 0 16px 48px rgba(15,23,42,0.35), 0 6px 16px rgba(0,0,0,0.2);
+  transform: translateY(-2px);
 }
 .db-hero::before {
   content: '';
   position: absolute;
-  top: -60px; right: -60px;
-  width: 220px; height: 220px;
-  background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%);
+  top: -80px; right: -80px;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(59,130,246,0.22) 0%, rgba(139,92,246,0.12) 50%, transparent 70%);
   pointer-events: none;
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
 }
 .db-hero-label {
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.45);
-  margin-bottom: 6px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 4px;
 }
 .db-hero-value {
   font-family: 'Manrope', sans-serif;
   font-weight: 800;
-  font-size: 2.6rem;
+  font-size: 2.4rem;
   color: #fff;
   line-height: 1;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 .db-hero-divider {
-  border-top: 1px solid rgba(255,255,255,0.08);
-  margin: 18px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin: 12px 0;
 }
 .db-hero-stat-label {
   font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.45);
   margin-bottom: 3px;
 }
 .db-hero-stat-value {
@@ -89,7 +119,7 @@
 }
 .db-hero-stat-sub {
   font-size: 0.68rem;
-  color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.4);
   margin-top: 1px;
 }
 
@@ -98,65 +128,121 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: #F8FAFC;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: #FAFBFC;
   border: 1px solid var(--border);
+  transition: all 0.2s ease;
 }
-.db-alert-row + .db-alert-row { margin-top: 8px; }
+.db-alert-row + .db-alert-row { margin-top: 5px; }
+.db-alert-row:hover {
+  background: #F1F5F9;
+  border-color: rgba(59,130,246,0.2);
+  transform: translateX(2px);
+}
 .db-alert-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
 }
 
 /* Cash card */
 .db-cash {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(145deg, #059669 0%, #047857 50%, #065f46 100%);
   border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: 0 6px 24px rgba(5,150,105,0.22);
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(5,150,105,0.25), 0 2px 8px rgba(5,150,105,0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.db-cash::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; right: -40px;
+  width: 180px; height: 180px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.db-cash:hover {
+  box-shadow: 0 12px 40px rgba(5,150,105,0.35), 0 4px 12px rgba(5,150,105,0.2);
+  transform: translateY(-2px);
 }
 .db-cash-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-radius: 8px;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.14);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
 }
-.db-cash-row + .db-cash-row { margin-top: 8px; }
+.db-cash-row + .db-cash-row { margin-top: 6px; }
+.db-cash-row:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateX(4px);
+}
 
 /* Orders card */
 .db-orders {
-  background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+  background: linear-gradient(145deg, #1D4ED8 0%, #1E40AF 50%, #1e3a8a 100%);
   border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: 0 6px 24px rgba(29,78,216,0.22);
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(29,78,216,0.25), 0 2px 8px rgba(29,78,216,0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.db-orders::after {
+  content: '';
+  position: absolute;
+  top: -40px; left: -40px;
+  width: 180px; height: 180px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.db-orders:hover {
+  box-shadow: 0 12px 40px rgba(29,78,216,0.35), 0 4px 12px rgba(29,78,216,0.2);
+  transform: translateY(-2px);
 }
 .db-orders-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-radius: 8px;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.14);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
 }
-.db-orders-row + .db-orders-row { margin-top: 8px; }
+.db-orders-row + .db-orders-row { margin-top: 6px; }
+.db-orders-row:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateX(4px);
+}
 
 /* Section card */
 .db-section {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.db-section:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  border-color: rgba(59,130,246,0.15);
 }
 .db-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
+  background: linear-gradient(to bottom, #FAFBFC 0%, #FFFFFF 100%);
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 .db-section-title {
   font-family: 'Manrope', sans-serif;
@@ -164,29 +250,43 @@
   font-size: 0.88rem;
   color: var(--text-primary);
 }
-.db-section-body { padding: 16px 20px; }
+.db-section-body { padding: 12px 16px; }
 
 /* Bar chart */
-.db-bar-row { margin-bottom: 14px; }
+.db-bar-row { margin-bottom: 18px; }
 .db-bar-row:last-child { margin-bottom: 0; }
 .db-bar-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: 7px;
 }
-.db-bar-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
-.db-bar-val  { font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); }
+.db-bar-name { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); }
+.db-bar-val  { font-size: 0.8rem; font-weight: 700; color: var(--secondary); }
 .db-bar-track {
-  height: 7px;
-  background: var(--bg);
-  border-radius: 4px;
+  height: 8px;
+  background: linear-gradient(to right, #F1F5F9 0%, #E2E8F0 100%);
+  border-radius: 6px;
   overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
 }
 .db-bar-fill {
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
+}
+.db-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* Booker table */
@@ -214,79 +314,142 @@
 
 /* Period toggle */
 .db-period-btn {
-  padding: 5px 14px;
-  font-size: 0.72rem;
+  padding: 7px 16px;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .db-period-btn.active {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: var(--secondary);
+  border-color: var(--secondary);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.25);
+  transform: translateY(-1px);
 }
-.db-period-btn:hover:not(.active) { background: var(--bg); }
+.db-period-btn:hover:not(.active) {
+  background: var(--bg);
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
 
 /* Quick stats strip */
 .db-stat-strip {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  background: #F8FAFC;
-  border-radius: 8px;
+  gap: 8px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  border-radius: 10px;
   border: 1px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.db-stat-strip::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(59,130,246,0.03) 100%);
+  pointer-events: none;
+}
+.db-stat-strip:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+  border-color: rgba(59,130,246,0.3);
+}
+.db-stat-strip i {
+  transition: transform 0.3s;
+}
+.db-stat-strip:hover i {
+  transform: scale(1.15) rotate(5deg);
 }
 .db-stat-strip-val {
   font-family: 'Manrope', sans-serif;
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   color: var(--text-primary);
 }
 .db-stat-strip-lbl {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 /* Pulse dot */
 @keyframes pulse-dot {
-  0%,100% { opacity: 1; }
-  50%      { opacity: 0.3; }
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(1.2); }
 }
 .live-dot {
-  width: 7px; height: 7px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   background: #10B981;
   animation: pulse-dot 2s infinite;
   display: inline-block;
+  box-shadow: 0 0 12px rgba(16,185,129,0.6);
 }
+
+/* Booker table enhanced */
+.db-booker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.db-booker-row:last-child { border-bottom: none; }
+.db-booker-row:hover {
+  background: linear-gradient(to right, transparent 0%, #F8FAFC 100%);
+  padding-left: 8px;
+  margin-left: -8px;
+  padding-right: 8px;
+  border-radius: 8px;
+}
+.db-rank {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.db-booker-row:hover .db-rank {
+  transform: scale(1.1);
+}
+.db-rank-1 { background: linear-gradient(135deg, #FEF9C3 0%, #FDE68A 100%); color: #854D0E; box-shadow: 0 2px 8px rgba(251,191,36,0.3); }
+.db-rank-2 { background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%); color: #475569; box-shadow: 0 2px 8px rgba(148,163,184,0.3); }
+.db-rank-3 { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #92400E; box-shadow: 0 2px 8px rgba(251,191,36,0.25); }
 </style>
 
 <!-- ── Dashboard Header ──────────────────────────────────────────────────── -->
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4" style="padding-bottom:16px;border-bottom:2px solid var(--border);">
   <div>
-    <div class="d-flex align-items-center gap-2 mb-1">
+    <div class="d-flex align-items-center gap-2 mb-2">
       <span class="live-dot"></span>
-      <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);">Live</span>
+      <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);">Live Dashboard</span>
     </div>
-    <h4 style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.25rem;margin:0;">Executive Dashboard</h4>
-    <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;" id="dashSubtitle">Real-time overview — Today</div>
+    <h4 style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.4rem;margin:0;color:var(--text-primary);">Executive Overview</h4>
+    <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:4px;font-weight:500;" id="dashSubtitle">Real-time business metrics — Today</div>
   </div>
-  <div class="d-flex align-items-center gap-2">
-    <div class="d-flex gap-1">
+  <div class="d-flex align-items-center gap-3">
+    <div class="d-flex gap-1" style="background:#F8FAFC;padding:4px;border-radius:10px;border:1px solid var(--border);">
       <button class="db-period-btn active" id="btnDaily"   onclick="window.switchView('daily')">Today</button>
       <button class="db-period-btn"        id="btnMonthly" onclick="window.switchView('monthly')">Month</button>
       <button class="db-period-btn"        id="btnYearly"  onclick="window.switchView('yearly')">Year</button>
     </div>
-    <button class="db-period-btn" onclick="window.refreshDashboard()" title="Refresh">
+    <button class="db-period-btn" onclick="window.refreshDashboard()" title="Refresh" style="padding:7px 12px;">
       <i class="bi bi-arrow-clockwise"></i>
     </button>
   </div>
@@ -340,17 +503,17 @@
     </div>
   </div><!-- /#statsStrip -->
 
-  <!-- ROW 2: Hero Financial + Alerts -->
+  <!-- ROW 2: Hero Financial + Cash + Orders + Alerts -->
   <div class="row g-3 mb-3">
 
     <!-- Financial Hero -->
-    <div class="col-lg-5">
+    <div class="col-lg-4 col-xl-3">
       <div class="db-hero h-100">
         <div class="db-hero-label">Total Outstanding</div>
         <div class="db-hero-value" id="totalOutstanding">Rs —</div>
-        <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:4px;" id="outstandingBillCount">— bills</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:2px;" id="outstandingBillCount">— bills</div>
         <div class="db-hero-divider"></div>
-        <div class="row g-3">
+        <div class="row g-2">
           <div class="col-6">
             <div class="db-hero-stat-label">Supplier Advance</div>
             <div class="db-hero-stat-value" id="supplierAdvance">Rs —</div>
@@ -362,81 +525,52 @@
             <div class="db-hero-stat-sub" id="stockUnits">— ctn</div>
           </div>
         </div>
-
-        <!-- Mobile App Connection Info -->
-        <div class="db-hero-divider"></div>
-        <div style="max-width:55%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 14px;">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <i class="bi bi-phone" style="color:rgba(255,255,255,0.5);font-size:0.85rem;"></i>
-            <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);">Mobile App Connection</span>
-          </div>
-          <div class="d-flex align-items-center gap-2 mb-1">
-            <span style="font-size:0.68rem;color:rgba(255,255,255,0.4);width:32px;">IP</span>
-            <code id="serverIP" style="font-size:0.82rem;font-weight:700;color:#60A5FA;background:rgba(96,165,250,0.1);padding:2px 8px;border-radius:5px;letter-spacing:0.03em;">—</code>
-            <button onclick="copyToClipboard('serverIP')" title="Copy IP" style="background:none;border:none;padding:0;cursor:pointer;color:rgba(255,255,255,0.3);">
-              <i class="bi bi-copy" style="font-size:0.75rem;"></i>
-            </button>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <span style="font-size:0.68rem;color:rgba(255,255,255,0.4);width:32px;">Port</span>
-            <code id="serverPort" style="font-size:0.82rem;font-weight:700;color:#34D399;background:rgba(52,211,153,0.1);padding:2px 8px;border-radius:5px;letter-spacing:0.03em;">—</code>
-            <button onclick="copyToClipboard('serverPort')" title="Copy Port" style="background:none;border:none;padding:0;cursor:pointer;color:rgba(255,255,255,0.3);">
-              <i class="bi bi-copy" style="font-size:0.75rem;"></i>
-            </button>
-          </div>
-        </div>
-        <!-- subtle logo watermark -->
-        <% if (typeof logoPath !== 'undefined' && logoPath) { %>
-        <img id="heroDashLogo" src="<%= logoPath %>?v=<%= Date.now() %>" alt="" aria-hidden="true"
-          style="position:absolute;bottom:-16px;right:10px;height:150px;width:auto;opacity:1;pointer-events:none;" />
-        <% } %>
       </div>
     </div>
 
-    <!-- KPI Column: Cash + Orders -->
-    <div class="col-lg-4 d-flex flex-column gap-3">
-
-      <!-- Cash Collected -->
-      <div class="db-cash flex-fill">
+    <!-- Cash Collected -->
+    <div class="col-lg-4 col-xl-3">
+      <div class="db-cash h-100">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Cash Collected</div>
-          <i class="bi bi-cash-coin" style="color:rgba(255,255,255,0.25);font-size:1.1rem;"></i>
+          <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.55);">Cash Collected</div>
+          <i class="bi bi-cash-coin" style="color:rgba(255,255,255,0.3);font-size:1.1rem;"></i>
         </div>
-        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:2rem;color:#fff;line-height:1;margin-bottom:14px;" id="cashCollectedTotal">Rs —</div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:2rem;color:#fff;line-height:1;margin-bottom:12px;text-shadow:0 2px 8px rgba(0,0,0,0.2);" id="cashCollectedTotal">Rs —</div>
         <div class="db-cash-row">
-          <span style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.85);">Salesman Sale</span>
+          <span style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.9);">Salesman Sale</span>
           <span style="font-size:0.78rem;font-weight:700;color:#fff;" id="cashSalesmanSale">Rs 0</span>
         </div>
         <div class="db-cash-row">
-          <span style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.85);">Recovery</span>
+          <span style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.9);">Recovery</span>
           <span style="font-size:0.78rem;font-weight:700;color:#fff;" id="cashRecovery">Rs 0</span>
         </div>
         <div class="db-cash-row">
-          <span style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.85);">Delivery Collection</span>
+          <span style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.9);">Delivery Collection</span>
           <span style="font-size:0.78rem;font-weight:700;color:#fff;" id="cashDeliveryMan">Rs 0</span>
         </div>
       </div>
+    </div>
 
-      <!-- Orders Booked -->
-      <div class="db-orders flex-fill">
+    <!-- Orders Booked -->
+    <div class="col-lg-4 col-xl-3">
+      <div class="db-orders h-100">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Orders Booked</div>
-          <i class="bi bi-clipboard-check" style="color:rgba(255,255,255,0.25);font-size:1.1rem;"></i>
+          <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.55);">Orders Booked</div>
+          <i class="bi bi-clipboard-check" style="color:rgba(255,255,255,0.3);font-size:1.1rem;"></i>
         </div>
-        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:2rem;color:#fff;line-height:1;margin-bottom:14px;" id="totalOrdersBooked">—</div>
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:2rem;color:#fff;line-height:1;margin-bottom:12px;text-shadow:0 2px 8px rgba(0,0,0,0.2);" id="totalOrdersBooked">—</div>
         <div id="topBookersList">
-          <div class="db-orders-row"><span style="font-size:0.75rem;color:rgba(255,255,255,0.5);">Loading…</span></div>
+          <div class="db-orders-row"><span style="font-size:0.76rem;color:rgba(255,255,255,0.5);">Loading…</span></div>
         </div>
       </div>
-
     </div>
 
     <!-- Alerts Panel -->
-    <div class="col-lg-3">
+    <div class="col-lg-12 col-xl-3">
       <div class="db-section h-100">
         <div class="db-section-header">
-          <span class="db-section-title">Alerts</span>
-          <span class="badge bg-danger" id="totalAlertsCount" style="font-size:0.7rem;">0</span>
+          <span class="db-section-title"><i class="bi bi-exclamation-triangle-fill" style="color:#EF4444;margin-right:6px;"></i>Alerts</span>
+          <span class="badge bg-danger" id="totalAlertsCount" style="font-size:0.68rem;padding:4px 8px;">0</span>
         </div>
         <div class="db-section-body">
           <div class="db-alert-row">
@@ -444,40 +578,40 @@
               <div class="db-alert-dot" style="background:#EF4444;"></div>
               <span style="font-size:0.8rem;font-weight:600;">Low Stock</span>
             </div>
-            <span class="badge" style="background:#FEE2E2;color:#991B1B;font-size:0.7rem;" id="lowStockCount">0</span>
+            <span class="badge" style="background:#FEE2E2;color:#991B1B;font-size:0.7rem;padding:3px 8px;font-weight:700;" id="lowStockCount">0</span>
           </div>
           <div class="db-alert-row">
             <div class="d-flex align-items-center gap-2">
               <div class="db-alert-dot" style="background:#F59E0B;"></div>
               <span style="font-size:0.8rem;font-weight:600;">Pending Orders</span>
             </div>
-            <span class="badge" style="background:#FEF9C3;color:#854D0E;font-size:0.7rem;" id="pendingOrdersCount">0</span>
+            <span class="badge" style="background:#FEF9C3;color:#854D0E;font-size:0.7rem;padding:3px 8px;font-weight:700;" id="pendingOrdersCount">0</span>
           </div>
           <div class="db-alert-row">
             <div class="d-flex align-items-center gap-2">
               <div class="db-alert-dot" style="background:#8B5CF6;"></div>
               <span style="font-size:0.8rem;font-weight:600;">Pending Issuances</span>
             </div>
-            <span class="badge" style="background:#EDE9FE;color:#5B21B6;font-size:0.7rem;" id="pendingIssuancesCount">0</span>
+            <span class="badge" style="background:#EDE9FE;color:#5B21B6;font-size:0.7rem;padding:3px 8px;font-weight:700;" id="pendingIssuancesCount">0</span>
           </div>
           <div class="db-alert-row">
             <div class="d-flex align-items-center gap-2">
               <div class="db-alert-dot" style="background:#3B82F6;"></div>
               <span style="font-size:0.8rem;font-weight:600;">Pending Returns</span>
             </div>
-            <span class="badge" style="background:#DBEAFE;color:#1E40AF;font-size:0.7rem;" id="pendingReturnsCount">0</span>
+            <span class="badge" style="background:#DBEAFE;color:#1E40AF;font-size:0.7rem;padding:3px 8px;font-weight:700;" id="pendingReturnsCount">0</span>
           </div>
           <div class="db-alert-row">
             <div class="d-flex align-items-center gap-2">
               <div class="db-alert-dot" style="background:#64748B;"></div>
               <span style="font-size:0.8rem;font-weight:600;">Unsynced Bookers</span>
             </div>
-            <span class="badge" style="background:#F1F5F9;color:#475569;font-size:0.7rem;" id="unsyncedCount">0</span>
+            <span class="badge" style="background:#F1F5F9;color:#475569;font-size:0.7rem;padding:3px 8px;font-weight:700;" id="unsyncedCount">0</span>
           </div>
-          <div class="d-flex gap-2 mt-3">
-            <a href="/stock"         class="btn btn-sm btn-dark-primary flex-fill" style="font-size:0.7rem;">Stock</a>
-            <a href="/orders"        class="btn btn-sm btn-dark-primary flex-fill" style="font-size:0.7rem;">Orders</a>
-            <a href="/cash-recovery" class="btn btn-sm btn-dark-primary flex-fill" style="font-size:0.7rem;">Recovery</a>
+          <div class="d-flex gap-2 mt-2">
+            <a href="/stock"         class="btn btn-sm btn-dark-primary flex-fill" style="font-size:0.68rem;padding:5px 6px;">Stock</a>
+            <a href="/orders"        class="btn btn-sm btn-dark-primary flex-fill" style="font-size:0.68rem;padding:5px 6px;">Orders</a>
+            <a href="/cash-recovery" class="btn btn-sm btn-dark-primary flex-fill" style="font-size:0.68rem;padding:5px 6px;">Recovery</a>
           </div>
         </div>
       </div>
@@ -645,16 +779,16 @@
     var el = document.getElementById('topBookersList');
     if (!el) return;
     if (!data || !data.length) {
-      el.innerHTML = '<div class="db-orders-row"><span style="font-size:0.75rem;color:rgba(255,255,255,0.45);">No data</span></div>';
+      el.innerHTML = '<div class="db-orders-row"><span style="font-size:0.76rem;color:rgba(255,255,255,0.5);">No data</span></div>';
       return;
     }
     el.innerHTML = data.slice(0, 3).map(function (b, i) {
       return '<div class="db-orders-row">' +
         '<div class="d-flex align-items-center gap-2">' +
-        '<div style="width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:#fff;">' + (i + 1) + '</div>' +
-        '<span style="font-size:0.78rem;font-weight:600;color:#fff;">' + b.full_name + '</span>' +
+        '<div style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;color:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.15);">' + (i + 1) + '</div>' +
+        '<span style="font-size:0.8rem;font-weight:600;color:#fff;">' + b.full_name + '</span>' +
         '</div>' +
-        '<span style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.85);">' + b.orders_booked + ' orders</span>' +
+        '<span style="font-size:0.76rem;font-weight:700;color:rgba(255,255,255,0.9);">' + b.orders_booked + ' orders</span>' +
         '</div>';
     }).join('');
   }
