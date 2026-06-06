@@ -11,107 +11,207 @@
   </div>
 
   <ul class="sidebar-nav">
+    <!-- Dashboard -->
     <li>
       <a href="/dashboard" class="nav-link <% if(currentPath==='/dashboard'){%>active<%}%>">
         <i class="bi bi-grid-1x2-fill nav-icon"></i><span class="nav-label">Dashboard</span>
       </a>
     </li>
-    <li>
-      <a href="/routes" class="nav-link <% if(currentPath&&currentPath.startsWith('/routes')&&!currentPath.startsWith('/route-a')){%>active<%}%>">
-        <i class="bi bi-signpost-2-fill nav-icon"></i><span class="nav-label">Route Management</span>
-      </a>
+
+    <!-- Operations Section -->
+    <li class="nav-section">
+      <button class="nav-section-toggle" onclick="toggleSection(this)">
+        <i class="bi bi-clipboard-check nav-icon"></i>
+        <span class="nav-label">Operations</span>
+        <i class="bi bi-chevron-down toggle-icon"></i>
+      </button>
+      <ul class="nav-submenu">
+        <li>
+          <a href="/orders" class="nav-link <% if(currentPath&&currentPath.startsWith('/orders')&&!currentPath.includes('print')){%>active<%}%>">
+            <i class="bi bi-clipboard-check-fill nav-icon"></i><span class="nav-label">Order Management</span>
+          </a>
+        </li>
+        <li>
+          <a href="/direct-sales" class="nav-link <% if(currentPath&&currentPath.startsWith('/direct-sales')){%>active<%}%>">
+            <i class="bi bi-cart-fill nav-icon"></i><span class="nav-label">Direct Shop Sales</span>
+          </a>
+        </li>
+        <li>
+          <a href="/orders/bills/print-open" class="nav-link <% if(currentPath&&currentPath.startsWith('/orders/bills/print-open')){%>active<%}%>">
+            <i class="bi bi-printer nav-icon"></i><span class="nav-label">Print Bills</span>
+          </a>
+        </li>
+        <li>
+          <a href="/cash-recovery" class="nav-link <% if(currentPath&&currentPath.startsWith('/cash-recovery')){%>active<%}%>">
+            <i class="bi bi-cash-coin nav-icon"></i><span class="nav-label">Cash Recovery</span>
+          </a>
+        </li>
+      </ul>
     </li>
-    <li>
-      <a href="/route-assignments" class="nav-link <% if(currentPath&&currentPath.startsWith('/route-assignments')){%>active<%}%>">
-        <i class="bi bi-calendar-check-fill nav-icon"></i><span class="nav-label">Route Assignments</span>
-      </a>
+
+    <!-- Inventory Section -->
+    <li class="nav-section">
+      <button class="nav-section-toggle" onclick="toggleSection(this)">
+        <i class="bi bi-box-seam nav-icon"></i>
+        <span class="nav-label">Inventory</span>
+        <i class="bi bi-chevron-down toggle-icon"></i>
+      </button>
+      <ul class="nav-submenu">
+        <li>
+          <a href="/products" class="nav-link <% if(currentPath&&currentPath.startsWith('/products')){%>active<%}%>">
+            <i class="bi bi-box-seam-fill nav-icon"></i><span class="nav-label">Products</span>
+          </a>
+        </li>
+        <li>
+          <a href="/stock" class="nav-link <% if(currentPath&&currentPath.startsWith('/stock')){%>active<%}%>">
+            <i class="bi bi-archive-fill nav-icon"></i><span class="nav-label">Stock</span>
+          </a>
+        </li>
+        <li>
+          <a href="/suppliers" class="nav-link <% if(currentPath&&currentPath.startsWith('/suppliers')){%>active<%}%>">
+            <i class="bi bi-truck nav-icon"></i><span class="nav-label">Suppliers</span>
+          </a>
+        </li>
+      </ul>
     </li>
-    <li>
-      <a href="/shops" class="nav-link <% if(currentPath&&currentPath.startsWith('/shops')){%>active<%}%>">
-        <i class="bi bi-shop-window nav-icon"></i><span class="nav-label">Shop Management</span>
-      </a>
+
+    <!-- Distribution Section -->
+    <li class="nav-section">
+      <button class="nav-section-toggle" onclick="toggleSection(this)">
+        <i class="bi bi-signpost-2 nav-icon"></i>
+        <span class="nav-label">Distribution</span>
+        <i class="bi bi-chevron-down toggle-icon"></i>
+      </button>
+      <ul class="nav-submenu">
+        <li>
+          <a href="/routes" class="nav-link <% if(currentPath&&currentPath.startsWith('/routes')&&!currentPath.startsWith('/route-a')){%>active<%}%>">
+            <i class="bi bi-signpost-2-fill nav-icon"></i><span class="nav-label">Routes</span>
+          </a>
+        </li>
+        <li>
+          <a href="/route-assignments" class="nav-link <% if(currentPath&&currentPath.startsWith('/route-assignments')){%>active<%}%>">
+            <i class="bi bi-calendar-check-fill nav-icon"></i><span class="nav-label">Route Assignments</span>
+          </a>
+        </li>
+        <li>
+          <a href="/shops" class="nav-link <% if(currentPath&&currentPath.startsWith('/shops')){%>active<%}%>">
+            <i class="bi bi-shop-window nav-icon"></i><span class="nav-label">Shops</span>
+          </a>
+        </li>
+      </ul>
     </li>
-    <li>
-      <a href="/products" class="nav-link <% if(currentPath&&currentPath.startsWith('/products')){%>active<%}%>">
-        <i class="bi bi-box-seam-fill nav-icon"></i><span class="nav-label">Product Management</span>
-      </a>
+
+    <!-- Finance Section -->
+    <li class="nav-section">
+      <button class="nav-section-toggle" onclick="toggleSection(this)">
+        <i class="bi bi-currency-dollar nav-icon"></i>
+        <span class="nav-label">Finance</span>
+        <i class="bi bi-chevron-down toggle-icon"></i>
+      </button>
+      <ul class="nav-submenu">
+        <li>
+          <a href="/centralized-cash" class="nav-link <% if(currentPath&&currentPath.startsWith('/centralized-cash')){%>active<%}%>">
+            <i class="bi bi-safe-fill nav-icon"></i><span class="nav-label">Centralized Cash</span>
+          </a>
+        </li>
+        <li>
+          <a href="/expenses" class="nav-link <% if(currentPath&&currentPath.startsWith('/expenses')){%>active<%}%>">
+            <i class="bi bi-receipt nav-icon"></i><span class="nav-label">Expenses</span>
+          </a>
+        </li>
+        <li>
+          <a href="/reports" class="nav-link <% if(currentPath&&currentPath.startsWith('/reports')){%>active<%}%>">
+            <i class="bi bi-bar-chart-fill nav-icon"></i><span class="nav-label">Reports</span>
+          </a>
+        </li>
+      </ul>
     </li>
-    <li>
-      <a href="/stock" class="nav-link <% if(currentPath&&currentPath.startsWith('/stock')){%>active<%}%>">
-        <i class="bi bi-archive-fill nav-icon"></i><span class="nav-label">Stock Management</span>
-      </a>
+
+    <!-- HR Section -->
+    <li class="nav-section">
+      <button class="nav-section-toggle" onclick="toggleSection(this)">
+        <i class="bi bi-people nav-icon"></i>
+        <span class="nav-label">Human Resources</span>
+        <i class="bi bi-chevron-down toggle-icon"></i>
+      </button>
+      <ul class="nav-submenu">
+        <li>
+          <a href="/users" class="nav-link <% if(currentPath&&currentPath.startsWith('/users')){%>active<%}%>">
+            <i class="bi bi-people-fill nav-icon"></i><span class="nav-label">User Management</span>
+          </a>
+        </li>
+        <li>
+          <a href="/attendance" class="nav-link <% if(currentPath&&currentPath.startsWith('/attendance')){%>active<%}%>">
+            <i class="bi bi-calendar-check nav-icon"></i><span class="nav-label">Attendance</span>
+          </a>
+        </li>
+        <li>
+          <a href="/payroll" class="nav-link <% if(currentPath&&currentPath.startsWith('/payroll')){%>active<%}%>">
+            <i class="bi bi-wallet2 nav-icon"></i><span class="nav-label">Payroll</span>
+          </a>
+        </li>
+      </ul>
     </li>
-    <li>
-      <a href="/orders" class="nav-link <% if(currentPath&&currentPath.startsWith('/orders')){%>active<%}%>">
-        <i class="bi bi-clipboard-check-fill nav-icon"></i><span class="nav-label">Order Management</span>
-      </a>
-    </li>
-    <li>
-      <a href="/direct-sales" class="nav-link <% if(currentPath&&currentPath.startsWith('/direct-sales')){%>active<%}%>">
-        <i class="bi bi-cart-fill nav-icon"></i><span class="nav-label">Direct Shop Sales</span>
-      </a>
-    </li>
-    <li>
-      <a href="/orders/bills/print-open" class="nav-link <% if(currentPath&&currentPath.startsWith('/orders/bills/print-open')){%>active<%}%>">
-        <i class="bi bi-printer nav-icon"></i><span class="nav-label">Print Bills</span>
-      </a>
-    </li>
-    <li>
-      <a href="/cash-recovery" class="nav-link <% if(currentPath&&currentPath.startsWith('/cash-recovery')){%>active<%}%>">
-        <i class="bi bi-cash-coin nav-icon"></i><span class="nav-label">Cash Recovery</span>
-      </a>
-    </li>
-    <li>
-      <a href="/suppliers" class="nav-link <% if(currentPath&&currentPath.startsWith('/suppliers')){%>active<%}%>">
-        <i class="bi bi-truck nav-icon"></i><span class="nav-label">Supplier Management</span>
-      </a>
-    </li>
-    <li>
-      <a href="/centralized-cash" class="nav-link <% if(currentPath&&currentPath.startsWith('/centralized-cash')){%>active<%}%>">
-        <i class="bi bi-safe-fill nav-icon"></i><span class="nav-label">Centralized Cash</span>
-      </a>
-    </li>
-    <li>
-      <a href="/payroll" class="nav-link <% if(currentPath&&currentPath.startsWith('/payroll')){%>active<%}%>">
-        <i class="bi bi-wallet2 nav-icon"></i><span class="nav-label">HR & Payroll</span>
-      </a>
-    </li>
-    <li>
-      <a href="/attendance" class="nav-link <% if(currentPath&&currentPath.startsWith('/attendance')){%>active<%}%>">
-        <i class="bi bi-calendar-check nav-icon"></i><span class="nav-label">Attendance</span>
-      </a>
-    </li>
-    <li>
-      <a href="/expenses" class="nav-link <% if(currentPath&&currentPath.startsWith('/expenses')){%>active<%}%>">
-        <i class="bi bi-receipt nav-icon"></i><span class="nav-label">Expenses</span>
-      </a>
-    </li>
-    <li>
-      <a href="/reports" class="nav-link <% if(currentPath&&currentPath.startsWith('/reports')){%>active<%}%>">
-        <i class="bi bi-bar-chart-fill nav-icon"></i><span class="nav-label">Reports</span>
-      </a>
-    </li>
-    <li>
-      <a href="/company-profile" class="nav-link <% if(currentPath&&currentPath.startsWith('/company-profile')){%>active<%}%>">
-        <i class="bi bi-building nav-icon"></i><span class="nav-label">Company Profile</span>
-      </a>
-    </li>
-    <li>
-      <a href="/settings/profile" class="nav-link <% if(currentPath&&currentPath.startsWith('/settings')){%>active<%}%>">
-        <i class="bi bi-gear-fill nav-icon"></i><span class="nav-label">Admin Settings</span>
-      </a>
-    </li>
-    <li>
-      <a href="/backup" class="nav-link <% if(currentPath&&currentPath.startsWith('/backup')){%>active<%}%>">
-        <i class="bi bi-cloud-arrow-up-fill nav-icon"></i><span class="nav-label">Backup</span>
-      </a>
-    </li>
-    <li>
-      <a href="/users" class="nav-link <% if(currentPath&&currentPath.startsWith('/users')){%>active<%}%>">
-        <i class="bi bi-people-fill nav-icon"></i><span class="nav-label">User Management</span>
-      </a>
+
+    <!-- System Section -->
+    <li class="nav-section">
+      <button class="nav-section-toggle" onclick="toggleSection(this)">
+        <i class="bi bi-gear nav-icon"></i>
+        <span class="nav-label">System</span>
+        <i class="bi bi-chevron-down toggle-icon"></i>
+      </button>
+      <ul class="nav-submenu">
+        <li>
+          <a href="/company-profile" class="nav-link <% if(currentPath&&currentPath.startsWith('/company-profile')){%>active<%}%>">
+            <i class="bi bi-building nav-icon"></i><span class="nav-label">Company Profile</span>
+          </a>
+        </li>
+        <li>
+          <a href="/settings/profile" class="nav-link <% if(currentPath&&currentPath.startsWith('/settings')){%>active<%}%>">
+            <i class="bi bi-gear-fill nav-icon"></i><span class="nav-label">Settings</span>
+          </a>
+        </li>
+        <li>
+          <a href="/backup" class="nav-link <% if(currentPath&&currentPath.startsWith('/backup')){%>active<%}%>">
+            <i class="bi bi-cloud-arrow-up-fill nav-icon"></i><span class="nav-label">Backup</span>
+          </a>
+        </li>
+      </ul>
     </li>
   </ul>
+
+  <script>
+  function toggleSection(button) {
+    const li = button.closest('.nav-section');
+    const submenu = li.querySelector('.nav-submenu');
+    const icon = button.querySelector('.toggle-icon');
+    
+    // Toggle current section
+    const isOpen = li.classList.contains('open');
+    li.classList.toggle('open');
+    
+    // Save state to localStorage
+    const sectionName = button.querySelector('.nav-label').textContent;
+    localStorage.setItem('sidebar-section-' + sectionName, isOpen ? 'closed' : 'open');
+  }
+
+  // Restore section states from localStorage on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.nav-section').forEach(section => {
+      const button = section.querySelector('.nav-section-toggle');
+      const sectionName = button.querySelector('.nav-label').textContent;
+      const savedState = localStorage.getItem('sidebar-section-' + sectionName);
+      
+      // Default to open for sections with active items
+      const hasActive = section.querySelector('.nav-link.active');
+      const shouldBeOpen = savedState === 'open' || (savedState === null && hasActive);
+      
+      if (shouldBeOpen) {
+        section.classList.add('open');
+      }
+    });
+  });
+  </script>
 
   <div class="sidebar-footer">
     <form method="POST" action="/logout">

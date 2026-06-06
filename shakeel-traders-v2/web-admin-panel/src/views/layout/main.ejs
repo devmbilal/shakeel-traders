@@ -155,6 +155,61 @@
     }
     .sidebar-nav .nav-label { font-size: 0.78rem; }
 
+    /* Collapsible Sections */
+    .nav-section { margin: 0; }
+    .nav-section-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: none;
+      background: none;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.78rem;
+      cursor: pointer;
+      text-align: left;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+      position: relative;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .nav-section-toggle:hover {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.9);
+    }
+    .nav-section-toggle .toggle-icon {
+      margin-left: auto;
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+    }
+    .nav-section.open .toggle-icon {
+      transform: rotate(180deg);
+    }
+    .nav-submenu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .nav-section.open .nav-submenu {
+      max-height: 500px;
+    }
+    .nav-submenu li {
+      margin: 1px 8px 1px 20px;
+    }
+    .nav-submenu .nav-link {
+      font-size: 0.75rem;
+      padding: 8px 12px;
+    }
+    .nav-submenu .nav-icon {
+      font-size: 0.9rem;
+    }
+
     /* Sidebar footer */
     .sidebar-footer {
       padding: 12px 8px;
