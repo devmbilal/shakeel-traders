@@ -75,12 +75,14 @@ class SyncService {
       shops = shopRows;
     }
 
-    // All active products with current stock
+    // All active products with current stock (exclude products with 0 inventory)
     const [products] = await pool.query(
       `SELECT id, sku_code, name AS product_name, brand, units_per_carton,
               retail_price, wholesale_price,
               current_stock_cartons, current_stock_loose
-       FROM products WHERE is_active = 1`
+       FROM products 
+       WHERE is_active = 1 
+         AND (current_stock_cartons > 0 OR current_stock_loose > 0)`
     );
 
     // Last prices per shop+product
@@ -255,11 +257,14 @@ class SyncService {
   static async assembleSalesmanMorningSyncPayload(salesmanId) {
     const today = getPakistanToday();
 
+    // All active products with stock (exclude products with 0 inventory)
     const [products] = await pool.query(
       `SELECT id, sku_code, name AS product_name, brand, units_per_carton,
               retail_price, wholesale_price,
               current_stock_cartons, current_stock_loose
-       FROM products WHERE is_active = 1`
+       FROM products 
+       WHERE is_active = 1 
+         AND (current_stock_cartons > 0 OR current_stock_loose > 0)`
     );
 
     // Get today's issuance with items if exists
