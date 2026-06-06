@@ -77,7 +77,7 @@
                     <%= a.booker_name %>
                   </div>
                 </td>
-                <td style="color:var(--text-muted);font-size:0.78rem;"><%= new Date(a.created_at).toLocaleTimeString() %></td>
+                <td style="color:var(--text-muted);font-size:0.78rem;"><%= formatPakistanTime(a.created_at) %></td>
                 <td>
                   <div class="d-flex gap-1">
                     <a href="/route-assignments/<%= a.id %>/edit" class="btn btn-icon btn-outline-primary btn-sm" title="Edit"><i class="bi bi-pencil"></i></a>
@@ -109,7 +109,7 @@
               <tr>
                 <td><span style="font-weight:600;"><%= a.route_name %></span></td>
                 <td><%= a.booker_name %></td>
-                <td style="color:var(--text-muted);"><%= a.assignment_date %></td>
+                <td style="color:var(--text-muted);"><%= sqlDateToDisplay(a.assignment_date) %></td>
                 <td>
                   <div class="d-flex gap-1">
                     <a href="/route-assignments/<%= a.id %>/edit" class="btn btn-icon btn-outline-primary btn-sm" title="Edit"><i class="bi bi-pencil"></i></a>
@@ -144,7 +144,7 @@
             <tbody>
               <% byBookerAssignments.forEach(a => { %>
               <tr>
-                <td style="color:var(--text-muted);"><%= a.assignment_date %></td>
+                <td style="color:var(--text-muted);"><%= sqlDateToDisplay(a.assignment_date) %></td>
                 <td><span style="font-weight:600;"><%= a.route_name %></span></td>
                 <td>
                   <div class="d-flex gap-1">

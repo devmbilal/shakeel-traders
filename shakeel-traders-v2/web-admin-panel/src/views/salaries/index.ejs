@@ -105,7 +105,7 @@
         <div class="modal-body">
           <div class="row g-3">
             <div class="col-md-6"><label class="form-label">Amount (Rs)</label><div class="input-group"><span class="input-group-text">Rs</span><input type="number" name="amount" class="form-control" step="0.01" min="0.01" required></div></div>
-            <div class="col-md-6"><label class="form-label">Date</label><input type="date" name="advance_date" class="form-control" value="<%= now.toISOString().slice(0,10) %>" required></div>
+            <div class="col-md-6"><label class="form-label">Date</label><input type="date" name="advance_date" class="form-control" value="<%= getPakistanDateString() %>" required></div>
             <div class="col-12"><label class="form-label">Note</label><input type="text" name="note" class="form-control" placeholder="Optional"></div>
           </div>
         </div>

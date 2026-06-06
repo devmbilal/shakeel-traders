@@ -37,7 +37,7 @@
     <tbody>
       <% data.forEach(r => { %>
       <tr>
-        <% if (filters.view==='monthly') { %><td><%= r.year %></td><td><%= r.month %></td><% } else { %><td class="small"><%= r.cash_date ? new Date(r.cash_date).toLocaleDateString('en-PK') : '' %></td><% } %>
+        <% if (filters.view==='monthly') { %><td><%= r.year %></td><td><%= r.month %></td><% } else { %><td class="small"><%= sqlDateToDisplay(r.cash_date) %></td><% } %>
         <td><span class="badge bg-primary-subtle text-primary small"><%= r.entry_type %></span></td>
         <td class="text-end fw-semibold text-success">Rs <%= Number(r.total_amount||0).toLocaleString() %></td>
         <td class="text-end"><%= r.entry_count %></td>

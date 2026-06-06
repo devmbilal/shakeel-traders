@@ -25,7 +25,7 @@
           <strong>Order Booker:</strong> <%= order.booker_name %>
         </div>
         <div style="font-size:0.85rem;color:var(--text-muted);">
-          <strong>Date:</strong> <%= new Date(order.created_at_device).toLocaleString() %> &nbsp;|&nbsp;
+          <strong>Date:</strong> <%= formatPakistanDateTime(order.created_at_device) %> &nbsp;|&nbsp;
           <strong>Status:</strong> <span class="badge <%= order.status === 'stock_adjusted' ? 'badge-orange' : 'badge-pending' %>">
             <%= order.status.replace(/_/g,' ') %>
           </span>

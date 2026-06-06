@@ -14,7 +14,7 @@
     <tbody>
       <% movements.forEach(m => { %>
       <tr>
-        <td style="font-size:0.78rem;"><%= new Date(m.created_at).toLocaleString() %></td>
+        <td style="font-size:0.78rem;"><%= formatPakistanDateTime(m.created_at) %></td>
         <td><span class="badge <%= ['receipt_supplier','manual_add','return_salesman'].includes(m.movement_type) ? 'badge-approved' : 'badge-open' %>"><%= m.movement_type.replace(/_/g,' ') %></span></td>
         <td style="color:#10B981;font-weight:600;"><%= m.cartons_in %>C + <%= m.loose_in %>L</td>
         <td style="color:#EF4444;font-weight:600;"><%= m.cartons_out %>C + <%= m.loose_out %>L</td>

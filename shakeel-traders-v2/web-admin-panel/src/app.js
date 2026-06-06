@@ -47,6 +47,16 @@ app.use((req, res, next) => {
   res.locals.success = req.flash('success');
   res.locals.error = req.flash('error');
   res.locals.info = req.flash('info');
+  
+  // Add Pakistan timezone date helpers
+  const dateHelpers = require('./utils/dateHelpers');
+  res.locals.getPakistanDateString = dateHelpers.getPakistanDateString;
+  res.locals.getPakistanYearMonth = dateHelpers.getPakistanYearMonth;
+  res.locals.formatPakistanDate = dateHelpers.formatPakistanDate;
+  res.locals.sqlDateToDisplay = dateHelpers.sqlDateToDisplay;
+  res.locals.formatPakistanDateTime = dateHelpers.formatPakistanDateTime;
+  res.locals.formatPakistanTime = dateHelpers.formatPakistanTime;
+  
   next();
 });
 

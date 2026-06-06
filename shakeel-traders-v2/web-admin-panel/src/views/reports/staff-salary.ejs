@@ -40,7 +40,7 @@
         <td class="text-end">Rs <%= Number(r.basic_salary||0).toLocaleString() %></td>
         <td class="text-end text-danger">Rs <%= Number(r.total_advances_paid||0).toLocaleString() %></td>
         <td class="text-end fw-bold <%= parseFloat(r.running_balance||0)>0?'text-success':'text-danger' %>">Rs <%= Number(r.running_balance||0).toLocaleString() %></td>
-        <td class="small"><%= r.clearance_date ? new Date(r.clearance_date).toLocaleDateString('en-PK') : '—' %></td>
+        <td class="small"><%= r.clearance_date ? sqlDateToDisplay(r.clearance_date) : '—' %></td>
       </tr>
       <% }) %>
     </tbody>

@@ -25,7 +25,7 @@
     <tbody>
       <% movements.forEach(m => { %>
       <tr>
-        <td style="font-size:0.78rem;"><%= new Date(m.created_at).toLocaleDateString() %></td>
+        <td style="font-size:0.78rem;"><%= formatPakistanDateTime(m.created_at) %></td>
         <td>
           <span class="badge <%= m.movement_type.includes('add') || m.movement_type.includes('receipt') || m.movement_type.includes('return') ? 'badge-approved' : 'badge-open' %>">
             <%= m.movement_type.replace(/_/g,' ') %>

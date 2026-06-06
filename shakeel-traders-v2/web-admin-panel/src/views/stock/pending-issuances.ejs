@@ -16,7 +16,7 @@
         <div class="avatar avatar-sm avatar-blue"><%= iss.salesman_name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() %></div>
         <div>
           <div style="font-weight:700;"><%= iss.salesman_name %></div>
-          <div style="font-size:0.72rem;color:var(--text-muted);">Issuance Date: <%= iss.issuance_date %></div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Issuance Date: <%= sqlDateToDisplay(iss.issuance_date) %></div>
         </div>
       </div>
       <span class="badge badge-pending">Pending Approval</span>

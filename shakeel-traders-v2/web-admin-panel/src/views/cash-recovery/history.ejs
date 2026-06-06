@@ -42,7 +42,7 @@
         <td><%= c.booker_name %></td>
         <td style="font-weight:700;color:#10B981;">Rs <%= Number(c.amount_collected).toFixed(2) %></td>
         <td><span class="badge badge-blue"><%= c.payment_method.replace(/_/g,' ') %></span></td>
-        <td style="font-size:0.78rem;"><%= new Date(c.verified_at).toLocaleString() %></td>
+        <td style="font-size:0.78rem;"><%= formatPakistanDateTime(c.verified_at) %></td>
       </tr>
       <% }) %>
     </tbody>

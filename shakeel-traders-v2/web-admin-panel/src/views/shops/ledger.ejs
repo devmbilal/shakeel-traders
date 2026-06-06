@@ -70,7 +70,7 @@
           <tbody>
             <% entries.forEach(e => { %>
               <tr>
-                <td class="text-nowrap small"><%= e.entry_date ? new Date(e.entry_date).toLocaleDateString('en-PK') : '' %></td>
+                <td class="text-nowrap small"><%= sqlDateToDisplay(e.entry_date) %></td>
                 <td>
                   <% const typeMap = {
                     bill: { label: 'Bill', cls: 'bg-primary-subtle text-primary' },

@@ -55,14 +55,14 @@
           <td><code style="font-size:0.75rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;"><%= b.bill_number %></code></td>
           <td style="font-weight:600;"><%= b.shop_name %></td>
           <td style="color:var(--text-secondary);"><%= b.route_name %></td>
-          <td style="font-size:0.78rem;"><%= b.bill_date %></td>
+          <td style="font-size:0.78rem;"><%= sqlDateToDisplay(b.bill_date) %></td>
           <td style="color:#EF4444;font-weight:700;">Rs <%= Number(b.outstanding_amount).toFixed(2) %></td>
           <td>
             <span class="badge" style="background:#DBEAFE;color:#1E40AF;font-weight:600;">
               <i class="bi bi-person me-1"></i><%= b.booker_name %>
             </span>
           </td>
-          <td style="font-size:0.78rem;"><%= b.assigned_date %></td>
+          <td style="font-size:0.78rem;"><%= sqlDateToDisplay(b.assigned_date) %></td>
           <td>
             <% if (b.assignment_status === 'partially_recovered') { %>
               <span class="badge badge-warning">Partial</span>
@@ -124,7 +124,7 @@
             <td><code style="font-size:0.75rem;background:#F1F5F9;padding:2px 6px;border-radius:4px;"><%= b.bill_number %></code></td>
             <td style="font-weight:600;"><%= b.shop_name %></td>
             <td style="color:var(--text-secondary);"><%= b.route_name %></td>
-            <td style="font-size:0.78rem;"><%= b.bill_date %></td>
+            <td style="font-size:0.78rem;"><%= sqlDateToDisplay(b.bill_date) %></td>
             <td>Rs <%= Number(b.net_amount).toFixed(2) %></td>
             <td style="color:#EF4444;font-weight:700;">Rs <%= Number(b.outstanding_amount).toFixed(2) %></td>
           </tr>

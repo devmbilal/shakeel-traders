@@ -84,7 +84,7 @@
           </td>
           <td style="font-weight:600;"><%= b.shop_name %></td>
           <td style="font-size:0.78rem;color:var(--text-muted);"><%= b.route_name %></td>
-          <td style="font-size:0.78rem;"><%= b.bill_date %></td>
+          <td style="font-size:0.78rem;"><%= sqlDateToDisplay(b.bill_date) %></td>
           <td>Rs <%= Number(b.net_amount).toFixed(2) %></td>
           <td style="color:#EF4444;font-weight:600;">Rs <%= Number(b.outstanding_amount).toFixed(2) %></td>
           <td>

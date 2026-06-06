@@ -65,7 +65,7 @@
           %>
           <tr <%= isUpcoming ? 'class="table-success"' : '' %> <%= isToday ? 'class="table-warning"' : '' %>>
             <td style="padding-left:20px;">
-              <strong><%= new Date(h.holiday_date).toLocaleDateString() %></strong>
+              <strong><%= sqlDateToDisplay(h.holiday_date) %></strong>
               <% if (isToday) { %>
                 <span class="badge bg-warning ms-2">Today</span>
               <% } else if (isUpcoming) { %>

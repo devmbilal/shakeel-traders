@@ -15,7 +15,7 @@
           <div><div class="fw-bold" style="font-size:.9rem;">Daily Sales Report</div><div class="small text-muted">Sales by channel for a date</div></div>
         </div>
         <form method="GET" action="/reports/daily-sales" class="d-flex gap-2 mt-auto">
-          <input type="date" name="date" class="form-control form-control-sm" value="<%= new Date().toISOString().slice(0,10) %>">
+          <input type="date" name="date" class="form-control form-control-sm" value="<%= getPakistanDateString() %>">
           <button class="btn btn-sm btn-primary text-nowrap"><i class="bi bi-arrow-right"></i></button>
         </form>
       </div>
@@ -30,7 +30,7 @@
           <div><div class="fw-bold" style="font-size:.9rem;">Monthly Sales Report</div><div class="small text-muted">Sales by channel for a month</div></div>
         </div>
         <form method="GET" action="/reports/monthly-sales" class="d-flex gap-2 mt-auto">
-          <input type="month" name="ym" class="form-control form-control-sm" value="<%= new Date().toISOString().slice(0,7) %>" onchange="this.form.month.value=this.value.split('-')[1];this.form.year.value=this.value.split('-')[0];">
+          <input type="month" name="ym" class="form-control form-control-sm" value="<%= getPakistanYearMonth() %>" onchange="this.form.month.value=this.value.split('-')[1];this.form.year.value=this.value.split('-')[0];">
           <input type="hidden" name="month" value="<%= new Date().getMonth()+1 %>">
           <input type="hidden" name="year" value="<%= new Date().getFullYear() %>">
           <button class="btn btn-sm btn-primary text-nowrap"><i class="bi bi-arrow-right"></i></button>

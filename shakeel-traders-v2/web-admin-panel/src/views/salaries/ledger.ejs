@@ -91,7 +91,7 @@
             %>
               <tr>
                 <td class="text-nowrap small">
-                  <%= e.entry_date ? new Date(e.entry_date).toLocaleDateString('en-PK') : '' %>
+                  <%= sqlDateToDisplay(e.entry_date) %>
                 </td>
                 <td>
                   <span class="badge <%= isBasicSalary ? 'bg-primary-subtle text-primary' : 'bg-warning-subtle text-warning' %> small">
@@ -208,7 +208,7 @@
             </div>
             <div class="col-md-6">
               <label class="form-label">Date</label>
-              <input type="date" name="advance_date" class="form-control" value="<%= new Date().toISOString().slice(0,10) %>" required>
+              <input type="date" name="advance_date" class="form-control" value="<%= getPakistanDateString() %>" required>
             </div>
             <div class="col-12">
               <label class="form-label">Note</label>

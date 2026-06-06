@@ -21,7 +21,7 @@
     <tbody>
       <% data.claims.forEach(c => { %>
       <tr>
-        <td class="small"><%= c.claim_date %></td>
+        <td class="small"><%= sqlDateToDisplay(c.claim_date) %></td>
         <td class="fw-semibold">Rs <%= Number(c.claim_value).toLocaleString() %></td>
         <td class="small"><%= c.reason %></td>
         <td class="small text-muted"><%= c.products || '—' %></td>

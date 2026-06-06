@@ -111,8 +111,7 @@
                   </div>
                 </td>
                 <td>
-                  <div style="font-size:0.8rem;"><%= new Date(backup.created_at).toLocaleDateString() %></div>
-                  <div style="font-size:0.7rem;color:var(--text-muted);"><%= new Date(backup.created_at).toLocaleTimeString() %></div>
+                  <div style="font-size:0.8rem;"><%= formatPakistanDateTime(backup.created_at) %></div>
                 </td>
                 <td>
                   <span style="font-weight:600;font-size:0.82rem;"><%= backup.sizeFormatted %></span>

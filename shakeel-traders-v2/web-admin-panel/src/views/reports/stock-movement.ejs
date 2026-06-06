@@ -37,7 +37,7 @@
     <tbody>
       <% data.forEach(r => { %>
       <tr>
-        <td class="small"><%= r.movement_date ? new Date(r.movement_date).toLocaleDateString('en-PK') : '' %></td>
+        <td class="small"><%= sqlDateToDisplay(r.movement_date) %></td>
         <td><span class="badge bg-secondary-subtle text-secondary small"><%= r.movement_type %></span></td>
         <td><code class="small"><%= r.sku_code %></code></td>
         <td class="small"><%= r.product_name %></td>

@@ -25,7 +25,7 @@
         <td><%= c.booker_name %></td>
         <td style="font-weight:700;color:var(--secondary);">Rs <%= Number(c.amount_collected).toFixed(2) %></td>
         <td><span class="badge badge-blue"><%= c.payment_method.replace(/_/g,' ') %></span></td>
-        <td style="font-size:0.78rem;"><%= new Date(c.collected_at_device).toLocaleString() %></td>
+        <td style="font-size:0.78rem;"><%= formatPakistanDateTime(c.collected_at_device) %></td>
         <td>
           <form method="POST" action="/cash-recovery/verify/<%= c.id %>"
                 onsubmit="return confirm('Verify this collection of Rs <%= Number(c.amount_collected).toFixed(2) %>?')">

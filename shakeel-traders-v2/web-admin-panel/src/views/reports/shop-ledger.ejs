@@ -36,7 +36,7 @@
     <tbody>
       <% data.entries.forEach(e => { %>
       <tr>
-        <td class="small"><%= e.entry_date ? new Date(e.entry_date).toLocaleDateString('en-PK') : '' %></td>
+        <td class="small"><%= sqlDateToDisplay(e.entry_date) %></td>
         <td><span class="badge bg-secondary-subtle text-secondary small"><%= e.entry_type %></span></td>
         <td class="small text-muted"><%= e.note || '—' %></td>
         <td class="text-end small <%= parseFloat(e.debit)>0?'text-danger':'' %>"><%= parseFloat(e.debit)>0 ? 'Rs '+Number(e.debit).toLocaleString() : '—' %></td>

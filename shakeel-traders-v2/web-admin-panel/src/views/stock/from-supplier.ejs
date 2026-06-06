@@ -19,7 +19,7 @@
         </div>
         <div class="col-md-3">
           <label class="form-label">Receipt Date <span style="color:#EF4444;">*</span></label>
-          <input type="date" name="receipt_date" class="form-control" value="<%= new Date().toISOString().slice(0,10) %>" required>
+          <input type="date" name="receipt_date" class="form-control" value="<%= getPakistanDateString() %>" required>
         </div>
         <div class="col-md-5">
           <label class="form-label">Note (optional)</label>

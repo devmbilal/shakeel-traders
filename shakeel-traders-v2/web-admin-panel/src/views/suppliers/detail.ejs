@@ -22,7 +22,7 @@
           <form method="POST" action="/suppliers/<%= supplier.id %>/advance">
             <div class="row g-3">
               <div class="col-md-3"><label class="form-label">Amount (Rs)</label><input type="number" name="amount" class="form-control" step="0.01" min="0.01" required></div>
-              <div class="col-md-3"><label class="form-label">Date</label><input type="date" name="payment_date" class="form-control" value="<%= new Date().toISOString().slice(0,10) %>" required></div>
+              <div class="col-md-3"><label class="form-label">Date</label><input type="date" name="payment_date" class="form-control" value="<%= getPakistanDateString() %>" required></div>
               <div class="col-md-3"><label class="form-label">Method</label><select name="payment_method" class="form-select" required><option value="cash">Cash</option><option value="bank_transfer">Bank Transfer</option><option value="cheque">Cheque</option><option value="other">Other</option></select></div>
               <div class="col-md-3"><label class="form-label">Note</label><input type="text" name="note" class="form-control" placeholder="Optional"></div>
             </div>
@@ -81,7 +81,7 @@
           <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div>
               <div style="font-weight:600;font-size:0.82rem;"><%= c.products || 'Products' %></div>
-              <div style="font-size:0.72rem;color:var(--text-muted);">Rs <%= Number(c.claim_value).toFixed(2) %> | <%= c.claim_date %></div>
+              <div style="font-size:0.72rem;color:var(--text-muted);">Rs <%= Number(c.claim_value).toFixed(2) %> | <%= sqlDateToDisplay(c.claim_date) %></div>
               <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px;"><%= c.reason %></div>
             </div>
             <div style="text-align:right;">
@@ -110,7 +110,7 @@
         <div class="modal-body">
           <div class="alert alert-warning py-2" style="font-size:0.78rem;"><i class="bi bi-exclamation-triangle me-1"></i>Claimed products are <strong>NOT added to warehouse stock</strong>.</div>
           <div class="row g-3 mb-3">
-            <div class="col-md-4"><label class="form-label">Claim Date</label><input type="date" name="claim_date" class="form-control" value="<%= new Date().toISOString().slice(0,10) %>" required></div>
+            <div class="col-md-4"><label class="form-label">Claim Date</label><input type="date" name="claim_date" class="form-control" value="<%= getPakistanDateString() %>" required></div>
             <div class="col-md-4"><label class="form-label">Claim Value (Rs)</label><input type="number" name="claim_value" class="form-control" step="0.01" min="0.01" required></div>
             <div class="col-12"><label class="form-label">Reason</label><textarea name="reason" class="form-control" rows="2" required></textarea></div>
           </div>

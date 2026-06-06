@@ -130,7 +130,7 @@
           %>
           <tr>
             <td style="padding-left:20px;">
-              <strong><%= a.attendance_date %></strong>
+              <strong><%= sqlDateToDisplay(a.attendance_date) %></strong>
             </td>
             <td>
               <span class="badge <%= dayName === 'Friday' ? 'bg-primary' : 'bg-secondary' %>">

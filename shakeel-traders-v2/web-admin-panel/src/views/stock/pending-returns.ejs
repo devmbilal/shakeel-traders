@@ -16,7 +16,7 @@
         <div class="avatar avatar-sm avatar-green"><%= ret.salesman_name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() %></div>
         <div>
           <div style="font-weight:700;"><%= ret.salesman_name %></div>
-          <div style="font-size:0.72rem;color:var(--text-muted);">Return Date: <%= ret.return_date %> | Issuance: <%= ret.issuance_date %></div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Return Date: <%= sqlDateToDisplay(ret.return_date) %> | Issuance: <%= sqlDateToDisplay(ret.issuance_date) %></div>
         </div>
       </div>
       <div style="text-align:right;">
