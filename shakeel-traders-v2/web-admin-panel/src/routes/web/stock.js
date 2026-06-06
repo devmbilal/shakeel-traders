@@ -6,6 +6,7 @@ const StockController = require('../../controllers/StockController');
 router.get('/',                           StockController.overview);
 router.get('/manual-add',                 StockController.manualAddForm);
 router.post('/manual-add',                StockController.manualAdd);
+router.post('/quick-adjust',              StockController.quickAdjust);
 router.get('/add-from-supplier',          StockController.fromSupplierForm);
 router.post('/add-from-supplier',         StockController.fromSupplierSubmit);
 router.get('/pending-issuances',          StockController.pendingIssuances);

@@ -68,6 +68,76 @@ const StockController = {
     } finally { conn.release(); }
   },
 
+  // POST /stock/quick-adjust — Quick stock adjustment from overview page
+  async quickAdjust(req, res) {
+    const conn = await getConnection();
+    try {
+      await conn.beginTransaction();
+      const { product_id, action, cartons, loose, note } = req.body;
+      
+      const cartonsQty = parseInt(cartons) || 0;
+      const looseQty = parseInt(loose) || 0;
+      
+      if (cartonsQty === 0 && looseQty === 0) {
+        req.flash('error', 'Please enter at least 1 carton or loose unit.');
+        return res.redirect('/stock');
+      }
+
+      if (action === 'add') {
+        // Add stock
+        await StockService.addStock(
+          product_id, cartonsQty, looseQty,
+          'manual_add', null, null, note || 'Quick adjustment', req.session.user.id, conn
+        );
+        await AuditModel.insertLog({ 
+          userId: req.session.user.id, 
+          action: 'QUICK_STOCK_ADD', 
+          entityType: 'products', 
+          entityId: product_id 
+        }, conn);
+        await conn.commit();
+        req.flash('success', `Stock added: ${cartonsQty}C + ${looseQty}L`);
+      } else if (action === 'remove') {
+        // Remove stock
+        const result = await StockService.deductStock(product_id, cartonsQty, looseQty, conn);
+        
+        // Record the deduction movement
+        await StockService.recordDeductionMovement(
+          product_id, 
+          cartonsQty, 
+          looseQty, 
+          'manual_add', 
+          null, 
+          null, 
+          note || 'Quick adjustment (removal)', 
+          req.session.user.id, 
+          result.stockAfterCartons, 
+          result.stockAfterLoose, 
+          conn
+        );
+        
+        await AuditModel.insertLog({ 
+          userId: req.session.user.id, 
+          action: 'QUICK_STOCK_REMOVE', 
+          entityType: 'products', 
+          entityId: product_id 
+        }, conn);
+        await conn.commit();
+        req.flash('success', `Stock removed: ${cartonsQty}C + ${looseQty}L`);
+      } else {
+        throw new Error('Invalid action');
+      }
+
+      res.redirect('/stock');
+    } catch (err) {
+      await conn.rollback();
+      req.flash('error', 'Failed to adjust stock: ' + err.message);
+      res.redirect('/stock');
+    } finally { 
+      conn.release(); 
+    }
+  },
+
   // GET /stock/add-from-supplier
   async fromSupplierForm(req, res) {
     try {
