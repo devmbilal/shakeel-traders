@@ -116,7 +116,7 @@ const ShopController = {
     }
   },
 
-  // POST /shops/import
+  // POST /shops/import - Parse and preview CSV
   async importCSV(req, res) {
     try {
       if (!req.file) {
@@ -138,8 +138,89 @@ const ShopController = {
         return res.redirect('/shops');
       }
       
-      const result = await ShopModel.bulkImportFromCSV(filteredRows);
-      const routeMsg = routeFilter ? ` for route ID ${routeFilter}` : '';
+      // Store parsed data in session for preview
+      req.session.csvPreviewData = {
+        shops: filteredRows,
+        routeFilter: routeFilter,
+        timestamp: Date.now()
+      };
+      
+      // Redirect to preview page
+      res.redirect('/shops/import/preview');
+    } catch (err) {
+      console.error(err);
+      req.flash('error', 'CSV import failed: ' + err.message);
+      res.redirect('/shops');
+    }
+  },
+
+  // GET /shops/import/preview - Show CSV preview for review
+  async importPreview(req, res) {
+    try {
+      if (!req.session.csvPreviewData) {
+        req.flash('error', 'No CSV data to preview. Please upload a file first.');
+        return res.redirect('/shops');
+      }
+      
+      const { shops, routeFilter } = req.session.csvPreviewData;
+      const routes = await RouteModel.listAll({ limit: 999999, offset: 0 });
+      
+      renderWithLayout(req, res, 'shops/import-preview', {
+        title: 'Review CSV Import',
+        shops,
+        routes,
+        routeFilter
+      });
+    } catch (err) {
+      console.error(err);
+      req.flash('error', 'Failed to load preview.');
+      res.redirect('/shops');
+    }
+  },
+
+  // POST /shops/import/confirm - Confirm and import shops
+  async importConfirm(req, res) {
+    try {
+      if (!req.session.csvPreviewData) {
+        req.flash('error', 'No CSV data to import. Please upload a file first.');
+        return res.redirect('/shops');
+      }
+      
+      // Get the edited data from the form
+      const names = [].concat(req.body.name || []);
+      const ownerNames = [].concat(req.body.owner_name || []);
+      const phones = [].concat(req.body.phone || []);
+      const addresses = [].concat(req.body.address || []);
+      const routeIds = [].concat(req.body.route_id || []);
+      const shopTypes = [].concat(req.body.shop_type || []);
+      const keepFlags = [].concat(req.body.keep || []);
+      
+      // Build the final rows to import (only rows that are marked to keep)
+      const rowsToImport = [];
+      for (let i = 0; i < names.length; i++) {
+        if (keepFlags.includes(String(i))) {
+          rowsToImport.push({
+            name: names[i],
+            owner_name: ownerNames[i],
+            phone: phones[i],
+            address: addresses[i],
+            route_id: routeIds[i],
+            shop_type: shopTypes[i] || 'retail'
+          });
+        }
+      }
+      
+      if (rowsToImport.length === 0) {
+        req.flash('error', 'No shops selected for import.');
+        return res.redirect('/shops/import/preview');
+      }
+      
+      const result = await ShopModel.bulkImportFromCSV(rowsToImport);
+      
+      // Clear session data
+      delete req.session.csvPreviewData;
+      
+      const routeMsg = req.session.csvPreviewData?.routeFilter ? ` for route ID ${req.session.csvPreviewData.routeFilter}` : '';
       if (result.errors.length > 0) {
         req.flash('error', `Imported ${result.inserted} shops${routeMsg}. Errors: ${result.errors.slice(0, 3).join('; ')}`);
       } else {
@@ -151,6 +232,13 @@ const ShopController = {
       req.flash('error', 'CSV import failed: ' + err.message);
       res.redirect('/shops');
     }
+  },
+
+  // POST /shops/import/cancel - Cancel CSV import
+  async importCancel(req, res) {
+    delete req.session.csvPreviewData;
+    req.flash('info', 'CSV import cancelled.');
+    res.redirect('/shops');
   },
 
   // GET /shops/:id

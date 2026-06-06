@@ -1,0 +1,195 @@
+<div class="page-header">
+  <div>
+    <h4>Review CSV Import</h4>
+    <div class="page-sub">Review, edit, and select shops before importing</div>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="POST" action="/shops/import/cancel" style="display:inline;">
+      <button type="submit" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-x-lg me-1"></i> Cancel Import
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="alert alert-info py-2 px-3 mb-3">
+  <i class="bi bi-info-circle me-2"></i>
+  <strong>Found <%= shops.length %> shops in CSV.</strong>
+  <span class="text-muted ms-2">Review the data below, make any edits, and uncheck any shops you don't want to import.</span>
+</div>
+
+<form method="POST" action="/shops/import/confirm" id="importForm">
+  <div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Shop Data Preview</h5>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="selectAll" checked>
+        <label class="form-check-label fw-semibold" for="selectAll">
+          Select All
+        </label>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th style="width:50px;">Import</th>
+            <th style="width:50px;">#</th>
+            <th>Shop Name</th>
+            <th>Owner Name</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Route</th>
+            <th>Type</th>
+            <th style="width:80px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="shopsTable">
+          <% shops.forEach((shop, index) => { %>
+          <tr id="row-<%= index %>" data-index="<%= index %>">
+            <td class="text-center">
+              <input class="form-check-input shop-checkbox" type="checkbox" name="keep" value="<%= index %>" checked>
+            </td>
+            <td><%= index + 1 %></td>
+            <td>
+              <input type="text" name="name" class="form-control form-control-sm" value="<%= shop.name || '' %>" required>
+            </td>
+            <td>
+              <input type="text" name="owner_name" class="form-control form-control-sm" value="<%= shop.owner_name || '' %>">
+            </td>
+            <td>
+              <input type="text" name="phone" class="form-control form-control-sm" value="<%= shop.phone || '' %>">
+            </td>
+            <td>
+              <input type="text" name="address" class="form-control form-control-sm" value="<%= shop.address || '' %>">
+            </td>
+            <td>
+              <select name="route_id" class="form-select form-select-sm" required>
+                <option value="">— Select —</option>
+                <% routes.forEach(r => { %>
+                  <option value="<%= r.id %>" <%= shop.route_id == r.id ? 'selected' : '' %>><%= r.name %></option>
+                <% }) %>
+              </select>
+            </td>
+            <td>
+              <select name="shop_type" class="form-select form-select-sm">
+                <option value="retail" <%= shop.shop_type === 'retail' ? 'selected' : '' %>  >Retail</option>
+                <option value="wholesale" <%= shop.shop_type === 'wholesale' ? 'selected' : '' %>>Wholesale</option>
+                <option value="distributor" <%= shop.shop_type === 'distributor' ? 'selected' : '' %>>Distributor</option>
+              </select>
+            </td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteRow(<%= index %>)" title="Remove">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h6 class="mb-1">Ready to Import</h6>
+          <p class="text-muted small mb-0">
+            <span id="selectedCount"><%= shops.length %></span> of <%= shops.length %> shops selected
+          </p>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('cancelForm').submit()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i> Confirm & Import
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form method="POST" action="/shops/import/cancel" id="cancelForm" style="display:none;"></form>
+
+<style>
+#shopsTable input.form-control-sm,
+#shopsTable select.form-select-sm {
+  font-size: 0.85rem;
+}
+
+#shopsTable tr.row-deleted {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+#shopsTable tr.row-deleted input,
+#shopsTable tr.row-deleted select {
+  pointer-events: none;
+  background-color: #f8f9fa;
+}
+</style>
+
+<script>
+// Select All / Deselect All
+document.getElementById('selectAll').addEventListener('change', function(e) {
+  const checkboxes = document.querySelectorAll('.shop-checkbox');
+  checkboxes.forEach(cb => {
+    if (!cb.closest('tr').classList.contains('row-deleted')) {
+      cb.checked = e.target.checked;
+    }
+  });
+  updateSelectedCount();
+});
+
+// Update selected count when individual checkboxes change
+document.querySelectorAll('.shop-checkbox').forEach(cb => {
+  cb.addEventListener('change', updateSelectedCount);
+});
+
+function updateSelectedCount() {
+  const checked = document.querySelectorAll('.shop-checkbox:checked').length;
+  document.getElementById('selectedCount').textContent = checked;
+}
+
+// Delete row (visual only, will be excluded from submission)
+function deleteRow(index) {
+  const row = document.getElementById('row-' + index);
+  const checkbox = row.querySelector('.shop-checkbox');
+  
+  if (row.classList.contains('row-deleted')) {
+    // Undelete
+    row.classList.remove('row-deleted');
+    checkbox.checked = true;
+    checkbox.disabled = false;
+  } else {
+    // Delete
+    row.classList.add('row-deleted');
+    checkbox.checked = false;
+    checkbox.disabled = true;
+  }
+  
+  updateSelectedCount();
+}
+
+// Form validation
+document.getElementById('importForm').addEventListener('submit', function(e) {
+  const checked = document.querySelectorAll('.shop-checkbox:checked').length;
+  if (checked === 0) {
+    e.preventDefault();
+    alert('Please select at least one shop to import.');
+    return false;
+  }
+  
+  // Confirm before submitting
+  if (!confirm(`Import ${checked} shop(s)?`)) {
+    e.preventDefault();
+    return false;
+  }
+});
+
+// Initialize count
+updateSelectedCount();
+</script>

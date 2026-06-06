@@ -21,6 +21,10 @@ router.post('/import',
   ShopController.importCSV
 );
 
+router.get('/import/preview', ShopController.importPreview);
+router.post('/import/confirm', ShopController.importConfirm);
+router.post('/import/cancel', ShopController.importCancel);
+
 router.get('/:id/ledger/export',  ShopController.exportLedger);
 router.get('/:id/ledger',         ShopController.ledger);
 router.post('/:id/advance',       ShopController.addAdvance);
