@@ -4,6 +4,7 @@ const router = express.Router();
 const ProductController = require('../../controllers/ProductController');
 
 router.get('/',                  ProductController.index);
+router.get('/export-csv',        ProductController.exportCSV);
 router.get('/new',               ProductController.newForm);
 router.post('/',                 ProductController.create);
 router.post('/import',

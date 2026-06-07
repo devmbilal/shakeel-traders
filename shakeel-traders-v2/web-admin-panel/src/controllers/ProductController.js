@@ -236,6 +236,75 @@ const ProductController = {
       res.status(500).json({ error: 'Failed to fetch products' });
     }
   },
+
+  // GET /products/export-csv - Export products to CSV
+  async exportCSV(req, res) {
+    try {
+      const filter = req.query.filter || '';
+      
+      // Fetch all products matching the current filter (no pagination)
+      const products = await ProductModel.listAll(filter, { limit: 999999, offset: 0 });
+      
+      if (products.length === 0) {
+        req.flash('error', 'No products to export.');
+        return res.redirect('/products');
+      }
+
+      // CSV header
+      const headers = [
+        'sku_code',
+        'name',
+        'brand',
+        'units_per_carton',
+        'retail_price',
+        'wholesale_price',
+        'low_stock_threshold',
+        'current_stock_cartons',
+        'current_stock_loose',
+        'is_active'
+      ];
+
+      // Build CSV rows
+      const csvRows = [headers.join(',')];
+      
+      products.forEach(p => {
+        const row = [
+          p.sku_code,
+          `"${(p.name || '').replace(/"/g, '""')}"`, // Escape quotes in product name
+          p.brand || '',
+          p.units_per_carton,
+          Number(p.retail_price).toFixed(2),
+          Number(p.wholesale_price).toFixed(2),
+          p.low_stock_threshold || '',
+          p.current_stock_cartons,
+          p.current_stock_loose,
+          p.is_active ? 'active' : 'inactive'
+        ];
+        csvRows.push(row.join(','));
+      });
+
+      const csvContent = csvRows.join('\n');
+      
+      // Generate filename with timestamp
+      const timestamp = Date.now();
+      let filename;
+      if (filter) {
+        filename = `products-${filter}-${timestamp}.csv`;
+      } else {
+        filename = `products-all-${timestamp}.csv`;
+      }
+
+      // Send CSV file
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(csvContent);
+      
+    } catch (err) {
+      console.error('Export CSV error:', err);
+      req.flash('error', 'Failed to export CSV: ' + err.message);
+      res.redirect('/products');
+    }
+  },
 };
 
 module.exports = ProductController;
