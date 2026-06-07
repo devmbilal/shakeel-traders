@@ -190,7 +190,7 @@ const ShopModel = {
     const rows = await query(`
       SELECT balance_after FROM shop_ledger_entries
       WHERE shop_id = ?
-      ORDER BY created_at DESC
+      ORDER BY id DESC
       LIMIT 1
     `, [shopId]);
     return rows.length ? rows[0].balance_after : 0;

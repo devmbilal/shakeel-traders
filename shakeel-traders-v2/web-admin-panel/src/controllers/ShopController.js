@@ -415,10 +415,10 @@ const ShopController = {
       // Insert bill
       const [billResult] = await conn.query(
         `INSERT INTO bills 
-          (shop_id, bill_type, bill_date, bill_number, gross_amount, advance_deducted, 
+          (order_id, shop_id, bill_type, bill_date, bill_number, gross_amount, advance_deducted, 
            net_amount, amount_paid, outstanding_amount, status, created_by)
-         VALUES (?, 'direct_shop', ?, ?, ?, 0, ?, ?, ?, ?)`,
-        [shop.id, bill_date, billNumber, grossAmt, grossAmt, paidAmt, outstandingAmt, status, req.session.user.id]
+         VALUES (NULL, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?)`,
+        [shop.id, 'direct_shop', bill_date, billNumber, grossAmt, grossAmt, paidAmt, outstandingAmt, status, req.session.user.id]
       );
 
       const billId = billResult.insertId;
@@ -543,6 +543,60 @@ const ShopController = {
       console.error(err);
       req.flash('error', 'Export failed: ' + err.message);
       res.redirect('/shops/' + req.params.id + '/ledger');
+    }
+  },
+
+  // GET /shops/export/csv
+  async exportCSV(req, res) {
+    try {
+      const filters = {
+        search:          req.query.search          || '',
+        route_id:        req.query.route_id        || '',
+        shop_type:       req.query.shop_type       || '',
+        is_active:       req.query.is_active !== undefined ? req.query.is_active : '',
+        has_outstanding: req.query.has_outstanding || '',
+      };
+      
+      // Get all shops matching filters (no pagination)
+      const shops = await ShopModel.listAll(filters, { limit: 999999, offset: 0 });
+      
+      if (shops.length === 0) {
+        req.flash('error', 'No shops found to export.');
+        return res.redirect('/shops');
+      }
+      
+      // Build CSV content
+      const headers = ['name', 'owner_name', 'phone', 'address', 'route_id', 'route_name', 'shop_type', 'is_active', 'price_edit_allowed', 'price_max_discount_pct'];
+      let csv = headers.join(',') + '\n';
+      
+      shops.forEach(shop => {
+        const row = [
+          `"${(shop.name || '').replace(/"/g, '""')}"`,
+          `"${(shop.owner_name || '').replace(/"/g, '""')}"`,
+          `"${(shop.phone || '').replace(/"/g, '""')}"`,
+          `"${(shop.address || '').replace(/"/g, '""')}"`,
+          shop.route_id || '',
+          `"${(shop.route_name || '').replace(/"/g, '""')}"`,
+          shop.shop_type || 'retail',
+          shop.is_active ? '1' : '0',
+          shop.price_edit_allowed ? '1' : '0',
+          shop.price_max_discount_pct || '0',
+        ];
+        csv += row.join(',') + '\n';
+      });
+      
+      // Set response headers
+      const filename = filters.route_id 
+        ? `shops-route-${filters.route_id}-${Date.now()}.csv`
+        : `shops-all-${Date.now()}.csv`;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(csv);
+    } catch (err) {
+      console.error(err);
+      req.flash('error', 'Export failed: ' + err.message);
+      res.redirect('/shops');
     }
   },
 };

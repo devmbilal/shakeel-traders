@@ -8,6 +8,8 @@ router.get('/',         ShopController.index);
 router.get('/new',      ShopController.newForm);
 router.post('/',        ShopController.create);
 
+router.get('/export/csv', ShopController.exportCSV);
+
 router.post('/import',
   (req, res, next) => {
     ShopController.csvUploadMiddleware(req, res, (err) => {
