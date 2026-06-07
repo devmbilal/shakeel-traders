@@ -29,8 +29,13 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── Body Parsing ─────────────────────────────────────────────────────────────
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// Increased limits for large CSV imports
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '50mb',
+  parameterLimit: 50000 
+}));
+app.use(express.json({ limit: '50mb' }));
 
 // ─── Method Override (for PUT/DELETE via forms) ───────────────────────────────
 app.use(methodOverride('_method'));

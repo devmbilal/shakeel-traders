@@ -201,9 +201,19 @@ class BackupService {
 
       await execPromise(command);
 
+      // Clear sessions table to prevent stale cached data
+      // The backup includes old sessions which can show outdated data (e.g., old payroll entries)
+      try {
+        const { query } = require('../config/db');
+        await query('DELETE FROM sessions');
+        console.log('[Backup] Sessions cleared after restore');
+      } catch (sessionError) {
+        console.warn('[Backup] Failed to clear sessions after restore:', sessionError.message);
+      }
+
       return {
         success: true,
-        message: 'Database restored successfully'
+        message: 'Database restored successfully. All sessions cleared.'
       };
     } catch (error) {
       console.error('Restore failed:', error);
